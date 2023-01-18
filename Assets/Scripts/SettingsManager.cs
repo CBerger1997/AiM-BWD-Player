@@ -176,7 +176,8 @@ public class SettingsManager : MonoBehaviour {
         List<string> deviceNames = new List<string>();
 
         foreach (Display device in displayDevices) {
-            deviceNames.Add(device.);
+            //Find way for actual device name
+            deviceNames.Add(device.ToString());
         }
 
         displayDeviceDropdown.options.Add(blankTempData);
