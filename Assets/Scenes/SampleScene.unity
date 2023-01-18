@@ -657,7 +657,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &91045376
 RectTransform:
   m_ObjectHideFlags: 0
@@ -985,7 +985,7 @@ MonoBehaviour:
   cameraImage: {fileID: 1572016936}
   analysisDropdown: {fileID: 872521066}
   resolutionDropdown: {fileID: 887456240}
-  audioDeviceDropdown: {fileID: 1481057306}
+  displayDeviceDropdown: {fileID: 1481057306}
   outputFilenameInputField: {fileID: 521363574}
   SaveButton: {fileID: 807606639}
   viewManager: {fileID: 1633040942}
@@ -1511,8 +1511,8 @@ RectTransform:
   - {fileID: 26795499}
   - {fileID: 940338172}
   - {fileID: 1085015235}
-  - {fileID: 1871884350}
   - {fileID: 1305743074}
+  - {fileID: 1871884350}
   - {fileID: 1206253045}
   - {fileID: 466045496}
   m_Father: {fileID: 1633040938}
@@ -1574,7 +1574,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   settingsButton: {fileID: 26795500}
+  playButton: {fileID: 940338173}
+  pauseButton: {fileID: 1085015236}
+  stopButton: {fileID: 1871884351}
   viewManager: {fileID: 1633040942}
+  videoPlayer: {fileID: 466045497}
+  videoImage1: {fileID: 861879849}
+  videoImage2: {fileID: 91045377}
 --- !u!1 &335372138
 GameObject:
   m_ObjectHideFlags: 0
@@ -2201,6 +2207,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 466045496}
+  - component: {fileID: 466045497}
   m_Layer: 0
   m_Name: VideoParent
   m_TagString: Untagged
@@ -2230,6 +2237,41 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!328 &466045497
+VideoPlayer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 466045495}
+  m_Enabled: 1
+  m_VideoClip: {fileID: 0}
+  m_TargetCameraAlpha: 1
+  m_TargetCamera3DLayout: 0
+  m_TargetCamera: {fileID: 0}
+  m_TargetTexture: {fileID: 8400000, guid: 1a9ca48056f877243befa5121b11e846, type: 2}
+  m_TimeReference: 0
+  m_TargetMaterialRenderer: {fileID: 0}
+  m_TargetMaterialProperty: <noninit>
+  m_RenderMode: 2
+  m_AspectRatio: 2
+  m_DataSource: 0
+  m_PlaybackSpeed: 1
+  m_AudioOutputMode: 2
+  m_TargetAudioSources:
+  - {fileID: 0}
+  m_DirectAudioVolumes:
+  - 1
+  m_Url: 
+  m_EnabledAudioTracks: 01
+  m_DirectAudioMutes: 00
+  m_ControlledAudioTrackCount: 1
+  m_PlayOnAwake: 0
+  m_SkipOnDrop: 1
+  m_Looping: 0
+  m_WaitForFirstFrame: 1
+  m_FrameReadyEventEnabled: 0
+  m_VideoShaders: []
 --- !u!1 &481299261
 GameObject:
   m_ObjectHideFlags: 0
@@ -2794,7 +2836,7 @@ GameObject:
   - component: {fileID: 551049418}
   - component: {fileID: 551049417}
   m_Layer: 0
-  m_Name: AudioTestButton
+  m_Name: Display Test Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4019,7 +4061,7 @@ GameObject:
   - component: {fileID: 836353269}
   - component: {fileID: 836353268}
   m_Layer: 0
-  m_Name: SelectAudioTxt
+  m_Name: Select Display Txt
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4065,7 +4107,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Select Audio Device
+  m_text: Select Video Display
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -4200,7 +4242,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Texture: {fileID: 0}
+  m_Texture: {fileID: 8400000, guid: 1a9ca48056f877243befa5121b11e846, type: 2}
   m_UVRect:
     serializedVersion: 2
     x: 0
@@ -6428,7 +6470,7 @@ RectTransform:
   m_Children:
   - {fileID: 741200878}
   m_Father: {fileID: 315177848}
-  m_RootOrder: 4
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -7093,7 +7135,7 @@ GameObject:
   - component: {fileID: 1481057307}
   - component: {fileID: 1481057306}
   m_Layer: 0
-  m_Name: Select Audio Dropdown
+  m_Name: Select Display Dropdown
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8076,7 +8118,7 @@ RectTransform:
   m_Children:
   - {fileID: 120631163}
   m_Father: {fileID: 315177848}
-  m_RootOrder: 3
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -8474,7 +8516,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1951873818}
   m_Layer: 0
-  m_Name: Audio Settings
+  m_Name: Display Settings
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

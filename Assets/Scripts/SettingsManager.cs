@@ -20,7 +20,7 @@ public class SettingsManager : MonoBehaviour {
     [SerializeField] private RawImage cameraImage;
     [SerializeField] private TMP_Dropdown analysisDropdown;
     [SerializeField] private TMP_Dropdown resolutionDropdown;
-    [SerializeField] private TMP_Dropdown audioDeviceDropdown;
+    [SerializeField] private TMP_Dropdown displayDeviceDropdown;
     [SerializeField] private TMP_InputField outputFilenameInputField;
     [SerializeField] private Button SaveButton;
     [SerializeField] private ViewManager viewManager;
@@ -32,6 +32,7 @@ public class SettingsManager : MonoBehaviour {
     public string outputFilename;
 
     private WebCamDevice[] cameraDevices;
+    private Display[] displayDevices;
     private TMP_Dropdown.OptionData blankTempData;
 
     private bool isCameraSet;
@@ -44,7 +45,7 @@ public class SettingsManager : MonoBehaviour {
         cameraDropdown.onValueChanged.AddListener(delegate { OnCameraOptionChanged(); });
         analysisDropdown.onValueChanged.AddListener(delegate { OnAnalysisOptionChanged(); });
         resolutionDropdown.onValueChanged.AddListener(delegate { OnResolutionOptionChanged(); });
-        audioDeviceDropdown.onValueChanged.AddListener(delegate { OnAudioDeviceChanged(); });
+        displayDeviceDropdown.onValueChanged.AddListener(delegate { OnDisplayDeviceChanged(); });
         outputFilenameInputField.onValueChanged.AddListener(delegate { OnOutputFileNameChanged(); });
         SaveButton.onClick.AddListener(delegate { OnSavebuttonClicked(); });
 
@@ -52,6 +53,7 @@ public class SettingsManager : MonoBehaviour {
 
         GetWebcamDevices();
         GetAnalysisOptions();
+        GetDisplayDevices();
         GetResolutionOptions();
         SaveButton.interactable = false;
     }
@@ -160,10 +162,26 @@ public class SettingsManager : MonoBehaviour {
 
     #endregion
 
-    #region AUDIO SETTINGS
+    #region DISPLAY SETTINGS
 
-    private void OnAudioDeviceChanged() {
+    private void OnDisplayDeviceChanged() {
         isAudioSet = true;
+    }
+
+    private void GetDisplayDevices() {
+        displayDeviceDropdown.ClearOptions();
+
+        displayDevices = Display.displays;
+
+        List<string> deviceNames = new List<string>();
+
+        foreach (Display device in displayDevices) {
+            deviceNames.Add(device.);
+        }
+
+        displayDeviceDropdown.options.Add(blankTempData);
+
+        displayDeviceDropdown.AddOptions(deviceNames);
     }
 
     #endregion
