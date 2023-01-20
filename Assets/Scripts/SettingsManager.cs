@@ -1,9 +1,14 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using UnityEditor;
+using UnityEngine.Networking;
 
 public class SettingsManager : MonoBehaviour {
+
+    #region ENUMS
 
     public enum AnalysisOptions {
         Range,
@@ -12,9 +17,25 @@ public class SettingsManager : MonoBehaviour {
     }
 
     public enum ResolutionOptions {
-        _2048x1080,
+        _1920x960,
         _4096x2160
     }
+
+    #endregion
+
+    #region CORE VARIABLES
+
+    public WebCamTexture webcam { get; set; }
+    public AnalysisOptions analysis { get; set; }
+    public ResolutionOptions resolution { get; set; }
+    public int displayDevice { get; set; }
+    public string outputFilename { get; set; }
+    public string outputFilePath { get; set; }
+    public string videoFilePath { get; set; }
+
+    #endregion
+
+    #region UI VARIABLES
 
     [SerializeField] private TMP_Dropdown cameraDropdown;
     [SerializeField] private RawImage cameraImage;
@@ -23,23 +44,32 @@ public class SettingsManager : MonoBehaviour {
     [SerializeField] private TMP_Dropdown displayDeviceDropdown;
     [SerializeField] private TMP_InputField outputFilenameInputField;
     [SerializeField] private Button SaveButton;
+    [SerializeField] private Button DisplayTestButton;
+    [SerializeField] private Button OpenExplorerButtonOutputFilePath;
+    [SerializeField] private Button OpenExplorerButtonVideoFilePath;
     [SerializeField] private ViewManager viewManager;
+    [SerializeField] private TMP_Text OutputFilePathText;
+    [SerializeField] private TMP_Text VideoFilePathText;
+    private TMP_Dropdown.OptionData blankTempData;
 
-    public WebCamDevice webcam;
-    public AnalysisOptions analysis;
-    public ResolutionOptions resolution;
-    public string audioDevice;
-    public string outputFilename;
+    #endregion 
+
+    #region DEVICE VARIABLES
 
     private WebCamDevice[] cameraDevices;
     private Display[] displayDevices;
-    private TMP_Dropdown.OptionData blankTempData;
+
+    #endregion
+
+    #region BOOLEANS
 
     private bool isCameraSet;
     private bool isAnalysisSet;
     private bool isResolutionSet;
-    private bool isAudioSet;
+    private bool isDisplaySet;
     private bool isOutputFilenameSet;
+
+    #endregion
 
     private void Awake() {
         cameraDropdown.onValueChanged.AddListener(delegate { OnCameraOptionChanged(); });
@@ -48,6 +78,7 @@ public class SettingsManager : MonoBehaviour {
         displayDeviceDropdown.onValueChanged.AddListener(delegate { OnDisplayDeviceChanged(); });
         outputFilenameInputField.onValueChanged.AddListener(delegate { OnOutputFileNameChanged(); });
         SaveButton.onClick.AddListener(delegate { OnSavebuttonClicked(); });
+        DisplayTestButton.onClick.AddListener(delegate { OnDisplayTestClicked(); });
 
         blankTempData = new TMP_Dropdown.OptionData("-");
 
@@ -56,10 +87,13 @@ public class SettingsManager : MonoBehaviour {
         GetDisplayDevices();
         GetResolutionOptions();
         SaveButton.interactable = false;
+        webcam = new WebCamTexture();
+
+        SetFilePathDestinations();
     }
 
     private void Update() {
-        if (isCameraSet && isAnalysisSet && isResolutionSet && isAudioSet && isOutputFilenameSet) {
+        if (isCameraSet && isAnalysisSet && isResolutionSet && isDisplaySet && isOutputFilenameSet) {
             SaveButton.interactable = true;
         } else {
             SaveButton.interactable = false;
@@ -70,18 +104,16 @@ public class SettingsManager : MonoBehaviour {
 
     private void OnCameraOptionChanged() {
         if (cameraDropdown.value > 0) {
-            WebCamTexture webcamTexture = new WebCamTexture(webcam.name);
+            if (webcam != null) {
+                webcam.Stop();
+            }
 
-            webcamTexture.Stop();
+            webcam.name = cameraDevices[cameraDropdown.value - 1].name;
 
-            webcam = cameraDevices[cameraDropdown.value - 1];
+            cameraImage.texture = webcam;
 
-            webcamTexture.name = webcam.name;
-
-            cameraImage.texture = webcamTexture;
-
-            if (webcamTexture.isReadable) {
-                webcamTexture.Play();
+            if (webcam.isReadable) {
+                webcam.Play();
             }
 
             isCameraSet = true;
@@ -165,7 +197,8 @@ public class SettingsManager : MonoBehaviour {
     #region DISPLAY SETTINGS
 
     private void OnDisplayDeviceChanged() {
-        isAudioSet = true;
+        displayDevice = displayDeviceDropdown.value - 1;
+        isDisplaySet = true;
     }
 
     private void GetDisplayDevices() {
@@ -185,10 +218,33 @@ public class SettingsManager : MonoBehaviour {
         displayDeviceDropdown.AddOptions(deviceNames);
     }
 
+    private void OnDisplayTestClicked() {
+        Display.displays[displayDevice].Activate();
+    }
+
     #endregion
 
     #region FILENAME SETTINGS
 
+    /// <summary>
+    /// Function to define the file path for the videos and output files
+    /// Change the path variable to string to define the location of the videos
+    /// The output files are located within a folder called Data Output, if this doesn't exist within the video folder, please create it
+    /// </summary>
+    private void SetFilePathDestinations() {
+        string path = "C:" + @"\" + "Users" + @"\" + "callu" + @"\" + "OneDrive" + @"\" + "Desktop" + @"\" + "BWD Videos" + @"\";
+
+        outputFilePath = path + "Data Output" + @"\";
+        videoFilePath = path;
+
+        OutputFilePathText.text = outputFilePath;
+        VideoFilePathText.text = videoFilePath;
+    }
+
+    /// <summary>
+    /// Function to check that the output filename contains text
+    /// Save button is disabled if there is no text
+    /// </summary>
     private void OnOutputFileNameChanged() {
         if (outputFilenameInputField.text != "") {
             isOutputFilenameSet = true;
@@ -197,14 +253,23 @@ public class SettingsManager : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Stores the output filename
+    /// </summary>
     private void SetOutputFilename() {
         outputFilename = outputFilenameInputField.text;
     }
 
     #endregion
 
+    /// <summary>
+    /// Function triggered when the save button is clicked
+    /// Sets the output filename, stops the webcam and goes to the main menu
+    /// </summary>
     private void OnSavebuttonClicked() {
         SetOutputFilename();
+
+        webcam.Stop();
 
         viewManager.GoToMainMenu();
     }

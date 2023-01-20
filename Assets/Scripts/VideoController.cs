@@ -18,6 +18,15 @@ public class VideoController : MonoBehaviour {
     [SerializeField] VideoPlayer videoPlayer;
     [SerializeField] RawImage videoImage1;
     [SerializeField] RawImage videoImage2;
+    [SerializeField] RawImage WebcamOutput;
+    [SerializeField] Camera videoCamera;
+    [SerializeField] RenderTexture videoTexture;
+
+    [SerializeField] SettingsManager settingsManager;
+
+    [SerializeField] List<VideoClip> videoClips;
+
+    private int videoCounter;
 
     private void Awake() {
         settingsButton.onClick.AddListener(delegate { OnSettingsClicked(); });
@@ -25,17 +34,7 @@ public class VideoController : MonoBehaviour {
         pauseButton.onClick.AddListener(delegate { OnPauseClicked(); });
         stopButton.onClick.AddListener(delegate { OnStopClicked(); });
 
-        string path = "C:" + @"\" + "Users" + @"\" + "callu" + @"\" + "OneDrive" + @"\" + "Desktop" + @"\" + "BWD Videos" + @"\" + "0.mov";
-
-        var info = new FileInfo(path);
-
-        videoPlayer.url = path;
-
-        videoPlayer.renderMode = VideoRenderMode.RenderTexture;
-    }
-
-    void Start() {
-
+        //videoPlayer.renderMode = VideoRenderMode.RenderTexture;
     }
 
     void Update() {
@@ -54,6 +53,37 @@ public class VideoController : MonoBehaviour {
         }
     }
 
+    public void OnShow() {
+        videoCamera.targetDisplay = settingsManager.displayDevice;
+        videoPlayer.targetCamera = videoCamera;
+
+        WebCamTexture webcamTexture = new WebCamTexture(settingsManager.webcam.name);
+
+        WebcamOutput.texture = webcamTexture;
+
+        webcamTexture.Play();
+
+        if(!Display.displays[settingsManager.displayDevice].active) {
+            Display.displays[settingsManager.displayDevice].Activate();
+        }
+
+        if(settingsManager.resolution == SettingsManager.ResolutionOptions._1920x960) {
+            //Load files from 2K
+        } else if(settingsManager.resolution == SettingsManager.ResolutionOptions._4096x2160) {
+            //Load files from 4k
+        }
+
+        videoCounter = 0;
+
+        Debug.Log(settingsManager.videoFilePath);
+
+        string currentVideoPath = settingsManager.videoFilePath + @"\" + videoCounter.ToString() + ".mov";
+
+        videoPlayer.url = currentVideoPath;
+
+        videoPlayer.Prepare();
+    }
+
     private void OnPlayClicked() {
         videoPlayer.Play();
     }
@@ -70,16 +100,7 @@ public class VideoController : MonoBehaviour {
         }
     }
 
-    //private void OnResetClicked() {
-    //    videoPlayer.rese();
-    //}
-
     private void OnSettingsClicked() {
         viewManager.GoToSettings();
     }
-
-    //public void ShowExplorer(string itemPath) {
-    //    itemPath = itemPath.Replace(@"/", @"\");   // explorer doesn't like front slashes
-    //    System.Diagnostics.Process.Start("explorer.exe", "/select," + itemPath);
-    //}
 }

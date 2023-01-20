@@ -19,5 +19,6 @@ public class ViewManager : MonoBehaviour {
     public void GoToMainMenu() {
         SettingsMenu.SetActive(false);
         MainMenu.SetActive(true);
+        MainMenu.GetComponent<VideoController>().OnShow();
     }
 }
