@@ -1945,7 +1945,19 @@ MonoBehaviour:
   AudioSlider: {fileID: 1496190380}
   AudioValueText: {fileID: 446389169}
   settingsManager: {fileID: 164487149}
-  videoClips: []
+  videoClips:
+  - {fileID: 32900000, guid: 1a0941886b8ccd04182c8b3d7e30f3a4, type: 3}
+  - {fileID: 32900000, guid: c0433fb7befcc404fa6cf6763fe48c49, type: 3}
+  - {fileID: 32900000, guid: 4b46b26454433d04a9078bd191560110, type: 3}
+  - {fileID: 32900000, guid: f48cfd8869213154b8e16f539a380e0a, type: 3}
+  - {fileID: 32900000, guid: a3ae37cc77d030c45ab742d999aafcda, type: 3}
+  - {fileID: 32900000, guid: 360dba2cad601244fa28c82b940f9bf1, type: 3}
+  - {fileID: 32900000, guid: 24890bd54b1ab7d4184986ea05b84e4c, type: 3}
+  - {fileID: 32900000, guid: 8dfafd3e58b1a254f9dc14801cc09c2d, type: 3}
+  - {fileID: 32900000, guid: 7eac71eeeb00e6848b8ad1e60685b66a, type: 3}
+  - {fileID: 32900000, guid: 65c167e1971ec154ea74ea56fad4890a, type: 3}
+  - {fileID: 32900000, guid: 660819993026bc8438987b715976d844, type: 3}
+  - {fileID: 32900000, guid: cd97f82eb4e088b4b8cde29563e0ea9c, type: 3}
 --- !u!1 &335372138
 GameObject:
   m_ObjectHideFlags: 0

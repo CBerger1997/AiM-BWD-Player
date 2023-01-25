@@ -108,9 +108,11 @@ public class VideoController : MonoBehaviour {
     private void LoadVideo() {
         Debug.Log(settingsManager.videoFilePath);
 
-        string currentVideoPath = settingsManager.videoFilePath + videoCounter.ToString() + ".mov";
+        //string currentVideoPath = settingsManager.videoFilePath + videoCounter.ToString() + ".mov";
 
-        currentActiveVideoPlayer.url = currentVideoPath;
+        //currentActiveVideoPlayer.url = currentVideoPath;
+
+        currentActiveVideoPlayer.clip = videoClips[videoCounter];
 
         currentActiveVideoPlayer.Prepare();
 

@@ -232,9 +232,10 @@ public class SettingsManager : MonoBehaviour {
     /// The output files are located within a folder called Data Output, if this doesn't exist within the video folder, please create it
     /// </summary>
     private void SetFilePathDestinations() {
-        string path = "C:" + @"\" + "Users" + @"\" + "callu" + @"\" + "OneDrive" + @"\" + "Desktop" + @"\" + "BWD Videos" + @"\";
-
-        outputFilePath = path + "Data Output" + @"\";
+        //string path = "C:/Users/callu/OneDrive/Desktop/BWD Videos/";
+        //path.Replace("/", @"\");
+        string path = Application.persistentDataPath + @"\" + "BWD Videos" + @"\";
+        outputFilePath = Application.persistentDataPath + @"\" + "Data Output" + @"\";
         videoFilePath = path;
 
         OutputFilePathText.text = outputFilePath;
