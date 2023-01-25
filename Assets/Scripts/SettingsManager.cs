@@ -102,8 +102,13 @@ public class SettingsManager : MonoBehaviour {
 
     #region CAMERA SETTINGS
 
+    //FIX CORRECT WEBCAM BEING SELECTED 
+    //FIX MAC PERMISSIONS FOR WEBCAM
     private void OnCameraOptionChanged() {
         if (cameraDropdown.value > 0) {
+            
+            //Application.RequestUserAuthorization(UserAuthorization.WebCam);
+
             if (webcam != null) {
                 webcam.Stop();
             }

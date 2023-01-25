@@ -117,6 +117,7 @@ public class VideoController : MonoBehaviour {
         currentActiveVideoPlayer.Prepare();
 
         currentActiveVideoPlayer.SetDirectAudioVolume(0, AudioSlider.value);
+        currentActiveVideoPlayer.SetDirectAudioVolume(1, AudioSlider.value);
     }
 
     #region UI LISTENER FUNCTIONS
@@ -137,6 +138,10 @@ public class VideoController : MonoBehaviour {
         if (currentActiveVideoPlayer.isPlaying) {
             currentActiveVideoPlayer.Stop();
         }
+
+        videoCounter = 0;
+
+        LoadVideo();
     }
 
     private void OnSettingsClicked() {
@@ -160,7 +165,9 @@ public class VideoController : MonoBehaviour {
     }
 
     private void OnRewindClicked() {
-        currentActiveVideoPlayer.playbackSpeed = 0;
+        if (currentActiveVideoPlayer.isPlaying) {
+            currentActiveVideoPlayer.Stop();
+        }
     }
 
     private void OnFastForwardClicked() {
@@ -173,8 +180,8 @@ public class VideoController : MonoBehaviour {
 
     private void OnAudioSliderChanged() {
         currentActiveVideoPlayer.SetDirectAudioVolume(0, AudioSlider.value);
+        currentActiveVideoPlayer.SetDirectAudioVolume(1, AudioSlider.value);
         AudioValueText.text = Mathf.Round(AudioSlider.value * 100).ToString() + "%";
-        
     }
 
     #endregion
