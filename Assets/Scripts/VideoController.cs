@@ -120,6 +120,10 @@ public class VideoController : MonoBehaviour {
         currentActiveVideoPlayer.SetDirectAudioVolume(1, AudioSlider.value);
     }
 
+    private void NextVideoLogic() {
+
+    }
+
     #region UI LISTENER FUNCTIONS
 
     private void OnPlayClicked() {
