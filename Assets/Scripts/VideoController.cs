@@ -25,6 +25,7 @@ public class VideoController : MonoBehaviour {
     [SerializeField] RenderTexture videoTexture;
     [SerializeField] Slider AudioSlider;
     [SerializeField] TMP_Text AudioValueText;
+    [SerializeField] TMP_Dropdown VideoPathDropdown;
 
     RawImage videoImage1;
     RawImage videoImage2;
@@ -35,6 +36,7 @@ public class VideoController : MonoBehaviour {
 
     private VideoPlayer currentActiveVideoPlayer;
     private int videoCounter;
+    private int prevVideoCounter;
 
     private void Awake() {
         settingsButton.onClick.AddListener(delegate { OnSettingsClicked(); });
@@ -75,12 +77,11 @@ public class VideoController : MonoBehaviour {
         NextButton.interactable = videoCounter == 11 ? false : true;
 
         if ((ulong)currentActiveVideoPlayer.frame == currentActiveVideoPlayer.frameCount - 5) {
-            Debug.Log(currentActiveVideoPlayer.frame);
             OnNextClicked();
         }
     }
 
-     public void OnShow() {
+    public void OnShow() {
         videoCamera.targetDisplay = settingsManager.displayDevice;
         currentActiveVideoPlayer.targetCamera = videoCamera;
 
@@ -120,9 +121,55 @@ public class VideoController : MonoBehaviour {
         currentActiveVideoPlayer.SetDirectAudioVolume(1, AudioSlider.value);
     }
 
-    private void NextVideoLogic() {
+    #region VideoLogic
 
+    private void NextVideoLogic(bool changePath) {
+        prevVideoCounter = videoCounter;
+
+        switch (videoCounter) {
+            case 0:
+                videoCounter++;
+                break;
+            case 1:
+                videoCounter = changePath == true ? 6 : 2;
+                break;
+            case 2:
+                videoCounter = changePath == true ? 7 : 3;
+                break;
+            case 3:
+                videoCounter = changePath == true ? 8 : 4;
+                break;
+            case 4:
+                videoCounter = changePath == true ? 9 : 5;
+                break;
+            case 5:
+                videoCounter = changePath == true ? 10 : 11;
+                break;
+            case 6:
+                videoCounter = 3;
+                break;
+            case 7:
+                videoCounter = 4;
+                break;
+            case 8:
+                videoCounter = 5;
+                break;
+            case 9:
+                videoCounter = 11;
+                break;
+            case 10:
+                videoCounter = 11;
+                break;
+            case 11:
+                currentActiveVideoPlayer.Stop();
+                break;
+            default:
+                Debug.LogError("Video counter is outside the video range");
+                break;
+        }
     }
+
+    #endregion
 
     #region UI LISTENER FUNCTIONS
 
@@ -153,7 +200,7 @@ public class VideoController : MonoBehaviour {
     }
 
     private void OnBackClicked() {
-        videoCounter--;
+        videoCounter = prevVideoCounter;
 
         LoadVideo();
 
@@ -161,7 +208,7 @@ public class VideoController : MonoBehaviour {
     }
 
     private void OnNextClicked() {
-        videoCounter++;
+        NextVideoLogic(VideoPathDropdown.value == 0 ? false : true);
 
         LoadVideo();
 
