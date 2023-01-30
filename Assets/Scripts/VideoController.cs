@@ -85,7 +85,7 @@ public class VideoController : MonoBehaviour {
         videoCamera.targetDisplay = settingsManager.displayDevice;
         currentActiveVideoPlayer.targetCamera = videoCamera;
 
-        WebCamTexture webcamTexture = new WebCamTexture(settingsManager.webcam.name);
+        WebCamTexture webcamTexture = new WebCamTexture(settingsManager.webcam.name, 320, 240, 30);
 
         WebcamOutput.texture = webcamTexture;
 
