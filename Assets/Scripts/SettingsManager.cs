@@ -88,6 +88,7 @@ public class SettingsManager : MonoBehaviour {
         GetResolutionOptions();
         SaveButton.interactable = false;
         webcam = new WebCamTexture();
+        webcam.requestedFPS = 30;
 
         SetFilePathDestinations();
     }
