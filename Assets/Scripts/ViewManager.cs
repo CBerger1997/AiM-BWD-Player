@@ -10,15 +10,15 @@ public class ViewManager : MonoBehaviour {
     private void Awake() {
         GoToSettings();
 
-#if UNITY_EDITOR_WIN
+#if UNITY_EDITOR_WIN || UNITY_EDITOR_OSX
         videoCamera.SetActive(false);
         videoCanvas.SetActive(false);
-#elif UNITY_STANDALONE_WIN
+#elif UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX
         videoCamera.SetActive(true);
         videoCanvas.SetActive(true);
 #endif
     }
-    
+
     public void GoToSettings() {
         SettingsMenu.SetActive(true);
         MainMenu.SetActive(false);
