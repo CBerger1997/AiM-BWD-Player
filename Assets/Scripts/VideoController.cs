@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
 using TMPro;
+using System.IO;
 
 public class VideoController : MonoBehaviour {
 
@@ -26,17 +27,18 @@ public class VideoController : MonoBehaviour {
     [SerializeField] Slider AudioSlider;
     [SerializeField] TMP_Text AudioValueText;
     [SerializeField] TMP_Dropdown VideoPathDropdown;
+    [SerializeField] TMP_Text CurrentVideoText;
+    [SerializeField] TMP_Text NextVideoText;
 
     RawImage videoImage1;
     RawImage videoImage2;
 
     [SerializeField] SettingsManager settingsManager;
 
-    [SerializeField] List<VideoClip> videoClips;
-
     private VideoPlayer currentActiveVideoPlayer;
     private int videoCounter;
-    private int prevVideoCounter;
+    private int nextVideoCounter;
+    private List<int> prevVideoCounter;
 
     private void Awake() {
         settingsButton.onClick.AddListener(delegate { OnSettingsClicked(); });
@@ -52,10 +54,17 @@ public class VideoController : MonoBehaviour {
 
         AudioSlider.gameObject.SetActive(false);
 
+        prevVideoCounter = new List<int>();
+
         currentActiveVideoPlayer = videoPlayer1;
 
         videoImage1 = videoPlayer1.GetComponent<RawImage>();
         videoImage2 = videoPlayer2.GetComponent<RawImage>();
+
+        VideoPathDropdown.onValueChanged.AddListener(delegate { NextVideoLogic(VideoPathDropdown.value == 0 ? false : true); });
+
+        CurrentVideoText.text = "Current Video: 0";
+        NextVideoText.text = "Next Video: 1";
     }
 
     void Update() {
@@ -103,62 +112,60 @@ public class VideoController : MonoBehaviour {
 
         videoCounter = 0;
 
-        LoadVideo();
+        LoadVideo(videoCounter);
     }
 
-    private void LoadVideo() {
-        Debug.Log(settingsManager.videoFilePath);
+    private void LoadVideo(int videoVal) {
+        string currentVideoPath = settingsManager.videoFilePath + videoCounter.ToString() + ".mp4";
 
-        //string currentVideoPath = settingsManager.videoFilePath + videoCounter.ToString() + ".mov";
-
-        //currentActiveVideoPlayer.url = currentVideoPath;
-
-        currentActiveVideoPlayer.clip = videoClips[videoCounter];
+        currentActiveVideoPlayer.url = currentVideoPath;
 
         currentActiveVideoPlayer.Prepare();
 
         currentActiveVideoPlayer.SetDirectAudioVolume(0, AudioSlider.value);
         currentActiveVideoPlayer.SetDirectAudioVolume(1, AudioSlider.value);
+
+        NextVideoLogic(VideoPathDropdown.value == 0 ? false : true);
+
+        CurrentVideoText.text = "Current Video: " + videoCounter.ToString();
     }
 
     #region VideoLogic
 
     private void NextVideoLogic(bool changePath) {
-        prevVideoCounter = videoCounter;
-
         switch (videoCounter) {
             case 0:
-                videoCounter++;
+                nextVideoCounter = 1;
                 break;
             case 1:
-                videoCounter = changePath == true ? 6 : 2;
+                nextVideoCounter = changePath == true ? 6 : 2;
                 break;
             case 2:
-                videoCounter = changePath == true ? 7 : 3;
+                nextVideoCounter = changePath == true ? 7 : 3;
                 break;
             case 3:
-                videoCounter = changePath == true ? 8 : 4;
+                nextVideoCounter = changePath == true ? 8 : 4;
                 break;
             case 4:
-                videoCounter = changePath == true ? 9 : 5;
+                nextVideoCounter = changePath == true ? 9 : 5;
                 break;
             case 5:
-                videoCounter = changePath == true ? 10 : 11;
+                nextVideoCounter = changePath == true ? 10 : 11;
                 break;
             case 6:
-                videoCounter = 3;
+                nextVideoCounter = 3;
                 break;
             case 7:
-                videoCounter = 4;
+                nextVideoCounter = 4;
                 break;
             case 8:
-                videoCounter = 5;
+                nextVideoCounter = 5;
                 break;
             case 9:
-                videoCounter = 11;
+                nextVideoCounter = 11;
                 break;
             case 10:
-                videoCounter = 11;
+                nextVideoCounter = 11;
                 break;
             case 11:
                 currentActiveVideoPlayer.Stop();
@@ -167,6 +174,8 @@ public class VideoController : MonoBehaviour {
                 Debug.LogError("Video counter is outside the video range");
                 break;
         }
+
+        NextVideoText.text = "Next Video: " + nextVideoCounter.ToString();
     }
 
     #endregion
@@ -191,8 +200,9 @@ public class VideoController : MonoBehaviour {
         }
 
         videoCounter = 0;
+        nextVideoCounter = 0;
 
-        LoadVideo();
+        LoadVideo(videoCounter);
     }
 
     private void OnSettingsClicked() {
@@ -200,17 +210,20 @@ public class VideoController : MonoBehaviour {
     }
 
     private void OnBackClicked() {
-        videoCounter = prevVideoCounter;
+        videoCounter = prevVideoCounter[prevVideoCounter.Count - 1];
+        prevVideoCounter.RemoveAt(prevVideoCounter.Count - 1);
 
-        LoadVideo();
+        LoadVideo(videoCounter);
 
         currentActiveVideoPlayer.Play();
     }
 
     private void OnNextClicked() {
+        prevVideoCounter.Add(videoCounter);
+        videoCounter = nextVideoCounter;
         NextVideoLogic(VideoPathDropdown.value == 0 ? false : true);
 
-        LoadVideo();
+        LoadVideo(videoCounter);
 
         currentActiveVideoPlayer.Play();
     }

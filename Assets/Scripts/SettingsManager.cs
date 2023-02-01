@@ -5,6 +5,7 @@ using TMPro;
 using UnityEngine.UI;
 using UnityEditor;
 using UnityEngine.Networking;
+using System.IO;
 
 public class SettingsManager : MonoBehaviour {
 
@@ -179,6 +180,12 @@ public class SettingsManager : MonoBehaviour {
         if (resolutionDropdown.value > 0) {
             resolution = (ResolutionOptions)resolutionDropdown.value - 1;
             isResolutionSet = true;
+            if(resolutionDropdown.value == 1) {
+                CheckVideosFromFolder(true);
+            } else {
+                CheckVideosFromFolder(false);
+            }
+            VideoFilePathText.text = videoFilePath;
         } else {
             isResolutionSet = false;
         }
@@ -196,6 +203,21 @@ public class SettingsManager : MonoBehaviour {
         resolutionDropdown.options.Add(blankTempData);
 
         resolutionDropdown.AddOptions(options);
+    }
+
+    private void CheckVideosFromFolder(bool is2K) {
+        string folder = is2K == true ? "/BWD 2K/" : "/BWD 4K/";
+        videoFilePath = Application.streamingAssetsPath + folder;
+        var info = new DirectoryInfo(videoFilePath);
+        var fileInfo = info.GetFiles();
+        int counter = 0;
+        foreach (var file in fileInfo) {
+            if (file.Extension == ".mov") {
+                counter++;
+            }
+        }
+
+        Debug.Log(counter);
     }
 
     #endregion
@@ -238,11 +260,8 @@ public class SettingsManager : MonoBehaviour {
     /// The output files are located within a folder called Data Output, if this doesn't exist within the video folder, please create it
     /// </summary>
     private void SetFilePathDestinations() {
-        //string path = "C:/Users/callu/OneDrive/Desktop/BWD Videos/";
-        //path.Replace("/", @"\");
-        string path = Application.persistentDataPath + @"\" + "BWD Videos" + @"\";
-        outputFilePath = Application.persistentDataPath + @"\" + "Data Output" + @"\";
-        videoFilePath = path;
+        outputFilePath = Application.streamingAssetsPath + @"\" + "Data Output" + @"\";
+        videoFilePath = Application.streamingAssetsPath + "/BWD 2K/";
 
         OutputFilePathText.text = outputFilePath;
         VideoFilePathText.text = videoFilePath;

@@ -1,0 +1,13 @@
+Bug List
+
+Audio doesn't mute on mac
+Video camera doesn't always load first time on mac
+
+Things to do:
+
+Resolution folders
+	Load files based on folder automatically
+
+Stop true or false choice
+Load in new video
+Swap video player over
