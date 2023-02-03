@@ -206,18 +206,17 @@ public class SettingsManager : MonoBehaviour {
     }
 
     private void CheckVideosFromFolder(bool is2K) {
-        string folder = is2K == true ? "/BWD 2K/" : "/BWD 4K/";
-        videoFilePath = Application.streamingAssetsPath + folder;
-        var info = new DirectoryInfo(videoFilePath);
-        var fileInfo = info.GetFiles();
-        int counter = 0;
-        foreach (var file in fileInfo) {
-            if (file.Extension == ".mov") {
-                counter++;
-            }
-        }
+        string folder = is2K == true ? "BWD 2K" : "BWD 4K";
+        videoFilePath = folder;
+        //var info = new DirectoryInfo(Application.streamingAssetsPath + "/" + folder + "/");
+        //var fileInfo = info.GetFiles();
+        //int counter = 0;
+        //foreach (var file in fileInfo) {
+        //    if (file.Extension == ".mp4") {
+        //        counter++;
+        //    }
+        //}
 
-        Debug.Log(counter);
     }
 
     #endregion

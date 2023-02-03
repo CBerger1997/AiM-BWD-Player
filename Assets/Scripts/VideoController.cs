@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using UnityEngine.Video;
 using TMPro;
 using System.IO;
+using System.Collections;
 
 public class VideoController : MonoBehaviour {
 
@@ -19,8 +20,6 @@ public class VideoController : MonoBehaviour {
     [SerializeField] Button AudioButton;
 
     [SerializeField] ViewManager viewManager;
-    [SerializeField] VideoPlayer videoPlayer1;
-    [SerializeField] VideoPlayer videoPlayer2;
     [SerializeField] RawImage WebcamOutput;
     [SerializeField] Camera videoCamera;
     [SerializeField] RenderTexture videoTexture;
@@ -29,18 +28,48 @@ public class VideoController : MonoBehaviour {
     [SerializeField] TMP_Dropdown VideoPathDropdown;
     [SerializeField] TMP_Text CurrentVideoText;
     [SerializeField] TMP_Text NextVideoText;
-
-    RawImage videoImage1;
-    RawImage videoImage2;
+    [SerializeField] TMP_Text StartFrameText;
+    [SerializeField] TMP_Text EndFrameText;
+    [SerializeField] TMP_Text FrameCountText;
+    [SerializeField] VideoPlayer[] VideoPlayers;
+    [SerializeField] RawImage[] ExternalVideoImages;
 
     [SerializeField] SettingsManager settingsManager;
 
-    private VideoPlayer currentActiveVideoPlayer;
-    private int videoCounter;
-    private int nextVideoCounter;
-    private List<int> prevVideoCounter;
+    public int curClipCounter;
+    public int nextClipCounter;
+    private List<int> prevClipCounters;
+
+    private int startFrame;
+    private int endFrame;
+    public bool isLoadingNextVideo;
+
+    public int currentActivePlayerIndex;
+
+    public VideoClip[] videos;
 
     private void Awake() {
+
+        SetupListeners();
+
+        AudioSlider.gameObject.SetActive(false);
+
+        prevClipCounters = new List<int>();
+
+        currentActivePlayerIndex = 0;
+
+        VideoPlayers[0].gameObject.GetComponent<RawImage>().enabled = true;
+        VideoPlayers[1].gameObject.GetComponent<RawImage>().enabled = false;
+
+        VideoPathDropdown.onValueChanged.AddListener(delegate { GetNextVideoValue(VideoPathDropdown.value == 0 ? false : true); });
+
+        CurrentVideoText.text = "Current Video: 0";
+        NextVideoText.text = "Next Video: 1";
+
+        isLoadingNextVideo = false;
+    }
+
+    private void SetupListeners() {
         settingsButton.onClick.AddListener(delegate { OnSettingsClicked(); });
         playButton.onClick.AddListener(delegate { OnPlayClicked(); });
         pauseButton.onClick.AddListener(delegate { OnPauseClicked(); });
@@ -51,48 +80,62 @@ public class VideoController : MonoBehaviour {
         FastForwardButton.onClick.AddListener(delegate { OnFastForwardClicked(); });
         AudioButton.onClick.AddListener(delegate { OnAudioClicked(); });
         AudioSlider.onValueChanged.AddListener(delegate { OnAudioSliderChanged(); });
-
-        AudioSlider.gameObject.SetActive(false);
-
-        prevVideoCounter = new List<int>();
-
-        currentActiveVideoPlayer = videoPlayer1;
-
-        videoImage1 = videoPlayer1.GetComponent<RawImage>();
-        videoImage2 = videoPlayer2.GetComponent<RawImage>();
-
-        VideoPathDropdown.onValueChanged.AddListener(delegate { NextVideoLogic(VideoPathDropdown.value == 0 ? false : true); });
-
-        CurrentVideoText.text = "Current Video: 0";
-        NextVideoText.text = "Next Video: 1";
     }
 
     void Update() {
-        if (currentActiveVideoPlayer.isPlaying) {
+        if (VideoPlayers[currentActivePlayerIndex].isPlaying) {
+            //Enabel/disable buttons
             playButton.gameObject.SetActive(false);
             pauseButton.gameObject.SetActive(true);
             stopButton.interactable = true;
-        } else if (currentActiveVideoPlayer.isPaused) {
+
+            if (((long)VideoPlayers[currentActivePlayerIndex].frame >= (endFrame - 168)) && !isLoadingNextVideo) {
+
+                //Debugging
+                Debug.Log(VideoPlayers[currentActivePlayerIndex]);
+                Debug.Log((ulong)VideoPlayers[currentActivePlayerIndex].frame);
+                Debug.Log(VideoPlayers[currentActivePlayerIndex].frameCount);
+                Debug.Log(VideoPlayers[currentActivePlayerIndex].frameCount - 168);
+                Debug.Log("CALLUM LOG: Initiating preload of next video: " + nextClipCounter.ToString() + ".mp4");
+
+                //Get the nextVideoCounter value
+                GetNextVideoValue(VideoPathDropdown.value == 0 ? false : true);
+
+                //Get the start frame for next video and set the text
+                startFrame = GetTimingsForVideoCounter(nextClipCounter, true);
+                StartFrameText.text = "Start Frame: " + startFrame.ToString();
+
+                //Set video loading to true
+                isLoadingNextVideo = true;
+
+                //Preload the next video
+                PreLoadNextVideo(nextClipCounter);
+            }
+        } else if (VideoPlayers[currentActivePlayerIndex].isPaused) {
+            //Enabel/disable buttons
             playButton.gameObject.SetActive(true);
             pauseButton.gameObject.SetActive(false);
             stopButton.interactable = true;
         } else {
+            //Enabel/disable buttons
             playButton.gameObject.SetActive(true);
             pauseButton.gameObject.SetActive(false);
             stopButton.interactable = false;
         }
 
-        BackButton.interactable = videoCounter == 0 ? false : true;
-        NextButton.interactable = videoCounter == 11 ? false : true;
-
-        if ((ulong)currentActiveVideoPlayer.frame == currentActiveVideoPlayer.frameCount - 5) {
-            OnNextClicked();
+        if (VideoPlayers[1].isPlaying) {
+            //Debug.Log(VideoPlayers[1].frame);
         }
+
+        BackButton.interactable = curClipCounter == 0 ? false : true;
+        NextButton.interactable = curClipCounter == 11 ? false : true;
     }
 
     public void OnShow() {
+        videos = Resources.LoadAll<VideoClip>(settingsManager.videoFilePath) as VideoClip[];
+
         videoCamera.targetDisplay = settingsManager.displayDevice;
-        currentActiveVideoPlayer.targetCamera = videoCamera;
+        VideoPlayers[currentActivePlayerIndex].targetCamera = videoCamera;
 
         WebCamTexture webcamTexture = new WebCamTexture(settingsManager.webcam.name, 600, 600, 30);
 
@@ -104,78 +147,249 @@ public class VideoController : MonoBehaviour {
             Display.displays[settingsManager.displayDevice].Activate();
         }
 
-        if (settingsManager.resolution == SettingsManager.ResolutionOptions._1920x960) {
-            //Load files from 2K
-        } else if (settingsManager.resolution == SettingsManager.ResolutionOptions._4096x2160) {
-            //Load files from 4k
-        }
+        curClipCounter = 0;
 
-        videoCounter = 0;
-
-        LoadVideo(videoCounter);
+        LoadVideo(curClipCounter);
     }
 
     private void LoadVideo(int videoVal) {
-        string currentVideoPath = settingsManager.videoFilePath + videoCounter.ToString() + ".mp4";
+        VideoPlayers[currentActivePlayerIndex].clip = videos[videoVal];
 
-        currentActiveVideoPlayer.url = currentVideoPath;
+        VideoPlayers[currentActivePlayerIndex].Prepare();
 
-        currentActiveVideoPlayer.Prepare();
+        VideoPlayers[currentActivePlayerIndex].SetDirectAudioVolume(0, AudioSlider.value);
+        VideoPlayers[currentActivePlayerIndex].SetDirectAudioVolume(1, AudioSlider.value);
 
-        currentActiveVideoPlayer.SetDirectAudioVolume(0, AudioSlider.value);
-        currentActiveVideoPlayer.SetDirectAudioVolume(1, AudioSlider.value);
+        GetNextVideoValue(VideoPathDropdown.value == 0 ? false : true);
 
-        NextVideoLogic(VideoPathDropdown.value == 0 ? false : true);
+        CurrentVideoText.text = "Current Video: " + videoVal.ToString();
 
-        CurrentVideoText.text = "Current Video: " + videoCounter.ToString();
+        endFrame = GetTimingsForVideoCounter(curClipCounter, false);
+
+        Debug.Log("CALLUM LOG: Load Video: " + curClipCounter.ToString() + ".mp4");
+
+        EndFrameText.text = "End Frame: " + endFrame.ToString();
+        FrameCountText.text = "Frame Count: " + VideoPlayers[currentActivePlayerIndex].clip.frameCount.ToString();
+    }
+
+    private void PreLoadNextVideo(int videoVal) {
+        int nextActiveIndex;
+
+        if (currentActivePlayerIndex == 0) {
+            nextActiveIndex = 1;
+        } else {
+            nextActiveIndex = 0;
+        }
+
+        //Get the path for the next video
+        Debug.Log("CALLUM LOG: Preloading video: " + videoVal.ToString() + ".mp4");
+
+
+        //Prepare the next video a few seconds before
+        VideoPlayers[nextActiveIndex].clip = videos[nextClipCounter];
+        VideoPlayers[nextActiveIndex].Prepare();
+
+        Debug.Log("CALLUM LOG: Preparing video: " + videoVal.ToString() + ".mp4");
+
+        //Once the overlap time has ended, swap the video players
+        StartCoroutine(CheckForEndOfVideo());
+    }
+
+    IEnumerator CheckForEndOfVideo() {
+        bool waiting = true;
+
+        int nextActiveIndex = 0;
+
+        if (currentActivePlayerIndex == 0) {
+            nextActiveIndex = 1;
+        } else {
+            nextActiveIndex = 0;
+        }
+        while (waiting) {
+            //Start playing next video
+            if (VideoPlayers[currentActivePlayerIndex].frame >= endFrame - startFrame && !VideoPlayers[nextActiveIndex].isPlaying) {
+                VideoPlayers[nextActiveIndex].Play();
+            }
+
+            if (VideoPlayers[currentActivePlayerIndex].frame >= endFrame) {
+                Debug.Log("TIME TO SWAP");
+            }
+
+            //Once the overlap time has ended or the video stopped playing, swap the video players
+            if (VideoPlayers[currentActivePlayerIndex].frame >= endFrame || !VideoPlayers[currentActivePlayerIndex].isPlaying) {
+                Debug.Log(VideoPlayers[currentActivePlayerIndex].frame);
+                Debug.Log(endFrame);
+                Debug.Log("CALLUM LOG: Next video swap over Initiated");
+
+                Debug.Log("CALLUM LOG: Swapping video player images");
+
+                VideoPlayers[currentActivePlayerIndex].gameObject.GetComponent<RawImage>().enabled = false;
+                VideoPlayers[nextActiveIndex].gameObject.GetComponent<RawImage>().enabled = true;
+
+                endFrame = GetTimingsForVideoCounter(nextClipCounter, false);
+                EndFrameText.text = "End Frame: " + endFrame.ToString();
+
+                prevClipCounters.Add(curClipCounter);
+                currentActivePlayerIndex = nextActiveIndex;
+
+                curClipCounter = nextClipCounter;
+
+                FrameCountText.text = "Frame Count: " + VideoPlayers[currentActivePlayerIndex].clip.frameCount.ToString();
+
+                CurrentVideoText.text = "Current Video: " + curClipCounter.ToString();
+
+                GetNextVideoValue(VideoPathDropdown.value == 0 ? false : true);
+
+                isLoadingNextVideo = false;
+                waiting = false;
+            }
+
+            yield return new WaitForEndOfFrame();
+        }
     }
 
     #region VideoLogic
 
-    private void NextVideoLogic(bool changePath) {
-        switch (videoCounter) {
+    private void GetNextVideoValue(bool changePath) {
+        switch (curClipCounter) {
             case 0:
-                nextVideoCounter = 1;
+                nextClipCounter = 1;
                 break;
             case 1:
-                nextVideoCounter = changePath == true ? 6 : 2;
+                nextClipCounter = changePath == true ? 6 : 2;
                 break;
             case 2:
-                nextVideoCounter = changePath == true ? 7 : 3;
+                nextClipCounter = changePath == true ? 7 : 3;
                 break;
             case 3:
-                nextVideoCounter = changePath == true ? 8 : 4;
+                nextClipCounter = changePath == true ? 8 : 4;
                 break;
             case 4:
-                nextVideoCounter = changePath == true ? 9 : 5;
+                nextClipCounter = changePath == true ? 9 : 5;
                 break;
             case 5:
-                nextVideoCounter = changePath == true ? 10 : 11;
+                nextClipCounter = changePath == true ? 10 : 11;
                 break;
             case 6:
-                nextVideoCounter = 3;
+                nextClipCounter = 3;
                 break;
             case 7:
-                nextVideoCounter = 4;
+                nextClipCounter = 4;
                 break;
             case 8:
-                nextVideoCounter = 5;
+                nextClipCounter = 5;
                 break;
             case 9:
-                nextVideoCounter = 11;
+                nextClipCounter = 11;
                 break;
             case 10:
-                nextVideoCounter = 11;
+                nextClipCounter = 11;
                 break;
             case 11:
-                currentActiveVideoPlayer.Stop();
+                VideoPlayers[currentActivePlayerIndex].Stop();
                 break;
             default:
                 Debug.LogError("Video counter is outside the video range");
                 break;
         }
 
-        NextVideoText.text = "Next Video: " + nextVideoCounter.ToString();
+        NextVideoText.text = "Next Video: " + nextClipCounter.ToString();
+    }
+
+    private int GetTimingsForVideoCounter(int val, bool isStart) {
+        int frameVal = 0;
+
+        switch (val) {
+            case 0:
+                if (isStart) {
+                    frameVal = 0;
+                } else {
+                    frameVal = 954;
+                }
+                break;
+            case 1:
+                if (isStart) {
+                    frameVal = 149;
+                } else {
+                    frameVal = 6675;
+                }
+                break;
+            case 2:
+                if (isStart) {
+                    frameVal = 0;
+                } else {
+                    frameVal = 2489;
+                }
+                break;
+            case 3:
+                if (isStart) {
+                    frameVal = 12;
+                } else {
+                    frameVal = 3865;
+                }
+                break;
+            case 4:
+                if (isStart) {
+                    frameVal = 6;
+                } else {
+                    frameVal = 2379;
+                }
+                break;
+            case 5:
+                if (isStart) {
+                    frameVal = 43;
+                } else {
+                    frameVal = 2743;
+                }
+                break;
+            case 6:
+                if (isStart) {
+                    frameVal = 0;
+                } else {
+                    frameVal = 3177;
+                }
+                break;
+            case 7:
+                if (isStart) {
+                    frameVal = 44;
+                } else {
+                    frameVal = 1525;
+                }
+                break;
+            case 8:
+                if (isStart) {
+                    frameVal = 65;
+                } else {
+                    frameVal = 2097;
+                }
+                break;
+            case 9:
+                if (isStart) {
+                    frameVal = 3;
+                } else {
+                    frameVal = 2806;
+                }
+                break;
+            case 10:
+                if (isStart) {
+                    frameVal = 63;
+                } else {
+                    frameVal = 4945;
+                }
+                break;
+            case 11:
+                if (isStart) {
+                    frameVal = 0;
+                } else {
+                    frameVal = 621;
+                }
+                break;
+            default:
+                Debug.LogError("Video counter is outside the video range");
+                break;
+        }
+
+        return frameVal;
     }
 
     #endregion
@@ -183,26 +397,31 @@ public class VideoController : MonoBehaviour {
     #region UI LISTENER FUNCTIONS
 
     private void OnPlayClicked() {
-        currentActiveVideoPlayer.playbackSpeed = 1;
-
-        currentActiveVideoPlayer.Play();
+        foreach (VideoPlayer player in VideoPlayers) {
+            if (player.isPrepared) {
+                player.playbackSpeed = 1;
+                player.Play();
+            }
+        }
     }
 
     private void OnPauseClicked() {
-        if (currentActiveVideoPlayer.isPlaying) {
-            currentActiveVideoPlayer.Pause();
+        foreach (VideoPlayer player in VideoPlayers) {
+            if (player.isPlaying) {
+                player.Pause();
+            }
         }
     }
 
     private void OnStopClicked() {
-        if (currentActiveVideoPlayer.isPlaying) {
-            currentActiveVideoPlayer.Stop();
+        if (VideoPlayers[currentActivePlayerIndex].isPlaying) {
+            VideoPlayers[currentActivePlayerIndex].Stop();
         }
 
-        videoCounter = 0;
-        nextVideoCounter = 0;
+        curClipCounter = 0;
+        nextClipCounter = 0;
 
-        LoadVideo(videoCounter);
+        LoadVideo(curClipCounter);
     }
 
     private void OnSettingsClicked() {
@@ -210,32 +429,42 @@ public class VideoController : MonoBehaviour {
     }
 
     private void OnBackClicked() {
-        videoCounter = prevVideoCounter[prevVideoCounter.Count - 1];
-        prevVideoCounter.RemoveAt(prevVideoCounter.Count - 1);
+        //curClipCounter = prevClipCounter[prevClipCounter.Count - 1];
+        //prevClipCounter.RemoveAt(prevClipCounter.Count - 1);
 
-        LoadVideo(videoCounter);
+        //LoadVideo(curClipCounter);
 
-        currentActiveVideoPlayer.Play();
+        //currentActiveVideoPlayer.Play();
     }
 
     private void OnNextClicked() {
-        prevVideoCounter.Add(videoCounter);
-        videoCounter = nextVideoCounter;
-        NextVideoLogic(VideoPathDropdown.value == 0 ? false : true);
+        //prevClipCounter.Add(curClipCounter);
+        //curClipCounter = nextClipCounter;
+        //NextVideoLogic(VideoPathDropdown.value == 0 ? false : true);
 
-        LoadVideo(videoCounter);
+        //LoadVideo(curClipCounter);
 
-        currentActiveVideoPlayer.Play();
+        //currentActiveVideoPlayer.Play();
     }
 
     private void OnRewindClicked() {
-        if (currentActiveVideoPlayer.isPlaying) {
-            currentActiveVideoPlayer.Stop();
+        foreach (VideoPlayer player in VideoPlayers) {
+            if (player.isPlaying) {
+                if (player.isPlaying) {
+                    player.Stop();
+                }
+            }
         }
     }
 
     private void OnFastForwardClicked() {
-        currentActiveVideoPlayer.playbackSpeed *= 2;
+        foreach (VideoPlayer player in VideoPlayers) {
+            if (player.isPlaying) {
+                if (player.playbackSpeed < 4) {
+                    player.playbackSpeed *= 2;
+                }
+            }
+        }
     }
 
     private void OnAudioClicked() {
@@ -243,9 +472,13 @@ public class VideoController : MonoBehaviour {
     }
 
     private void OnAudioSliderChanged() {
-        currentActiveVideoPlayer.SetDirectAudioVolume(0, AudioSlider.value);
-        currentActiveVideoPlayer.SetDirectAudioVolume(1, AudioSlider.value);
-        AudioValueText.text = Mathf.Round(AudioSlider.value * 100).ToString() + "%";
+        foreach (VideoPlayer player in VideoPlayers) {
+            if (player.audioTrackCount > 0) {
+                player.SetDirectAudioVolume(0, AudioSlider.value);
+                player.SetDirectAudioVolume(1, AudioSlider.value);
+                AudioValueText.text = Mathf.Round(AudioSlider.value * 100).ToString() + "%";
+            }
+        }
     }
 
     #endregion

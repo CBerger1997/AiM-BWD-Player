@@ -70,3 +70,28 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+*.mp4
+Assets/StreamingAssets/BWD 2K/0.mp4.meta
+Assets/StreamingAssets/BWD 2K/1.mp4.meta
+Assets/StreamingAssets/BWD 2K/10.mp4.meta
+Assets/StreamingAssets/BWD 2K/11.mp4.meta
+Assets/StreamingAssets/BWD 2K/2.mp4.meta
+Assets/StreamingAssets/BWD 2K/3.mp4.meta
+Assets/StreamingAssets/BWD 2K/4.mp4.meta
+Assets/StreamingAssets/BWD 2K/5.mp4.meta
+Assets/StreamingAssets/BWD 2K/6.mp4.meta
+Assets/StreamingAssets/BWD 2K/7.mp4.meta
+Assets/StreamingAssets/BWD 2K/8.mp4.meta
+Assets/StreamingAssets/BWD 2K/9.mp4.meta
+Assets/StreamingAssets/BWD 4K/0.mp4.meta
+Assets/StreamingAssets/BWD 4K/1.mp4.meta
+Assets/StreamingAssets/BWD 4K/10.mp4.meta
+Assets/StreamingAssets/BWD 4K/11.mp4.meta
+Assets/StreamingAssets/BWD 4K/2.mp4.meta
+Assets/StreamingAssets/BWD 4K/3.mp4.meta
+Assets/StreamingAssets/BWD 4K/4.mp4.meta
+Assets/StreamingAssets/BWD 4K/5.mp4.meta
+Assets/StreamingAssets/BWD 4K/6.mp4.meta
+Assets/StreamingAssets/BWD 4K/7.mp4.meta
+Assets/StreamingAssets/BWD 4K/8.mp4.meta
+Assets/StreamingAssets/BWD 4K/9.mp4.meta
