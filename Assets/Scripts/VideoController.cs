@@ -48,6 +48,8 @@ public class VideoController : MonoBehaviour {
 
     public VideoClip[] videos;
 
+    private bool isInactivePaused;
+
     private void Awake() {
 
         SetupListeners();
@@ -67,6 +69,8 @@ public class VideoController : MonoBehaviour {
         NextVideoText.text = "Next Video: 1";
 
         isLoadingNextVideo = false;
+
+        isInactivePaused = false;
     }
 
     private void SetupListeners() {
@@ -397,8 +401,13 @@ public class VideoController : MonoBehaviour {
     #region UI LISTENER FUNCTIONS
 
     private void OnPlayClicked() {
+        int val;
+
         foreach (VideoPlayer player in VideoPlayers) {
-            if (player.isPrepared) {
+            if (player.isPrepared && (player == VideoPlayers[currentActivePlayerIndex] || isInactivePaused)) {
+                if(player == VideoPlayers[val = currentActivePlayerIndex == 0 ? 1 : 0]) {
+                    isInactivePaused = false;
+                }
                 player.playbackSpeed = 1;
                 player.Play();
             }
@@ -406,9 +415,14 @@ public class VideoController : MonoBehaviour {
     }
 
     private void OnPauseClicked() {
+        int val;
+
         foreach (VideoPlayer player in VideoPlayers) {
             if (player.isPlaying) {
                 player.Pause();
+                if (player == VideoPlayers[val = currentActivePlayerIndex == 0 ? 1 : 0]) {
+                    isInactivePaused = true;
+                }
             }
         }
     }
