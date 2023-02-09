@@ -63,6 +63,9 @@ public class VideoController : MonoBehaviour {
         VideoPlayers[0].gameObject.GetComponent<RawImage>().enabled = true;
         VideoPlayers[1].gameObject.GetComponent<RawImage>().enabled = false;
 
+        ExternalVideoImages[0].enabled = true;
+        ExternalVideoImages[1].enabled = false;
+
         VideoPathDropdown.onValueChanged.AddListener(delegate { GetNextVideoValue(VideoPathDropdown.value == 0 ? false : true); });
 
         CurrentVideoText.text = "Current Video: 0";
@@ -229,6 +232,9 @@ public class VideoController : MonoBehaviour {
 
                 VideoPlayers[currentActivePlayerIndex].gameObject.GetComponent<RawImage>().enabled = false;
                 VideoPlayers[nextActiveIndex].gameObject.GetComponent<RawImage>().enabled = true;
+
+                ExternalVideoImages[currentActivePlayerIndex].enabled = false;
+                ExternalVideoImages[nextActiveIndex].enabled = true;
 
                 endFrame = GetTimingsForVideoCounter(nextClipCounter, false);
                 EndFrameText.text = "End Frame: " + endFrame.ToString();
