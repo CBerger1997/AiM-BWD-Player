@@ -84,11 +84,10 @@ public class VideoController : MonoBehaviour {
         }
         
         BSocialUnity.BSocialWrapper_set_body_tracking_enabled(false);
-        // BSocialUnity.BSocialWrapper_set_body_tracking_overlay_enabled(false);
+
         BSocialUnity.BSocialWrapper_set_min_face_diagonal(100); // Alter this if you have issues with small faces/bounding boxes (min = 1)
 
         rcode = BSocialUnity.BSocialWrapper_init_embedded(); // Init with embedded/encrypted models (don't need to pass anything in)
-//        rcode = BSocialUnity.BSocialWrapper_init(Path.Combine(Application.streamingAssetsPath, "models"));
 
         BSocialOK = rcode == 0;
 
@@ -135,13 +134,11 @@ public class VideoController : MonoBehaviour {
 
         //trigger any registered events
         EvNewBSocialData?.Invoke(predictions);
-        // EvNewBAutomotiveDriverDataWithFrame?.Invoke(predictions, txBuffer[0]);
 
         // Sleep a little bit and set the signal to get the next frame
         Thread.Sleep(1);
 
-        BSocialThreadIsFree = true;
-        
+        BSocialThreadIsFree = true;        
     }
 #endregion
 
