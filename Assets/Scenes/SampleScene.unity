@@ -2169,6 +2169,10 @@ MonoBehaviour:
   - {fileID: 914301840}
   - {fileID: 299463626}
   settingsManager: {fileID: 164487149}
+  curClipCounter: 0
+  nextClipCounter: 0
+  isLoadingNextVideo: 0
+  currentActivePlayerIndex: 0
   videos: []
 --- !u!1 &335372138
 GameObject:

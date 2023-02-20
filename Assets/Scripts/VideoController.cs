@@ -98,13 +98,6 @@ public class VideoController : MonoBehaviour {
 
             if (((long)VideoPlayers[currentActivePlayerIndex].frame >= (endFrame - 168)) && !isLoadingNextVideo) {
 
-                //Debugging
-                Debug.Log(VideoPlayers[currentActivePlayerIndex]);
-                Debug.Log((ulong)VideoPlayers[currentActivePlayerIndex].frame);
-                Debug.Log(VideoPlayers[currentActivePlayerIndex].frameCount);
-                Debug.Log(VideoPlayers[currentActivePlayerIndex].frameCount - 168);
-                Debug.Log("CALLUM LOG: Initiating preload of next video: " + nextClipCounter.ToString() + ".mp4");
-
                 //Get the nextVideoCounter value
                 GetNextVideoValue(VideoPathDropdown.value == 0 ? false : true);
 
@@ -173,8 +166,6 @@ public class VideoController : MonoBehaviour {
 
         endFrame = GetTimingsForVideoCounter(curClipCounter, false);
 
-        Debug.Log("CALLUM LOG: Load Video: " + curClipCounter.ToString() + ".mp4");
-
         EndFrameText.text = "End Frame: " + endFrame.ToString();
         FrameCountText.text = "Frame Count: " + VideoPlayers[currentActivePlayerIndex].clip.frameCount.ToString();
     }
@@ -188,18 +179,14 @@ public class VideoController : MonoBehaviour {
             nextActiveIndex = 0;
         }
 
-        //Get the path for the next video
-        Debug.Log("CALLUM LOG: Preloading video: " + videoVal.ToString() + ".mp4");
+        if (nextClipCounter < 12) {
+            //Prepare the next video a few seconds before
+            VideoPlayers[nextActiveIndex].clip = videos[nextClipCounter];
+            VideoPlayers[nextActiveIndex].Prepare();
 
-
-        //Prepare the next video a few seconds before
-        VideoPlayers[nextActiveIndex].clip = videos[nextClipCounter];
-        VideoPlayers[nextActiveIndex].Prepare();
-
-        Debug.Log("CALLUM LOG: Preparing video: " + videoVal.ToString() + ".mp4");
-
-        //Once the overlap time has ended, swap the video players
-        StartCoroutine(CheckForEndOfVideo());
+            //Once the overlap time has ended, swap the video players
+            StartCoroutine(CheckForEndOfVideo());
+        }
     }
 
     IEnumerator CheckForEndOfVideo() {
@@ -218,18 +205,8 @@ public class VideoController : MonoBehaviour {
                 VideoPlayers[nextActiveIndex].Play();
             }
 
-            if (VideoPlayers[currentActivePlayerIndex].frame >= endFrame) {
-                Debug.Log("TIME TO SWAP");
-            }
-
             //Once the overlap time has ended or the video stopped playing, swap the video players
             if (VideoPlayers[currentActivePlayerIndex].frame >= endFrame || !VideoPlayers[currentActivePlayerIndex].isPlaying) {
-                Debug.Log(VideoPlayers[currentActivePlayerIndex].frame);
-                Debug.Log(endFrame);
-                Debug.Log("CALLUM LOG: Next video swap over Initiated");
-
-                Debug.Log("CALLUM LOG: Swapping video player images");
-
                 VideoPlayers[currentActivePlayerIndex].gameObject.GetComponent<RawImage>().enabled = false;
                 VideoPlayers[nextActiveIndex].gameObject.GetComponent<RawImage>().enabled = true;
 
@@ -296,7 +273,10 @@ public class VideoController : MonoBehaviour {
                 nextClipCounter = 11;
                 break;
             case 11:
-                VideoPlayers[currentActivePlayerIndex].Stop();
+                nextClipCounter = 12;
+                break;
+            case 12:
+                Debug.Log("End Reached");
                 break;
             default:
                 Debug.LogError("Video counter is outside the video range");
@@ -393,6 +373,9 @@ public class VideoController : MonoBehaviour {
                 } else {
                     frameVal = 621;
                 }
+                break;
+            case 12:
+                Debug.Log("End Reached");
                 break;
             default:
                 Debug.LogError("Video counter is outside the video range");
