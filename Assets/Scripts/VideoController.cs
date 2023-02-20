@@ -5,9 +5,11 @@ using UnityEngine.Video;
 using TMPro;
 using System.IO;
 using System.Collections;
+using System.Threading;
+
+public delegate void NewBSocialData(BSocialUnity.BSocialPredictions p);
 
 public class VideoController : MonoBehaviour {
-
     [SerializeField] Button settingsButton;
 
     [SerializeField] Button playButton;
@@ -49,8 +51,103 @@ public class VideoController : MonoBehaviour {
     public VideoClip[] videos;
 
     private bool isInactivePaused;
+    private WebCamTexture webcamTexture;
+
+#region BSocial
+    public static event NewBSocialData EvNewBSocialData;
+    private Thread BSocialThread;
+    private bool BSocialThreadIsFree = true;
+    private bool BSocialOK = false;
+    private string BSocialLicenceKeyPath;
+    public Color32[] textureData;
+    public Texture2D txBuffer;
+
+    /*
+     * BSocial SDK v1.4.0 Copyright BlueSkeye AI LTD.
+     * For Academic Use Only
+     * Original Setup Code Copyright Timur Almaev, Chief Engineer
+     * This Setup Code Copyright Luke Rose, Automotive Engineering Lead
+     */
+    private bool InitBSocial() {
+        
+        BSocialLicenceKeyPath = Path.Combine(Application.streamingAssetsPath, "bsocial.lic");
+
+        Debug.Log("B-Social licence key path : " + BSocialLicenceKeyPath);
+
+        BSocialUnity.BSocialWrapper_create();
+        int rcode = BSocialUnity.BSocialWrapper_load_online_licence_key(BSocialLicenceKeyPath);
+        
+        if (rcode != 0)
+        {
+            Debug.LogError("Start: ERROR - BSocialWrapper_load_online_license_key() failed");
+            return false;
+        }
+        
+        BSocialUnity.BSocialWrapper_set_body_tracking_enabled(false);
+        // BSocialUnity.BSocialWrapper_set_body_tracking_overlay_enabled(false);
+        BSocialUnity.BSocialWrapper_set_min_face_diagonal(100); // Alter this if you have issues with small faces/bounding boxes (min = 1)
+
+        rcode = BSocialUnity.BSocialWrapper_init_embedded(); // Init with embedded/encrypted models (don't need to pass anything in)
+//        rcode = BSocialUnity.BSocialWrapper_init(Path.Combine(Application.streamingAssetsPath, "models"));
+
+        BSocialOK = rcode == 0;
+
+        if (rcode != 0)
+        {
+            Debug.LogError("Start: ERROR - BSocialWrapper_init_embedded() failed");
+            return false;
+        }
+
+        BSocialUnity.BSocialWrapper_set_nthreads(4); // Change for optimal performance, BSocial needs at least 10FPS, 15FPS+ preferred
+        BSocialUnity.BSocialWrapper_reset();
+
+        return BSocialOK;
+    }
+
+    private void BSocialUpdate() {
+        if (!(BSocialOK && BSocialThreadIsFree && webcamTexture.isPlaying)) return;
+         
+        webcamTexture.GetPixels32(textureData);
+
+        BSocialUnity.BSocialWrapper_set_image_native(
+                ref textureData, webcamTexture.width, webcamTexture.height, true, false, BSocialUnity.BSocialWrapper_Rotation.BM_NO_ROTATION);
+
+        BSocialUnity.BSocialWrapper_overlay_native(
+                ref textureData, webcamTexture.width, webcamTexture.height, true, false, BSocialUnity.BSocialWrapper_Rotation.BM_NO_ROTATION);
+
+        BSocialThread = new Thread(BSocialProcessing);
+        BSocialThreadIsFree = false;
+        BSocialThread.Start();
+
+        if(!txBuffer)    
+            txBuffer = new Texture2D(webcamTexture.width, webcamTexture.height);       
+        txBuffer.name = $"BSocial Webcam Capture";
+        txBuffer.SetPixels32(textureData);
+        txBuffer.Apply(); 
+    }
+
+    private void BSocialProcessing()
+    {
+        Debug.Log("Processing");
+        BSocialUnity.BSocialWrapper_run();
+
+        BSocialUnity.BSocialPredictions predictions = BSocialUnity.BSocialWrapper_get_predictions();
+
+        //trigger any registered events
+        EvNewBSocialData?.Invoke(predictions);
+        // EvNewBAutomotiveDriverDataWithFrame?.Invoke(predictions, txBuffer[0]);
+
+        // Sleep a little bit and set the signal to get the next frame
+        Thread.Sleep(1);
+
+        BSocialThreadIsFree = true;
+        
+    }
+#endregion
 
     private void Awake() {
+
+        BSocialOK = InitBSocial();
 
         SetupListeners();
 
@@ -90,6 +187,8 @@ public class VideoController : MonoBehaviour {
     }
 
     void Update() {
+        BSocialUpdate();
+
         if (VideoPlayers[currentActivePlayerIndex].isPlaying) {
             //Enabel/disable buttons
             playButton.gameObject.SetActive(false);
@@ -137,9 +236,10 @@ public class VideoController : MonoBehaviour {
         videoCamera.targetDisplay = settingsManager.displayDevice;
         VideoPlayers[currentActivePlayerIndex].targetCamera = videoCamera;
 
-        WebCamTexture webcamTexture = new WebCamTexture(settingsManager.webcam.name, 600, 600, 30);
+        webcamTexture = new WebCamTexture(settingsManager.webcam.name, 600, 600, 30);
 
-        WebcamOutput.texture = webcamTexture;
+        //WebcamOutput.texture = webcamTexture;
+        WebcamOutput.texture = BSocialUnity.OverlayTexture;
 
         webcamTexture.Play();
 
@@ -485,4 +585,16 @@ public class VideoController : MonoBehaviour {
     }
 
     #endregion
+
+     private void OnApplicationQuit()
+    {
+        Debug.Log("Quitting ... ");
+
+        /* Deallocate memory taken by B-Social if it was init-d */
+
+        if (BSocialOK)
+        {
+            // BSocialUnity.BSocialWrapper_release();
+        }
+    }
 }
