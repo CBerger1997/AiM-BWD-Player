@@ -53,6 +53,8 @@ public class VideoController : MonoBehaviour {
     private bool isInactivePaused;
     private WebCamTexture webcamTexture;
 
+    bool isShowing = false;
+
 #region BSocial
     public static event NewBSocialData EvNewBSocialData;
     private Thread BSocialThread;
@@ -100,6 +102,8 @@ public class VideoController : MonoBehaviour {
         BSocialUnity.BSocialWrapper_set_nthreads(4); // Change for optimal performance, BSocial needs at least 10FPS, 15FPS+ preferred
         BSocialUnity.BSocialWrapper_reset();
 
+        isShowing = true;
+
         return BSocialOK;
     }
 
@@ -144,8 +148,6 @@ public class VideoController : MonoBehaviour {
 
     private void Awake() {
 
-        BSocialOK = InitBSocial();
-
         SetupListeners();
 
         AudioSlider.gameObject.SetActive(false);
@@ -184,7 +186,9 @@ public class VideoController : MonoBehaviour {
     }
 
     void Update() {
-        BSocialUpdate();
+        //if (isShowing) {
+        //    BSocialUpdate();
+        //}
 
         if (VideoPlayers[currentActivePlayerIndex].isPlaying) {
             //Enabel/disable buttons
@@ -235,8 +239,10 @@ public class VideoController : MonoBehaviour {
 
         webcamTexture = new WebCamTexture(settingsManager.webcam.name, 600, 600, 30);
 
-        //WebcamOutput.texture = webcamTexture;
-        WebcamOutput.texture = BSocialUnity.OverlayTexture;
+        //BSocialOK = InitBSocial();
+
+        WebcamOutput.texture = webcamTexture;
+        //WebcamOutput.texture = BSocialUnity.OverlayTexture;
 
         webcamTexture.Play();
 
@@ -337,7 +343,7 @@ public class VideoController : MonoBehaviour {
     private void GetNextVideoValue(bool changePath) {
         switch (curClipCounter) {
             case 0:
-                nextClipCounter = 1;
+                nextClipCounter = changePath == true ? 1 : 2;
                 break;
             case 1:
                 nextClipCounter = changePath == true ? 6 : 2;
