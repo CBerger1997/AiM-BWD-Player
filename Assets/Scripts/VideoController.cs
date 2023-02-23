@@ -406,7 +406,7 @@ public class VideoController : MonoBehaviour {
                 if (isStart) {
                     frameVal = 0;
                 } else {
-                    frameVal = 954;
+                    frameVal = 1320;
                 }
                 break;
             case 1:
@@ -476,7 +476,7 @@ public class VideoController : MonoBehaviour {
                 if (isStart) {
                     frameVal = 63;
                 } else {
-                    frameVal = 4945;
+                    frameVal = 5104;
                 }
                 break;
             case 11:
