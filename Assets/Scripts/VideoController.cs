@@ -102,7 +102,7 @@ public class VideoController : MonoBehaviour {
         BSocialUnity.BSocialWrapper_set_nthreads(4); // Change for optimal performance, BSocial needs at least 10FPS, 15FPS+ preferred
         BSocialUnity.BSocialWrapper_reset();
 
-        webcamTexture = new WebCamTexture(settingsManager.webcam.name, 800, 400, 30);
+        webcamTexture = new WebCamTexture(settingsManager.webcam.name, 1280, 720, 30);
 
         WebcamOutput.texture = webcamTexture;
 
@@ -122,7 +122,7 @@ public class VideoController : MonoBehaviour {
     private void BSocialUpdate() {
         if (!(BSocialOK && BSocialThreadIsFree && webcamTexture.isPlaying)) return;
          
-        textureData = new Color32[800 * 400];
+        textureData = new Color32[1280 * 720];
 
         webcamTexture.GetPixels32(textureData);
 
@@ -499,6 +499,13 @@ public class VideoController : MonoBehaviour {
         return frameVal;
     }
 
+    private void SetBaselineValence() {
+    }
+
+    private void SetBaselineArousal() {
+
+    }
+
     #endregion
 
     #region UI LISTENER FUNCTIONS
@@ -600,8 +607,7 @@ public class VideoController : MonoBehaviour {
 
     #endregion
 
-     private void OnApplicationQuit()
-    {
+     private void OnApplicationQuit() {
         Debug.Log("Quitting ... ");
 
         /* Deallocate memory taken by B-Social if it was init-d */

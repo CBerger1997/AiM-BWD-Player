@@ -72,8 +72,8 @@ public class SettingsManager : MonoBehaviour {
 
     #endregion
 
-    public readonly int textureRequestedWidth = 800;
-    public readonly int textureRequestedHeight = 400;
+    public readonly int textureRequestedWidth = 1280;
+    public readonly int textureRequestedHeight = 720;
     private readonly int wTextureRequestedFPS = 30;
 
     private void Awake() {
