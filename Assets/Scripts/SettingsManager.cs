@@ -126,6 +126,8 @@ public class SettingsManager : MonoBehaviour {
                 wTextureRequestedFPS
             );
 
+            webcam.name = cameraDevices[cameraDropdown.value - 1].name;
+
             cameraImage.texture = webcam;
 
             if (webcam.isReadable) {

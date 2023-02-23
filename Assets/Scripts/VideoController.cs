@@ -137,7 +137,7 @@ public class VideoController : MonoBehaviour {
         BSocialThread.Start();
 
         if(!txBuffer)    
-            txBuffer = new Texture2D(webcamTexture.width, webcamTexture.height);       
+            txBuffer = new Texture2D(1280, 720);       
 
         WebcamOutput.texture = BSocialUnity.OverlayTexture;
 
@@ -254,8 +254,6 @@ public class VideoController : MonoBehaviour {
         VideoPlayers[currentActivePlayerIndex].targetCamera = videoCamera;
 
         BSocialOK = InitBSocial();
-
-        //WebcamOutput.texture = BSocialUnity.OverlayTexture;
 
         if (!Display.displays[settingsManager.displayDevice].active) {
             Display.displays[settingsManager.displayDevice].Activate();
@@ -500,6 +498,7 @@ public class VideoController : MonoBehaviour {
     }
 
     private void SetBaselineValence() {
+        
     }
 
     private void SetBaselineArousal() {
