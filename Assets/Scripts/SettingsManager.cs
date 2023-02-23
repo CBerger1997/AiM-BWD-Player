@@ -72,6 +72,10 @@ public class SettingsManager : MonoBehaviour {
 
     #endregion
 
+    public readonly int textureRequestedWidth = 800;
+    public readonly int textureRequestedHeight = 400;
+    private readonly int wTextureRequestedFPS = 30;
+
     private void Awake() {
         cameraDropdown.onValueChanged.AddListener(delegate { OnCameraOptionChanged(); });
         analysisDropdown.onValueChanged.AddListener(delegate { OnAnalysisOptionChanged(); });
@@ -115,7 +119,12 @@ public class SettingsManager : MonoBehaviour {
                 webcam.Stop();
             }
 
-            webcam.name = cameraDevices[cameraDropdown.value - 1].name;
+            webcam = new WebCamTexture(
+                cameraDevices[cameraDropdown.value - 1].name,
+                textureRequestedWidth,
+                textureRequestedHeight,
+                wTextureRequestedFPS
+            );
 
             cameraImage.texture = webcam;
 

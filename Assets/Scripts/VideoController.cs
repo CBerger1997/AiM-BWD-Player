@@ -102,6 +102,18 @@ public class VideoController : MonoBehaviour {
         BSocialUnity.BSocialWrapper_set_nthreads(4); // Change for optimal performance, BSocial needs at least 10FPS, 15FPS+ preferred
         BSocialUnity.BSocialWrapper_reset();
 
+        webcamTexture = new WebCamTexture(settingsManager.webcam.name, 800, 400, 30);
+
+        WebcamOutput.texture = webcamTexture;
+
+        Debug.Log(webcamTexture.name);
+
+        webcamTexture.Play();
+
+        if(webcamTexture.isPlaying) {
+            Debug.Log($"Using webcam: {webcamTexture.name}");
+        }
+
         isShowing = true;
 
         return BSocialOK;
@@ -110,6 +122,8 @@ public class VideoController : MonoBehaviour {
     private void BSocialUpdate() {
         if (!(BSocialOK && BSocialThreadIsFree && webcamTexture.isPlaying)) return;
          
+        textureData = new Color32[800 * 400];
+
         webcamTexture.GetPixels32(textureData);
 
         BSocialUnity.BSocialWrapper_set_image_native(
@@ -124,13 +138,15 @@ public class VideoController : MonoBehaviour {
 
         if(!txBuffer)    
             txBuffer = new Texture2D(webcamTexture.width, webcamTexture.height);       
+
+        WebcamOutput.texture = BSocialUnity.OverlayTexture;
+
         txBuffer.name = $"BSocial Webcam Capture";
         txBuffer.SetPixels32(textureData);
         txBuffer.Apply(); 
     }
 
-    private void BSocialProcessing()
-    {
+    private void BSocialProcessing() {
         Debug.Log("Processing");
         BSocialUnity.BSocialWrapper_run();
 
@@ -186,9 +202,9 @@ public class VideoController : MonoBehaviour {
     }
 
     void Update() {
-        //if (isShowing) {
-        //    BSocialUpdate();
-        //}
+        if (isShowing) {
+           BSocialUpdate();
+        }
 
         if (VideoPlayers[currentActivePlayerIndex].isPlaying) {
             //Enabel/disable buttons
@@ -237,14 +253,9 @@ public class VideoController : MonoBehaviour {
         videoCamera.targetDisplay = settingsManager.displayDevice;
         VideoPlayers[currentActivePlayerIndex].targetCamera = videoCamera;
 
-        webcamTexture = new WebCamTexture(settingsManager.webcam.name, 600, 600, 30);
+        BSocialOK = InitBSocial();
 
-        //BSocialOK = InitBSocial();
-
-        WebcamOutput.texture = webcamTexture;
         //WebcamOutput.texture = BSocialUnity.OverlayTexture;
-
-        webcamTexture.Play();
 
         if (!Display.displays[settingsManager.displayDevice].active) {
             Display.displays[settingsManager.displayDevice].Activate();
