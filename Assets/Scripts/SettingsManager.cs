@@ -12,14 +12,15 @@ public class SettingsManager : MonoBehaviour {
     #region ENUMS
 
     public enum AnalysisOptions {
-        Range,
-        Average,
-        Baseline
+        Valence_Baseline,
+        Arousal_Baseline,
+        Arousal_Over_Valence,
+        Valence_Over_Arousal
     }
 
     public enum ResolutionOptions {
-        _1920x960,
-        _4096x2160
+        _2K,
+        _4K
     }
 
     #endregion

@@ -28,7 +28,7 @@ public class VideoController : MonoBehaviour {
     [SerializeField] RenderTexture videoTexture;
     [SerializeField] Slider AudioSlider;
     [SerializeField] TMP_Text AudioValueText;
-    [SerializeField] TMP_Dropdown VideoPathDropdown;
+    //[SerializeField] TMP_Dropdown VideoPathDropdown;
     [SerializeField] TMP_Text CurrentVideoText;
     [SerializeField] TMP_Text NextVideoText;
     [SerializeField] TMP_Text StartFrameText;
@@ -59,6 +59,19 @@ public class VideoController : MonoBehaviour {
     private WebCamTexture webcamTexture;
 
     bool isShowing = false;
+    bool isCollectingBaseline = false;
+    bool isWaitingBaseline = false;
+    bool isWaitingPrediction = false;
+    bool shouldCollectBaseline = true;
+    bool collectPredictionPerSecond = false;
+    bool isChangingScene = false;
+
+    int baselineCounter = 0;
+    float baseline = 0;
+    float currentPredictionAverage = 0;
+    int currentPredictionCounter = 0;
+    float currentValenceAverage = 0;
+    float currentArousalAverage = 0;
 
 #region BSocial
     public static event NewBSocialData EvNewBSocialData;
@@ -152,10 +165,12 @@ public class VideoController : MonoBehaviour {
     }
 
     private void BSocialProcessing() {
-        Debug.Log("Processing");
+        //Debug.Log("Processing");
         BSocialUnity.BSocialWrapper_run();
 
         BSocialUnity.BSocialPredictions predictions = BSocialUnity.BSocialWrapper_get_predictions();
+
+        CheckAnalysisOption(predictions);
 
         //trigger any registered events
         EvNewBSocialData?.Invoke(predictions);
@@ -186,7 +201,7 @@ public class VideoController : MonoBehaviour {
 
         QRPanel.gameObject.SetActive(false);
 
-        VideoPathDropdown.onValueChanged.AddListener(delegate { GetNextVideoValue(VideoPathDropdown.value == 0 ? false : true); });
+        //VideoPathDropdown.onValueChanged.AddListener(delegate { GetNextVideoValue(VideoPathDropdown.value == 0 ? false : true); });
 
         CurrentVideoText.text = "Current Video: 0";
         NextVideoText.text = "Next Video: 1";
@@ -221,6 +236,70 @@ public class VideoController : MonoBehaviour {
            BSocialUpdate();
         }
 
+        if (isCollectingBaseline && !isWaitingBaseline && !shouldCollectBaseline) {
+            StartCoroutine(WaitForSecondBaselinePrediction());
+        } else if ( collectPredictionPerSecond && !isWaitingPrediction ) {
+            StartCoroutine(WaitForSecondPrediction());
+            if ((long)VideoPlayers[currentActivePlayerIndex].frame >= (endFrame - 288)) {
+                collectPredictionPerSecond = false;
+
+                if (settingsManager.analysis == SettingsManager.AnalysisOptions.Arousal_Baseline || 
+                    settingsManager.analysis == SettingsManager.AnalysisOptions.Valence_Baseline) {
+                    currentPredictionAverage = currentPredictionAverage / currentPredictionCounter;
+
+                    Debug.Log("Average: " + currentPredictionAverage);
+                    Debug.Log("Baseline: " + baseline);
+
+                    if(currentPredictionAverage < baseline) {
+                        isChangingScene = true;
+                        Debug.Log("Changing True");
+                    } else {
+                        isChangingScene = false;
+                        Debug.Log("Changing False");
+                    }
+
+                    currentPredictionAverage = 0;
+                } else if (settingsManager.analysis == SettingsManager.AnalysisOptions.Arousal_Over_Valence) {
+                    currentArousalAverage = currentArousalAverage / currentPredictionCounter;
+                    currentValenceAverage = currentValenceAverage / currentPredictionCounter;
+
+                    Debug.Log("Arousal: " + currentArousalAverage);
+                    Debug.Log("Valence: " + currentValenceAverage);
+
+                    if(currentArousalAverage > currentValenceAverage) {
+                        isChangingScene = true;
+                        Debug.Log("Changing True");
+                    } else {
+                        isChangingScene = false;
+                        Debug.Log("Changing False");
+                    }
+
+                    currentArousalAverage = 0;
+                    currentValenceAverage = 0;
+                } else if (settingsManager.analysis == SettingsManager.AnalysisOptions.Valence_Over_Arousal) {
+                    currentArousalAverage = currentArousalAverage / currentPredictionCounter;
+                    currentValenceAverage = currentValenceAverage / currentPredictionCounter;
+                    
+                    Debug.Log("Arousal: " + currentArousalAverage);
+                    Debug.Log("Valence: " + currentValenceAverage);
+
+                    if(currentValenceAverage > currentArousalAverage) {
+                        isChangingScene = true;
+                        Debug.Log("Changing True");
+                    } else {
+                        isChangingScene = false;
+                        Debug.Log("Changing False");
+                    }
+
+                    currentArousalAverage = 0;
+                    currentValenceAverage = 0;
+                }
+
+                currentPredictionCounter = 0;
+
+            }
+        }
+
         if (VideoPlayers[currentActivePlayerIndex].isPlaying) {
             //Enabel/disable buttons
             playButton.gameObject.SetActive(false);
@@ -230,7 +309,7 @@ public class VideoController : MonoBehaviour {
             if (((long)VideoPlayers[currentActivePlayerIndex].frame >= (endFrame - 168)) && !isLoadingNextVideo) {
 
                 //Get the nextVideoCounter value
-                GetNextVideoValue(VideoPathDropdown.value == 0 ? false : true);
+                GetNextVideoValue(isChangingScene);
 
                 //Get the start frame for next video and set the text
                 startFrame = GetTimingsForVideoCounter(nextClipCounter, true);
@@ -287,7 +366,7 @@ public class VideoController : MonoBehaviour {
         VideoPlayers[currentActivePlayerIndex].SetDirectAudioVolume(0, AudioSlider.value);
         VideoPlayers[currentActivePlayerIndex].SetDirectAudioVolume(1, AudioSlider.value);
 
-        GetNextVideoValue(VideoPathDropdown.value == 0 ? false : true);
+        GetNextVideoValue(isChangingScene);
 
         CurrentVideoText.text = "Current Video: " + videoVal.ToString();
 
@@ -352,10 +431,11 @@ public class VideoController : MonoBehaviour {
 
                 CurrentVideoText.text = "Current Video: " + curClipCounter.ToString();
 
-                GetNextVideoValue(VideoPathDropdown.value == 0 ? false : true);
+                GetNextVideoValue(isChangingScene);
 
                 isLoadingNextVideo = false;
                 waiting = false;
+                collectPredictionPerSecond = true;
             }
 
             yield return new WaitForEndOfFrame();
@@ -364,10 +444,68 @@ public class VideoController : MonoBehaviour {
 
     #region VideoLogic
 
+    private void CheckAnalysisOption(BSocialUnity.BSocialPredictions prediction) {
+        if(settingsManager.analysis == SettingsManager.AnalysisOptions.Valence_Baseline) {
+            if(isCollectingBaseline && baselineCounter < 15 && !isWaitingBaseline && shouldCollectBaseline) {
+                Debug.Log("Collectiong Valence Baseline");
+                baseline += prediction.affect.valence;
+                shouldCollectBaseline = false;
+            } else if (collectPredictionPerSecond && !isWaitingPrediction) {
+                Debug.Log("VIDEO PREDICTION Valence");
+                currentPredictionAverage += prediction.affect.valence;
+                currentPredictionCounter++;
+            }
+        } else if (settingsManager.analysis == SettingsManager.AnalysisOptions.Arousal_Baseline) {
+            if(isCollectingBaseline && baselineCounter < 15 && !isWaitingBaseline && shouldCollectBaseline) {
+                Debug.Log("Collectiong Arousal Baseline");
+                baseline += prediction.affect.arousal;
+                shouldCollectBaseline = false;
+            } else if (collectPredictionPerSecond && !isWaitingPrediction) {
+                Debug.Log("VIDEO PREDICTION Arousal");
+                currentPredictionAverage += prediction.affect.arousal;
+                currentPredictionCounter++;
+            }
+        } else if (settingsManager.analysis == SettingsManager.AnalysisOptions.Arousal_Over_Valence) {
+            if (collectPredictionPerSecond && !isWaitingPrediction) {
+                Debug.Log("VIDEO PREDICTION Arousal Valence");
+                currentArousalAverage += prediction.affect.arousal;
+                currentValenceAverage += prediction.affect.valence;
+                currentPredictionCounter++;
+            }
+        } else if (settingsManager.analysis == SettingsManager.AnalysisOptions.Valence_Over_Arousal) {
+            if (collectPredictionPerSecond && !isWaitingPrediction) {
+                Debug.Log("VIDEO PREDICTION Valence Arousal");
+                currentArousalAverage += prediction.affect.arousal;
+                currentValenceAverage += prediction.affect.valence;
+                currentPredictionCounter++;
+            }
+        }
+    }
+
+    IEnumerator WaitForSecondBaselinePrediction() {
+        isWaitingBaseline = true;
+        yield return new WaitForSeconds(1);
+        shouldCollectBaseline = true;
+        isWaitingBaseline = false;
+        baselineCounter++;
+        if(baselineCounter == 15) {
+            baseline = baseline / 15;
+            Debug.Log(baseline);
+            isCollectingBaseline = false;
+            collectPredictionPerSecond = true;
+        } 
+    }
+
+    IEnumerator WaitForSecondPrediction() {
+        isWaitingPrediction = true;
+        yield return new WaitForSeconds(1);
+        isWaitingPrediction = false;
+    }
+
     private void GetNextVideoValue(bool changePath) {
         switch (curClipCounter) {
             case 0:
-                nextClipCounter = changePath == true ? 1 : 2;
+                nextClipCounter = changePath == true ? 2 : 1;
                 break;
             case 1:
                 nextClipCounter = changePath == true ? 6 : 2;
@@ -512,14 +650,6 @@ public class VideoController : MonoBehaviour {
         return frameVal;
     }
 
-    private void SetBaselineValence() {
-        
-    }
-
-    private void SetBaselineArousal() {
-
-    }
-
     #endregion
 
     #region UI LISTENER FUNCTIONS
@@ -531,6 +661,14 @@ public class VideoController : MonoBehaviour {
             if (player.isPrepared && (player == VideoPlayers[currentActivePlayerIndex] || isInactivePaused)) {
                 if(player == VideoPlayers[val = currentActivePlayerIndex == 0 ? 1 : 0]) {
                     isInactivePaused = false;
+                }
+                if(curClipCounter == 0) {
+                    if(settingsManager.analysis == SettingsManager.AnalysisOptions.Valence_Baseline ||
+                       settingsManager.analysis == SettingsManager.AnalysisOptions.Arousal_Baseline) {
+                        isCollectingBaseline = true;
+                    } else {
+                        collectPredictionPerSecond = true;
+                    }
                 }
                 player.playbackSpeed = 1;
                 player.Play();
