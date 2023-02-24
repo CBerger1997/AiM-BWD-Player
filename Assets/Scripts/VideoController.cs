@@ -20,6 +20,7 @@ public class VideoController : MonoBehaviour {
     [SerializeField] Button NextButton;
     [SerializeField] Button FastForwardButton;
     [SerializeField] Button AudioButton;
+    [SerializeField] Button QRButton;
 
     [SerializeField] ViewManager viewManager;
     [SerializeField] RawImage WebcamOutput;
@@ -35,6 +36,10 @@ public class VideoController : MonoBehaviour {
     [SerializeField] TMP_Text FrameCountText;
     [SerializeField] VideoPlayer[] VideoPlayers;
     [SerializeField] RawImage[] ExternalVideoImages;
+    [SerializeField] RawImage ExternalQRCodes;
+    [SerializeField] GameObject QRPanel;
+    [SerializeField] Button[] QRButtons;
+    [SerializeField] Texture2D[] QRImages;
 
     [SerializeField] SettingsManager settingsManager;
 
@@ -177,6 +182,9 @@ public class VideoController : MonoBehaviour {
 
         ExternalVideoImages[0].enabled = true;
         ExternalVideoImages[1].enabled = false;
+        ExternalQRCodes.enabled = false;
+
+        QRPanel.gameObject.SetActive(false);
 
         VideoPathDropdown.onValueChanged.AddListener(delegate { GetNextVideoValue(VideoPathDropdown.value == 0 ? false : true); });
 
@@ -199,6 +207,13 @@ public class VideoController : MonoBehaviour {
         FastForwardButton.onClick.AddListener(delegate { OnFastForwardClicked(); });
         AudioButton.onClick.AddListener(delegate { OnAudioClicked(); });
         AudioSlider.onValueChanged.AddListener(delegate { OnAudioSliderChanged(); });
+        QRButton.onClick.AddListener(delegate { OnQROverallButtonClicked(); });
+
+        for (int i = 0; i < QRButtons.Length; i++) {
+            int copy = i;
+            QRButtons[i].onClick.AddListener(delegate { OnQRButtonClicked(copy); });
+        }
+
     }
 
     void Update() {
@@ -604,9 +619,37 @@ public class VideoController : MonoBehaviour {
         }
     }
 
+    private void OnQROverallButtonClicked() {
+        QRPanel.gameObject.SetActive(QRPanel.gameObject.activeSelf ? false : true);
+    }
+
+    private void OnQRButtonClicked(int val) {
+
+        int nextActiveIndex;
+
+        if (currentActivePlayerIndex == 0) {
+            nextActiveIndex = 1;
+        } else {
+            nextActiveIndex = 0;
+        }
+
+        if (ExternalQRCodes.enabled == true) { 
+            VideoPlayers[currentActivePlayerIndex].enabled = true;
+            VideoPlayers[nextActiveIndex].enabled = false;
+            ExternalQRCodes.enabled = false;
+        } else {
+            VideoPlayers[currentActivePlayerIndex].enabled = false;
+            VideoPlayers[nextActiveIndex].enabled = false;
+            ExternalQRCodes.enabled = true;
+            ExternalQRCodes.texture = QRImages[val];
+            ExternalQRCodes.GetComponent<RectTransform>().sizeDelta = new Vector2 (Screen.height, Screen.height); 
+        }
+
+    }
+
     #endregion
 
-     private void OnApplicationQuit() {
+    private void OnApplicationQuit() {
         Debug.Log("Quitting ... ");
 
         /* Deallocate memory taken by B-Social if it was init-d */

@@ -8,6 +8,7 @@ public class ViewManager : MonoBehaviour {
     [SerializeField] private GameObject videoCanvas;
 
     private void Awake() {
+        
         GoToSettings();
 
 #if UNITY_EDITOR_WIN || UNITY_EDITOR_OSX
