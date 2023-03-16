@@ -139,7 +139,19 @@ public class VideoController : MonoBehaviour {
 
     private void BSocialUpdate() {
         if (!(BSocialOK && BSocialThreadIsFree && webcamTexture.isPlaying)) return;
-         
+
+        if (webcamTexture.width != 1280)
+        {
+            Debug.Log("UNEXPECTED WEBCAM TEXTURE DIMENSIONS");
+            return;
+        }
+
+        if (webcamTexture.height != 720)
+        {
+            Debug.Log("UNEXPECTED WEBCAM TEXTURE DIMENSIONS");
+            return;
+        }
+
         textureData = new Color32[1280 * 720];
 
         webcamTexture.GetPixels32(textureData);
@@ -780,7 +792,7 @@ public class VideoController : MonoBehaviour {
             VideoPlayers[nextActiveIndex].enabled = false;
             ExternalQRCodes.enabled = true;
             ExternalQRCodes.texture = QRImages[val];
-            ExternalQRCodes.GetComponent<RectTransform>().sizeDelta = new Vector2 (Screen.height, Screen.height); 
+            ExternalQRCodes.GetComponent<RectTransform>().sizeDelta = new Vector2 (700, 700); 
         }
 
     }

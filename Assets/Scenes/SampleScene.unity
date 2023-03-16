@@ -2403,7 +2403,6 @@ MonoBehaviour:
   videoTexture: {fileID: 8400000, guid: 1a9ca48056f877243befa5121b11e846, type: 2}
   AudioSlider: {fileID: 1496190380}
   AudioValueText: {fileID: 446389169}
-  VideoPathDropdown: {fileID: 1238230736}
   CurrentVideoText: {fileID: 651386057}
   NextVideoText: {fileID: 813049850}
   StartFrameText: {fileID: 1969812514}
