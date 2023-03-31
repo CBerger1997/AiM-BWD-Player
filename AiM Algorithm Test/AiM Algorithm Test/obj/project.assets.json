@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\callu\\OneDrive\\Desktop\\AiM Algorithm Test\\AiM Algorithm Test\\AiM Algorithm Test.csproj",
+      "projectUniqueName": "E:\\Unity\\AiM BWD Player\\AiM Algorithm Test\\AiM Algorithm Test\\AiM Algorithm Test.csproj",
       "projectName": "AiM Algorithm Test",
-      "projectPath": "C:\\Users\\callu\\OneDrive\\Desktop\\AiM Algorithm Test\\AiM Algorithm Test\\AiM Algorithm Test.csproj",
+      "projectPath": "E:\\Unity\\AiM BWD Player\\AiM Algorithm Test\\AiM Algorithm Test\\AiM Algorithm Test.csproj",
       "packagesPath": "C:\\Users\\callu\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\callu\\OneDrive\\Desktop\\AiM Algorithm Test\\AiM Algorithm Test\\obj\\",
+      "outputPath": "E:\\Unity\\AiM BWD Player\\AiM Algorithm Test\\AiM Algorithm Test\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\callu\\AppData\\Roaming\\NuGet\\NuGet.Config",
