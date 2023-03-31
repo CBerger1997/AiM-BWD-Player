@@ -1,0 +1,15 @@
+C:\Users\callu\Documents\GitHub\AiM-BWD-Player\AiM Algorithm Test\AiM Algorithm Test\bin\Debug\net6.0\AiM Algorithm Test.exe
+C:\Users\callu\Documents\GitHub\AiM-BWD-Player\AiM Algorithm Test\AiM Algorithm Test\bin\Debug\net6.0\AiM Algorithm Test.deps.json
+C:\Users\callu\Documents\GitHub\AiM-BWD-Player\AiM Algorithm Test\AiM Algorithm Test\bin\Debug\net6.0\AiM Algorithm Test.runtimeconfig.json
+C:\Users\callu\Documents\GitHub\AiM-BWD-Player\AiM Algorithm Test\AiM Algorithm Test\bin\Debug\net6.0\AiM Algorithm Test.dll
+C:\Users\callu\Documents\GitHub\AiM-BWD-Player\AiM Algorithm Test\AiM Algorithm Test\bin\Debug\net6.0\AiM Algorithm Test.pdb
+C:\Users\callu\Documents\GitHub\AiM-BWD-Player\AiM Algorithm Test\AiM Algorithm Test\obj\Debug\net6.0\AiM Algorithm Test.csproj.AssemblyReference.cache
+C:\Users\callu\Documents\GitHub\AiM-BWD-Player\AiM Algorithm Test\AiM Algorithm Test\obj\Debug\net6.0\AiM Algorithm Test.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\callu\Documents\GitHub\AiM-BWD-Player\AiM Algorithm Test\AiM Algorithm Test\obj\Debug\net6.0\AiM Algorithm Test.AssemblyInfoInputs.cache
+C:\Users\callu\Documents\GitHub\AiM-BWD-Player\AiM Algorithm Test\AiM Algorithm Test\obj\Debug\net6.0\AiM Algorithm Test.AssemblyInfo.cs
+C:\Users\callu\Documents\GitHub\AiM-BWD-Player\AiM Algorithm Test\AiM Algorithm Test\obj\Debug\net6.0\AiM Algorithm Test.csproj.CoreCompileInputs.cache
+C:\Users\callu\Documents\GitHub\AiM-BWD-Player\AiM Algorithm Test\AiM Algorithm Test\obj\Debug\net6.0\AiM Algorithm Test.dll
+C:\Users\callu\Documents\GitHub\AiM-BWD-Player\AiM Algorithm Test\AiM Algorithm Test\obj\Debug\net6.0\refint\AiM Algorithm Test.dll
+C:\Users\callu\Documents\GitHub\AiM-BWD-Player\AiM Algorithm Test\AiM Algorithm Test\obj\Debug\net6.0\AiM Algorithm Test.pdb
+C:\Users\callu\Documents\GitHub\AiM-BWD-Player\AiM Algorithm Test\AiM Algorithm Test\obj\Debug\net6.0\AiM Algorithm Test.genruntimeconfig.cache
+C:\Users\callu\Documents\GitHub\AiM-BWD-Player\AiM Algorithm Test\AiM Algorithm Test\obj\Debug\net6.0\ref\AiM Algorithm Test.dll
