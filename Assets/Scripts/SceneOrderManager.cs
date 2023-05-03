@@ -1,0 +1,507 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class SceneOrderManager : MonoBehaviour {
+    List<Scene> scenes = new List<Scene> ();
+
+    List<Scene> currentSceneOrder = new List<Scene> ();
+    List<List<Scene>> previousSceneOrders = new List<List<Scene>> ();
+    List<Scene> requiredScenes = new List<Scene> ();
+
+
+    bool isValenceHigher;
+    bool isArousalHigher;
+
+    int currentSceneIndex;
+    int sceneCount;
+    int sceneCountMin;
+    int sceneCountMax;
+    int numOfScreenings;
+    int currentScreeningIndex = 0;
+
+public void StartOrderManager() {
+        //Program program = new Program ();
+
+        //Define the setup for each scene 1 - 10
+        SceneSetup ();
+
+        //Set the higher and lower values for valence and arousal
+        SetValenceArousalValues ();
+
+        //Configure the amount of screenings and the total current scene count
+        ConfigureScreeningsAndSceneCount ();
+
+        //Assign weights to scenes based on the higher and lower values for valence and arousal
+        ModifyWeightsForValenceAndArousal ();
+
+        for ( int i = 0; i < numOfScreenings; i++ ) {
+            //Create the scene order
+            CreateSceneOrder ();
+
+            foreach ( Scene scene in currentSceneOrder ) {
+                if ( scene == currentSceneOrder.Last () ) {
+                    //Console.Write ( scene.index );
+                } else {
+                    //Console.Write ( scene.index + ", " );
+                }
+            }
+
+            //Console.WriteLine ( "" );
+            //Console.WriteLine ( "" );
+
+            previousSceneOrders.Add ( currentSceneOrder );
+
+            currentSceneOrder = new List<Scene> ();
+
+            currentScreeningIndex++;
+        }
+    }
+
+    private void SceneSetup () {
+        for ( int i = 0; i < 10; i++ ) {
+            Scene newScene = new Scene ( i + 1 );
+            scenes.Add ( newScene );
+        }
+    }
+
+    private void SetValenceArousalValues () {
+        isValenceHigher = Convert.ToBoolean ( new Random ().Next ( 2 ) );
+        isArousalHigher = Convert.ToBoolean ( new Random ().Next ( 2 ) );
+    }
+
+    private void ConfigureScreeningsAndSceneCount () {
+        /*
+         * Here we want to configure how many screenings there are,
+         * then define the scene count range,
+         * and finally define the actual scene count for this screening
+         */
+
+        numOfScreenings = 5;
+
+        switch ( numOfScreenings ) {
+            case < 1:
+                //Console.WriteLine ( "Number of screenings must be greater than 0" );
+                break;
+            case < 2:
+                sceneCountMin = 10;
+                sceneCountMax = 10;
+                break;
+            case < 4:
+                sceneCountMin = 5;
+                sceneCountMax = 10;
+                break;
+            case >= 4:
+                sceneCountMin = 3;
+                sceneCountMax = 6;
+                break;
+        }
+    }
+
+    private void ModifyWeightsForValenceAndArousal () {
+        /*
+         * Here we want to add directly to the weight values based on arousal responsibility graph and valence positivity graph
+         */
+
+        foreach ( Scene scene in scenes ) {
+            scene.UpdateWeightsForValenceArousal ( isValenceHigher, isArousalHigher );
+        }
+    }
+
+    private void CreateSceneOrder () {
+        /*
+         * Here we want to create a scene order, 
+         * checking for first scene to apply the start weight,
+         * then ignore start weight and go off current weight and future links,
+         * then include end weight for final scene
+         * 
+         * Later apply previous scene orders as additional weightings for current scene order
+         */
+
+        if ( currentScreeningIndex == numOfScreenings - 1 ) {
+
+            List<int> sceneIndexes = new List<int> ();
+
+            bool isSceneAlreadyIncluded = false;
+
+            foreach ( List<Scene> sceneOrders in previousSceneOrders ) {
+                foreach ( Scene scene in sceneOrders ) {
+                    isSceneAlreadyIncluded = false;
+                    foreach ( int index in sceneIndexes ) {
+                        if ( scene.index == index ) {
+                            isSceneAlreadyIncluded = true;
+                        }
+                    }
+
+                    if ( !isSceneAlreadyIncluded ) {
+                        sceneIndexes.Add ( scene.index );
+                    }
+                }
+            }
+
+            foreach ( Scene scene in scenes ) {
+                requiredScenes.Add ( scene );
+            }
+
+            if ( sceneIndexes.Count < scenes.Count ) {
+                foreach ( int index in sceneIndexes ) {
+                    foreach ( Scene scene in requiredScenes ) {
+                        if ( scene.index == index ) {
+                            requiredScenes.Remove ( scene );
+                            break;
+                        }
+                    }
+                }
+            }
+
+        } else {
+            sceneCount = new Random ().Next ( sceneCountMin, sceneCountMax + 1 );
+        }
+
+        for ( int i = 0; i < sceneCount; i++ ) {
+            //Check if this is the first screening
+            if ( i == 0 ) {
+                ConfigureFirstScene ();
+            } else if ( currentSceneIndex == sceneCount - 1 ) {
+                ConfigureEndScene ();
+            } else {
+                ConfigureNextScene ();
+            }
+        }
+    }
+
+    private void ConfigureFirstScene () {
+        int weightSum = 0;
+        int startSceneRandomWeightVal = 0;
+
+        bool isSceneWeightReduced = false;
+
+        if ( currentScreeningIndex == numOfScreenings - 1 ) {
+            foreach ( Scene scene in requiredScenes ) {
+                weightSum += scene.startWeighting * 2;
+            }
+
+            if ( weightSum > 0 ) {
+                startSceneRandomWeightVal = new Random ().Next ( 0, weightSum + 1 );
+
+                weightSum = 0;
+
+                foreach ( Scene scene in requiredScenes ) {
+                    weightSum += scene.startWeighting * 2;
+
+                    if ( startSceneRandomWeightVal <= weightSum ) {
+                        currentSceneOrder.Add ( scene );
+                        requiredScenes.Remove ( scene );
+                        currentSceneIndex++;
+                        return;
+                    }
+                }
+            }
+        }
+
+        //Calculate the initial weightSum
+        foreach ( Scene scene in scenes ) {
+            isSceneWeightReduced = false;
+
+            if ( currentScreeningIndex > 0 ) {
+                foreach ( List<Scene> sceneOrder in previousSceneOrders ) {
+                    if ( scene.index == sceneOrder.First ().index ) {
+                        weightSum += ( scene.startWeighting / 5 );
+                        isSceneWeightReduced = true;
+                        break;
+                    }
+                }
+            }
+
+            if ( !isSceneWeightReduced ) {
+                weightSum += scene.startWeighting * 2;
+            }
+        }
+
+        //Define the randomWeightValue within the total weightSum
+        startSceneRandomWeightVal = new Random ().Next ( 0, weightSum + 1 );
+
+        //Calculate which scene falls within the randomWeightValue and at to scene order
+        weightSum = 0;
+        foreach ( Scene scene in scenes ) {
+            isSceneWeightReduced = false;
+
+            if ( currentScreeningIndex > 0 ) {
+                foreach ( List<Scene> sceneOrder in previousSceneOrders ) {
+                    if ( scene.index == sceneOrder.First ().index ) {
+                        weightSum += ( scene.startWeighting / 5 );
+                        isSceneWeightReduced = true;
+                        break;
+                    }
+                }
+            }
+
+            if ( !isSceneWeightReduced ) {
+                weightSum += scene.startWeighting * 2;
+            }
+
+            if ( startSceneRandomWeightVal <= weightSum ) {
+                currentSceneOrder.Add ( scene );
+                currentSceneIndex++;
+                return;
+            }
+        }
+    }
+
+    private void ConfigureNextScene () {
+        int weightSum = 0;
+        int startSceneRandomWeightVal = 0;
+
+        bool isSceneInOrder = false;
+        bool isSceneWeightReduced = false;
+
+        if ( currentScreeningIndex == numOfScreenings - 1 ) {
+            foreach ( Scene scene in requiredScenes ) {
+                weightSum += scene.weight;
+            }
+
+            if ( weightSum > 0 ) {
+                startSceneRandomWeightVal = new Random ().Next ( 0, weightSum + 1 );
+
+                weightSum = 0;
+
+                foreach ( Scene scene in requiredScenes ) {
+                    weightSum += scene.weight;
+
+                    if ( startSceneRandomWeightVal <= weightSum ) {
+                        currentSceneOrder.Add ( scene );
+                        requiredScenes.Remove ( scene );
+                        currentSceneIndex++;
+                        return;
+                    }
+                }
+            }
+        }
+
+        foreach ( Scene scene in scenes ) {
+            isSceneInOrder = false;
+            isSceneWeightReduced = false;
+
+            foreach ( Scene curOrderScene in currentSceneOrder ) {
+                if ( curOrderScene.index == scene.index ) {
+                    isSceneInOrder = true;
+                }
+            }
+
+            //Continues if the scene is not within the current scene order
+            if ( !isSceneInOrder ) {
+                //Checks whether the current screening is after the first
+                if ( currentScreeningIndex > 0 ) {
+                    //Loop through eachh previous scene order
+                    foreach ( List<Scene> sceneOrder in previousSceneOrders ) {
+                        //Loop through each scene in the current previous scene order
+                        for ( int i = 0; i < sceneOrder.Count; i++ ) {
+                            //Check if the index of the current potential scene is the same as the current previous scene order scene
+                            if ( scene.index == sceneOrder[ i ].index ) {
+                                //Check if the current previous scene order scene is not the first in that order
+                                //and check if the current scene order previous scene is the same as the current previous scene order previous scene
+                                if ( i > 0 && currentSceneOrder[ currentSceneOrder.Count - 1 ].index == sceneOrder[ i - 1 ].index ) {
+                                    //Reduce the scene weight by a fifth
+                                    weightSum += ( scene.weight / 5 );
+                                    isSceneWeightReduced = true;
+                                }
+                            }
+                            //Break loop if scene weight has been reduced
+                            if ( isSceneWeightReduced ) {
+                                break;
+                            }
+                        }
+
+                        //Break loop if scene weight has been reduced
+                        if ( isSceneWeightReduced ) {
+                            break;
+                        }
+                    }
+                }
+
+                if ( !isSceneWeightReduced ) {
+                    //Add current scene weight to the weightSum
+                    weightSum += scene.weight;
+                }
+                //Check if the current scene index is a future link to the previous scene index
+                //and check that the current scene weight has not been reduced already
+                if ( scene.index == currentSceneOrder.Last ().futureLink && !isSceneWeightReduced ) {
+                    weightSum += 80;
+                }
+            }
+        }
+
+        //calculate the startSceneRandomWeightVal based off the weightSum
+        startSceneRandomWeightVal = new Random ().Next ( 0, weightSum + 1 );
+
+        //Reset the weightSum
+        weightSum = 0;
+
+        //Loop through each scene in all possible scenes
+        foreach ( Scene scene in scenes ) {
+            //reset booleans
+            isSceneInOrder = false;
+            isSceneWeightReduced = false;
+
+            //Loop through each scene in the current scene order
+            foreach ( Scene curOrderScene in currentSceneOrder ) {
+                //Check if the current scene index is already in the current scene order
+                if ( curOrderScene.index == scene.index ) {
+                    //Set scene in order to true
+                    isSceneInOrder = true;
+                }
+            }
+
+            //Continues if the scene is not within the current scene order
+            if ( !isSceneInOrder ) {
+                //Checks whether the current screening is after the first
+                if ( currentScreeningIndex > 0 ) {
+                    //Loop through eachh previous scene order
+                    foreach ( List<Scene> sceneOrder in previousSceneOrders ) {
+                        //Loop through each scene in the current previous scene order
+                        for ( int i = 0; i < sceneOrder.Count; i++ ) {
+                            //Check if the index of the current potential scene is the same as the current previous scene order scene
+                            if ( scene.index == sceneOrder[ i ].index ) {
+                                //Check if the current previous scene order scene is not the first in that order
+                                //and check if the current scene order previous scene is the same as the current previous scene order previous scene
+                                if ( i > 0 && currentSceneOrder[ currentSceneOrder.Count - 1 ].index == sceneOrder[ i - 1 ].index ) {
+                                    //Reduce the scene weight by a fifth
+                                    weightSum += ( scene.weight / 5 );
+                                    isSceneWeightReduced = true;
+                                }
+                            }
+                            //Break loop if scene weight has been reduced
+                            if ( isSceneWeightReduced ) {
+                                break;
+                            }
+                        }
+
+                        //Break loop if scene weight has been reduced
+                        if ( isSceneWeightReduced ) {
+                            break;
+                        }
+                    }
+                }
+
+                if ( !isSceneWeightReduced ) {
+                    //Add current scene weight to the weightSum
+                    weightSum += scene.weight;
+                }
+                //Check if the current scene index is a future link to the previous scene index
+                //and check that the current scene weight has not been reduced already
+                if ( scene.index == currentSceneOrder.Last ().futureLink && !isSceneWeightReduced ) {
+                    weightSum += 80;
+                }
+
+                //Check if the startSceneRandomWeightVal is less than the current weightSum
+                if ( startSceneRandomWeightVal <= weightSum ) {
+
+                    //Add the current scene to the scene order
+                    currentSceneOrder.Add ( scene );
+
+                    //increment the current scene index by 1
+
+                    currentSceneIndex++;
+                    //return from the function
+                    return;
+                }
+            }
+        }
+    }
+
+    private void ConfigureEndScene () {
+        int weightSum = 0;
+        int startSceneRandomWeightVal = 0;
+
+        bool isSceneInOrder = false;
+        bool isSceneWeightReduced = false;
+
+
+        if ( currentScreeningIndex == numOfScreenings - 1 ) {
+            foreach ( Scene scene in requiredScenes ) {
+                weightSum += scene.endWeighting;
+            }
+
+            if ( weightSum > 0 ) {
+                startSceneRandomWeightVal = new Random ().Next ( 0, weightSum + 1 );
+
+                weightSum = 0;
+
+                foreach ( Scene scene in requiredScenes ) {
+                    weightSum += scene.endWeighting;
+
+                    if ( startSceneRandomWeightVal <= weightSum ) {
+                        currentSceneOrder.Add ( scene );
+                        requiredScenes.Remove ( scene );
+                        currentSceneIndex++;
+                        return;
+                    }
+                }
+            }
+        }
+
+        foreach ( Scene scene in scenes ) {
+            isSceneInOrder = false;
+            isSceneWeightReduced = false;
+
+            foreach ( Scene curOrderScene in currentSceneOrder ) {
+                if ( curOrderScene.index == scene.index ) {
+                    isSceneInOrder = true;
+                }
+            }
+
+            if ( !isSceneInOrder ) {
+                if ( currentScreeningIndex > 0 ) {
+                    foreach ( List<Scene> sceneOrder in previousSceneOrders ) {
+                        if ( scene.index == sceneOrder.Last ().index ) {
+                            weightSum += ( scene.endWeighting / 5 );
+                            isSceneWeightReduced = true;
+                            break;
+                        }
+                    }
+                }
+
+                if ( !isSceneWeightReduced ) {
+                    weightSum += scene.endWeighting;
+                }
+            }
+        }
+
+        startSceneRandomWeightVal = new Random ().Next ( 0, weightSum + 1 );
+
+        weightSum = 0;
+
+        foreach ( Scene scene in scenes ) {
+            isSceneInOrder = false;
+            isSceneWeightReduced = false;
+
+            foreach ( Scene curOrderScene in currentSceneOrder ) {
+                if ( curOrderScene.index == scene.index ) {
+                    isSceneInOrder = true;
+                }
+            }
+
+            if ( !isSceneInOrder ) {
+                if ( currentScreeningIndex > 0 ) {
+                    foreach ( List<Scene> sceneOrder in previousSceneOrders ) {
+                        if ( scene.index == sceneOrder.Last ().index ) {
+                            weightSum += ( scene.endWeighting / 5 );
+                            isSceneWeightReduced = true;
+                            break;
+                        }
+                    }
+                }
+
+                if ( !isSceneWeightReduced ) {
+                    weightSum += scene.endWeighting;
+                }
+
+                if ( startSceneRandomWeightVal <= weightSum ) {
+                    currentSceneOrder.Add ( scene );
+                    currentSceneIndex++;
+                    return;
+                }
+            }
+        }
+    }
+}
