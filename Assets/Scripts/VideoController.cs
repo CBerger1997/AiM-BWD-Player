@@ -7,7 +7,7 @@ using System.IO;
 using System.Collections;
 using System.Threading;
 
-public delegate void NewBSocialData(BSocialUnity.BSocialPredictions p);
+public delegate void NewBSocialData ( BSocialUnity.BSocialPredictions p );
 
 public class VideoController : MonoBehaviour {
     [SerializeField] Button settingsButton;
@@ -21,6 +21,7 @@ public class VideoController : MonoBehaviour {
     [SerializeField] Button FastForwardButton;
     [SerializeField] Button AudioButton;
     [SerializeField] Button QRButton;
+    [SerializeField] Button ResetButton;
 
     [SerializeField] ViewManager viewManager;
     [SerializeField] RawImage WebcamOutput;
@@ -63,17 +64,24 @@ public class VideoController : MonoBehaviour {
     bool isWaitingBaseline = false;
     bool isWaitingPrediction = false;
     bool shouldCollectBaseline = true;
-    bool collectPredictionPerSecond = false;
+    bool isCollectPredictionPerSecond = false;
     bool isChangingScene = false;
 
+    bool isFirstScene = false;
+
     int baselineCounter = 0;
-    float baseline = 0;
-    float currentPredictionAverage = 0;
+    float arousalBaseline = 0;
+    float valenceBaseline = 0;
     int currentPredictionCounter = 0;
     float currentValenceAverage = 0;
     float currentArousalAverage = 0;
 
-#region BSocial
+    int currentSceneIndex = 0;
+
+    SceneOrderManager sceneOrderManager;
+
+    #region BSocial
+
     public static event NewBSocialData EvNewBSocialData;
     private Thread BSocialThread;
     private bool BSocialThreadIsFree = true;
@@ -88,48 +96,44 @@ public class VideoController : MonoBehaviour {
      * Original Setup Code Copyright Timur Almaev, Chief Engineer
      * This Setup Code Copyright Luke Rose, Automotive Engineering Lead
      */
-    private bool InitBSocial() {
-        
-        BSocialLicenceKeyPath = Path.Combine(Application.streamingAssetsPath, "bsocial.lic");
+    private bool InitBSocial () {
 
-        Debug.Log("B-Social licence key path : " + BSocialLicenceKeyPath);
+        BSocialLicenceKeyPath = Path.Combine ( Application.streamingAssetsPath, "bsocial.lic" );
 
-        BSocialUnity.BSocialWrapper_create();
-        int rcode = BSocialUnity.BSocialWrapper_load_online_licence_key(BSocialLicenceKeyPath);
-        
-        if (rcode != 0)
-        {
-            Debug.LogError("Start: ERROR - BSocialWrapper_load_online_license_key() failed");
+        Debug.Log ( "B-Social licence key path : " + BSocialLicenceKeyPath );
+
+        BSocialUnity.BSocialWrapper_create ();
+        int rcode = BSocialUnity.BSocialWrapper_load_online_licence_key ( BSocialLicenceKeyPath );
+
+        if ( rcode != 0 ) {
+            Debug.LogError ( "Start: ERROR - BSocialWrapper_load_online_license_key() failed" );
             return false;
         }
-        
-        BSocialUnity.BSocialWrapper_set_body_tracking_enabled(false);
 
-        BSocialUnity.BSocialWrapper_set_min_face_diagonal(100); // Alter this if you have issues with small faces/bounding boxes (min = 1)
+        BSocialUnity.BSocialWrapper_set_body_tracking_enabled ( false );
 
-        rcode = BSocialUnity.BSocialWrapper_init_embedded(); // Init with embedded/encrypted models (don't need to pass anything in)
+        BSocialUnity.BSocialWrapper_set_min_face_diagonal ( 100 ); // Alter this if you have issues with small faces/bounding boxes (min = 1)
+
+        rcode = BSocialUnity.BSocialWrapper_init_embedded (); // Init with embedded/encrypted models (don't need to pass anything in)
 
         BSocialOK = rcode == 0;
 
-        if (rcode != 0)
-        {
-            Debug.LogError("Start: ERROR - BSocialWrapper_init_embedded() failed");
+        if ( rcode != 0 ) {
+            Debug.LogError ( "Start: ERROR - BSocialWrapper_init_embedded() failed" );
             return false;
         }
 
-        BSocialUnity.BSocialWrapper_set_nthreads(4); // Change for optimal performance, BSocial needs at least 10FPS, 15FPS+ preferred
-        BSocialUnity.BSocialWrapper_reset();
+        BSocialUnity.BSocialWrapper_set_nthreads ( 4 ); // Change for optimal performance, BSocial needs at least 10FPS, 15FPS+ preferred
+        BSocialUnity.BSocialWrapper_reset ();
 
-        webcamTexture = new WebCamTexture(settingsManager.webcam.name, 1280, 720, 30);
+        webcamTexture = new WebCamTexture ( settingsManager.webcam.name, 1280, 720, 30 );
 
         WebcamOutput.texture = webcamTexture;
 
-        Debug.Log(webcamTexture.name);
+        webcamTexture.Play ();
 
-        webcamTexture.Play();
-
-        if(webcamTexture.isPlaying) {
-            Debug.Log($"Using webcam: {webcamTexture.name}");
+        if ( webcamTexture.isPlaying ) {
+            Debug.Log ( $"Using webcam: {webcamTexture.name}" );
         }
 
         isShowing = true;
@@ -137,83 +141,80 @@ public class VideoController : MonoBehaviour {
         return BSocialOK;
     }
 
-    private void BSocialUpdate() {
-        if (!(BSocialOK && BSocialThreadIsFree && webcamTexture.isPlaying)) return;
+    private void BSocialUpdate () {
+        if ( !( BSocialOK && BSocialThreadIsFree && webcamTexture.isPlaying ) )
+            return;
 
-        if (webcamTexture.width != 1280)
-        {
-            Debug.Log("UNEXPECTED WEBCAM TEXTURE DIMENSIONS");
+        if ( webcamTexture.width != 1280 ) {
+            Debug.Log ( "UNEXPECTED WEBCAM TEXTURE DIMENSIONS" );
             return;
         }
 
-        if (webcamTexture.height != 720)
-        {
-            Debug.Log("UNEXPECTED WEBCAM TEXTURE DIMENSIONS");
+        if ( webcamTexture.height != 720 ) {
+            Debug.Log ( "UNEXPECTED WEBCAM TEXTURE DIMENSIONS" );
             return;
         }
 
-        textureData = new Color32[1280 * 720];
+        textureData = new Color32[ 1280 * 720 ];
 
-        webcamTexture.GetPixels32(textureData);
+        webcamTexture.GetPixels32 ( textureData );
 
-        BSocialUnity.BSocialWrapper_set_image_native(
-                ref textureData, webcamTexture.width, webcamTexture.height, true, false, BSocialUnity.BSocialWrapper_Rotation.BM_NO_ROTATION);
+        BSocialUnity.BSocialWrapper_set_image_native (
+                ref textureData, webcamTexture.width, webcamTexture.height, true, false, BSocialUnity.BSocialWrapper_Rotation.BM_NO_ROTATION );
 
-        BSocialUnity.BSocialWrapper_overlay_native(
-                ref textureData, webcamTexture.width, webcamTexture.height, true, false, BSocialUnity.BSocialWrapper_Rotation.BM_NO_ROTATION);
+        BSocialUnity.BSocialWrapper_overlay_native (
+                ref textureData, webcamTexture.width, webcamTexture.height, true, false, BSocialUnity.BSocialWrapper_Rotation.BM_NO_ROTATION );
 
-        BSocialThread = new Thread(BSocialProcessing);
+        BSocialThread = new Thread ( BSocialProcessing );
         BSocialThreadIsFree = false;
-        BSocialThread.Start();
+        BSocialThread.Start ();
 
-        if(!txBuffer)    
-            txBuffer = new Texture2D(1280, 720);       
+        if ( !txBuffer )
+            txBuffer = new Texture2D ( 1280, 720 );
 
         WebcamOutput.texture = BSocialUnity.OverlayTexture;
 
         txBuffer.name = $"BSocial Webcam Capture";
-        txBuffer.SetPixels32(textureData);
-        txBuffer.Apply(); 
+        txBuffer.SetPixels32 ( textureData );
+        txBuffer.Apply ();
     }
 
-    private void BSocialProcessing() {
+    private void BSocialProcessing () {
         //Debug.Log("Processing");
-        BSocialUnity.BSocialWrapper_run();
+        BSocialUnity.BSocialWrapper_run ();
 
-        BSocialUnity.BSocialPredictions predictions = BSocialUnity.BSocialWrapper_get_predictions();
+        BSocialUnity.BSocialPredictions predictions = BSocialUnity.BSocialWrapper_get_predictions ();
 
-        CheckAnalysisOption(predictions);
+        GatherValenceArousalValues ( predictions );
 
         //trigger any registered events
-        EvNewBSocialData?.Invoke(predictions);
+        EvNewBSocialData?.Invoke ( predictions );
 
         // Sleep a little bit and set the signal to get the next frame
-        Thread.Sleep(1);
+        Thread.Sleep ( 1 );
 
-        BSocialThreadIsFree = true;        
+        BSocialThreadIsFree = true;
     }
-#endregion
+    #endregion
 
-    private void Awake() {
+    private void Awake () {
 
-        SetupListeners();
+        SetupListeners ();
 
-        AudioSlider.gameObject.SetActive(false);
+        AudioSlider.gameObject.SetActive ( false );
 
-        prevClipCounters = new List<int>();
+        prevClipCounters = new List<int> ();
 
         currentActivePlayerIndex = 0;
 
-        VideoPlayers[0].gameObject.GetComponent<RawImage>().enabled = true;
-        VideoPlayers[1].gameObject.GetComponent<RawImage>().enabled = false;
+        VideoPlayers[ 0 ].gameObject.GetComponent<RawImage> ().enabled = true;
+        VideoPlayers[ 1 ].gameObject.GetComponent<RawImage> ().enabled = false;
 
-        ExternalVideoImages[0].enabled = true;
-        ExternalVideoImages[1].enabled = false;
+        ExternalVideoImages[ 0 ].enabled = true;
+        ExternalVideoImages[ 1 ].enabled = false;
         ExternalQRCodes.enabled = false;
 
-        QRPanel.gameObject.SetActive(false);
-
-        //VideoPathDropdown.onValueChanged.AddListener(delegate { GetNextVideoValue(VideoPathDropdown.value == 0 ? false : true); });
+        QRPanel.gameObject.SetActive ( false );
 
         CurrentVideoText.text = "Current Video: 0";
         NextVideoText.text = "Next Video: 1";
@@ -223,129 +224,88 @@ public class VideoController : MonoBehaviour {
         isInactivePaused = false;
     }
 
-    private void SetupListeners() {
-        settingsButton.onClick.AddListener(delegate { OnSettingsClicked(); });
-        playButton.onClick.AddListener(delegate { OnPlayClicked(); });
-        pauseButton.onClick.AddListener(delegate { OnPauseClicked(); });
-        stopButton.onClick.AddListener(delegate { OnStopClicked(); });
-        BackButton.onClick.AddListener(delegate { OnBackClicked(); });
-        RewindButton.onClick.AddListener(delegate { OnRewindClicked(); });
-        NextButton.onClick.AddListener(delegate { OnNextClicked(); });
-        FastForwardButton.onClick.AddListener(delegate { OnFastForwardClicked(); });
-        AudioButton.onClick.AddListener(delegate { OnAudioClicked(); });
-        AudioSlider.onValueChanged.AddListener(delegate { OnAudioSliderChanged(); });
-        QRButton.onClick.AddListener(delegate { OnQROverallButtonClicked(); });
+    private void SetupListeners () {
+        settingsButton.onClick.AddListener ( delegate { OnSettingsClicked (); } );
+        playButton.onClick.AddListener ( delegate { OnPlayClicked (); } );
+        pauseButton.onClick.AddListener ( delegate { OnPauseClicked (); } );
+        stopButton.onClick.AddListener ( delegate { OnStopClicked (); } );
+        BackButton.onClick.AddListener ( delegate { OnBackClicked (); } );
+        RewindButton.onClick.AddListener ( delegate { OnRewindClicked (); } );
+        NextButton.onClick.AddListener ( delegate { OnNextClicked (); } );
+        FastForwardButton.onClick.AddListener ( delegate { OnFastForwardClicked (); } );
+        AudioButton.onClick.AddListener ( delegate { OnAudioClicked (); } );
+        AudioSlider.onValueChanged.AddListener ( delegate { OnAudioSliderChanged (); } );
+        QRButton.onClick.AddListener ( delegate { OnQROverallButtonClicked (); } );
+        ResetButton.onClick.AddListener ( delegate { ResetValuesForNextScreening (); } );
 
-        for (int i = 0; i < QRButtons.Length; i++) {
+        for ( int i = 0; i < QRButtons.Length; i++ ) {
             int copy = i;
-            QRButtons[i].onClick.AddListener(delegate { OnQRButtonClicked(copy); });
+            QRButtons[ i ].onClick.AddListener ( delegate { OnQRButtonClicked ( copy ); } );
         }
 
     }
 
-    void Update() {
-        if (isShowing) {
-           BSocialUpdate();
+    void Update () {
+        if ( isShowing && isFirstScene ) {
+            BSocialUpdate ();
         }
 
-        if (isCollectingBaseline && !isWaitingBaseline && !shouldCollectBaseline) {
-            StartCoroutine(WaitForSecondBaselinePrediction());
-        } else if ( collectPredictionPerSecond && !isWaitingPrediction ) {
-            StartCoroutine(WaitForSecondPrediction());
-            if ((long)VideoPlayers[currentActivePlayerIndex].frame >= (endFrame - 288)) {
-                collectPredictionPerSecond = false;
+        if ( isCollectingBaseline && !isWaitingBaseline && !shouldCollectBaseline ) {
+            StartCoroutine ( WaitForSecondBaselinePrediction () );
+        } else if ( isCollectPredictionPerSecond && !isWaitingPrediction ) {
+            StartCoroutine ( WaitForSecondPrediction () );
+            if ( ( long ) VideoPlayers[ currentActivePlayerIndex ].frame >= ( endFrame - 288 ) ) {
+                isCollectPredictionPerSecond = false;
 
-                if (settingsManager.analysis == SettingsManager.AnalysisOptions.Arousal_Baseline || 
-                    settingsManager.analysis == SettingsManager.AnalysisOptions.Valence_Baseline) {
-                    currentPredictionAverage = currentPredictionAverage / currentPredictionCounter;
+                currentArousalAverage = currentArousalAverage / currentPredictionCounter;
+                currentValenceAverage = currentValenceAverage / currentPredictionCounter;
 
-                    Debug.Log("Average: " + currentPredictionAverage);
-                    Debug.Log("Baseline: " + baseline);
+                sceneOrderManager.SetValenceArousalValues ( currentValenceAverage > valenceBaseline ? true : false, currentArousalAverage > arousalBaseline ? true : false );
 
-                    if(currentPredictionAverage < baseline) {
-                        isChangingScene = true;
-                        Debug.Log("Changing True");
-                    } else {
-                        isChangingScene = false;
-                        Debug.Log("Changing False");
-                    }
+                sceneOrderManager.CalculateSceneOrder ();
 
-                    currentPredictionAverage = 0;
-                } else if (settingsManager.analysis == SettingsManager.AnalysisOptions.Arousal_Over_Valence) {
-                    currentArousalAverage = currentArousalAverage / currentPredictionCounter;
-                    currentValenceAverage = currentValenceAverage / currentPredictionCounter;
-
-                    Debug.Log("Arousal: " + currentArousalAverage);
-                    Debug.Log("Valence: " + currentValenceAverage);
-
-                    if(currentArousalAverage > currentValenceAverage) {
-                        isChangingScene = true;
-                        Debug.Log("Changing True");
-                    } else {
-                        isChangingScene = false;
-                        Debug.Log("Changing False");
-                    }
-
-                    currentArousalAverage = 0;
-                    currentValenceAverage = 0;
-                } else if (settingsManager.analysis == SettingsManager.AnalysisOptions.Valence_Over_Arousal) {
-                    currentArousalAverage = currentArousalAverage / currentPredictionCounter;
-                    currentValenceAverage = currentValenceAverage / currentPredictionCounter;
-                    
-                    Debug.Log("Arousal: " + currentArousalAverage);
-                    Debug.Log("Valence: " + currentValenceAverage);
-
-                    if(currentValenceAverage > currentArousalAverage) {
-                        isChangingScene = true;
-                        Debug.Log("Changing True");
-                    } else {
-                        isChangingScene = false;
-                        Debug.Log("Changing False");
-                    }
-
-                    currentArousalAverage = 0;
-                    currentValenceAverage = 0;
+                foreach ( Scene scene in sceneOrderManager.currentSceneOrder ) {
+                    Debug.Log ( scene.index );
                 }
 
-                currentPredictionCounter = 0;
-
+                isFirstScene = false;
             }
         }
 
-        if (VideoPlayers[currentActivePlayerIndex].isPlaying) {
-            //Enabel/disable buttons
-            playButton.gameObject.SetActive(false);
-            pauseButton.gameObject.SetActive(true);
+        if ( VideoPlayers[ currentActivePlayerIndex ].isPlaying ) {
+            //Enable / disable buttons
+            playButton.gameObject.SetActive ( false );
+            pauseButton.gameObject.SetActive ( true );
             stopButton.interactable = true;
 
-            if (((long)VideoPlayers[currentActivePlayerIndex].frame >= (endFrame - 168)) && !isLoadingNextVideo) {
+            if ( ( ( long ) VideoPlayers[ currentActivePlayerIndex ].frame >= ( endFrame - 168 ) ) && !isLoadingNextVideo ) {
 
                 //Get the nextVideoCounter value
-                GetNextVideoValue(isChangingScene);
+                GetNextVideoValue ( isChangingScene );
 
                 //Get the start frame for next video and set the text
-                startFrame = GetTimingsForVideoCounter(nextClipCounter, true);
-                StartFrameText.text = "Start Frame: " + startFrame.ToString();
+                startFrame = GetTimingsForVideoCounter ( nextClipCounter, true );
+                StartFrameText.text = "Start Frame: " + startFrame.ToString ();
 
                 //Set video loading to true
                 isLoadingNextVideo = true;
 
                 //Preload the next video
-                PreLoadNextVideo(nextClipCounter);
+                PreLoadNextVideo ( nextClipCounter );
             }
-        } else if (VideoPlayers[currentActivePlayerIndex].isPaused) {
+        } else if ( VideoPlayers[ currentActivePlayerIndex ].isPaused ) {
             //Enabel/disable buttons
-            playButton.gameObject.SetActive(true);
-            pauseButton.gameObject.SetActive(false);
+            playButton.gameObject.SetActive ( true );
+            pauseButton.gameObject.SetActive ( false );
             stopButton.interactable = true;
         } else {
             //Enabel/disable buttons
-            playButton.gameObject.SetActive(true);
-            pauseButton.gameObject.SetActive(false);
+            playButton.gameObject.SetActive ( true );
+            pauseButton.gameObject.SetActive ( false );
             stopButton.interactable = false;
         }
 
-        if (VideoPlayers[1].isPlaying) {
+        if ( VideoPlayers[ 1 ].isPlaying ) {
             //Debug.Log(VideoPlayers[1].frame);
         }
 
@@ -353,309 +313,248 @@ public class VideoController : MonoBehaviour {
         NextButton.interactable = curClipCounter == 11 ? false : true;
     }
 
-    public void OnShow() {
-        videos = Resources.LoadAll<VideoClip>(settingsManager.videoFilePath) as VideoClip[];
+    public void OnShow () {
+        sceneOrderManager = new SceneOrderManager ( settingsManager.numOfScreenings );
+
+        videos = Resources.LoadAll<VideoClip> ( settingsManager.videoFilePath ) as VideoClip[];
 
         videoCamera.targetDisplay = settingsManager.displayDevice;
-        VideoPlayers[currentActivePlayerIndex].targetCamera = videoCamera;
+        VideoPlayers[ currentActivePlayerIndex ].targetCamera = videoCamera;
 
-        BSocialOK = InitBSocial();
+        BSocialOK = InitBSocial ();
 
-        if (!Display.displays[settingsManager.displayDevice].active) {
-            Display.displays[settingsManager.displayDevice].Activate();
+        if ( !Display.displays[ settingsManager.displayDevice ].active ) {
+            Display.displays[ settingsManager.displayDevice ].Activate ();
         }
 
         curClipCounter = 0;
 
-        LoadVideo(curClipCounter);
+        LoadVideo ( curClipCounter );
     }
 
-    private void LoadVideo(int videoVal) {
-        VideoPlayers[currentActivePlayerIndex].clip = videos[videoVal];
+    private void LoadVideo ( int videoVal ) {
+        VideoPlayers[ currentActivePlayerIndex ].clip = videos[ videoVal ];
 
-        VideoPlayers[currentActivePlayerIndex].Prepare();
+        VideoPlayers[ currentActivePlayerIndex ].Prepare ();
 
-        VideoPlayers[currentActivePlayerIndex].SetDirectAudioVolume(0, AudioSlider.value);
-        VideoPlayers[currentActivePlayerIndex].SetDirectAudioVolume(1, AudioSlider.value);
+        VideoPlayers[ currentActivePlayerIndex ].SetDirectAudioVolume ( 0, AudioSlider.value );
+        VideoPlayers[ currentActivePlayerIndex ].SetDirectAudioVolume ( 1, AudioSlider.value );
 
-        GetNextVideoValue(isChangingScene);
+        GetNextVideoValue ( isChangingScene );
 
-        CurrentVideoText.text = "Current Video: " + videoVal.ToString();
+        CurrentVideoText.text = "Current Video: " + videoVal.ToString ();
 
-        endFrame = GetTimingsForVideoCounter(curClipCounter, false);
+        endFrame = GetTimingsForVideoCounter ( curClipCounter, false );
 
-        EndFrameText.text = "End Frame: " + endFrame.ToString();
-        FrameCountText.text = "Frame Count: " + VideoPlayers[currentActivePlayerIndex].clip.frameCount.ToString();
+        EndFrameText.text = "End Frame: " + endFrame.ToString ();
+        FrameCountText.text = "Frame Count: " + VideoPlayers[ currentActivePlayerIndex ].clip.frameCount.ToString ();
     }
 
-    private void PreLoadNextVideo(int videoVal) {
+    private void PreLoadNextVideo ( int videoVal ) {
         int nextActiveIndex;
 
-        if (currentActivePlayerIndex == 0) {
+        if ( currentActivePlayerIndex == 0 ) {
             nextActiveIndex = 1;
         } else {
             nextActiveIndex = 0;
         }
 
-        if (nextClipCounter < 12) {
+        if ( nextClipCounter < 12 ) {
             //Prepare the next video a few seconds before
-            VideoPlayers[nextActiveIndex].clip = videos[nextClipCounter];
-            VideoPlayers[nextActiveIndex].Prepare();
+            VideoPlayers[ nextActiveIndex ].clip = videos[ nextClipCounter ];
+            VideoPlayers[ nextActiveIndex ].Prepare ();
 
             //Once the overlap time has ended, swap the video players
-            StartCoroutine(CheckForEndOfVideo());
+            StartCoroutine ( CheckForEndOfVideo () );
         }
     }
 
-    IEnumerator CheckForEndOfVideo() {
+    IEnumerator CheckForEndOfVideo () {
         bool waiting = true;
 
         int nextActiveIndex = 0;
 
-        if (currentActivePlayerIndex == 0) {
+        if ( currentActivePlayerIndex == 0 ) {
             nextActiveIndex = 1;
         } else {
             nextActiveIndex = 0;
         }
-        while (waiting) {
+        while ( waiting ) {
             //Start playing next video
-            if (VideoPlayers[currentActivePlayerIndex].frame >= endFrame - startFrame && !VideoPlayers[nextActiveIndex].isPlaying) {
-                VideoPlayers[nextActiveIndex].Play();
+            if ( VideoPlayers[ currentActivePlayerIndex ].frame >= endFrame - startFrame && !VideoPlayers[ nextActiveIndex ].isPlaying ) {
+                VideoPlayers[ nextActiveIndex ].Play ();
             }
 
             //Once the overlap time has ended or the video stopped playing, swap the video players
-            if (VideoPlayers[currentActivePlayerIndex].frame >= endFrame || !VideoPlayers[currentActivePlayerIndex].isPlaying) {
-                VideoPlayers[currentActivePlayerIndex].gameObject.GetComponent<RawImage>().enabled = false;
-                VideoPlayers[nextActiveIndex].gameObject.GetComponent<RawImage>().enabled = true;
+            if ( VideoPlayers[ currentActivePlayerIndex ].frame >= endFrame || !VideoPlayers[ currentActivePlayerIndex ].isPlaying ) {
+                VideoPlayers[ currentActivePlayerIndex ].gameObject.GetComponent<RawImage> ().enabled = false;
+                VideoPlayers[ nextActiveIndex ].gameObject.GetComponent<RawImage> ().enabled = true;
 
-                ExternalVideoImages[currentActivePlayerIndex].enabled = false;
-                ExternalVideoImages[nextActiveIndex].enabled = true;
+                ExternalVideoImages[ currentActivePlayerIndex ].enabled = false;
+                ExternalVideoImages[ nextActiveIndex ].enabled = true;
 
-                endFrame = GetTimingsForVideoCounter(nextClipCounter, false);
-                EndFrameText.text = "End Frame: " + endFrame.ToString();
+                endFrame = GetTimingsForVideoCounter ( nextClipCounter, false );
+                EndFrameText.text = "End Frame: " + endFrame.ToString ();
 
-                prevClipCounters.Add(curClipCounter);
+                prevClipCounters.Add ( curClipCounter );
                 currentActivePlayerIndex = nextActiveIndex;
 
                 curClipCounter = nextClipCounter;
 
-                FrameCountText.text = "Frame Count: " + VideoPlayers[currentActivePlayerIndex].clip.frameCount.ToString();
+                FrameCountText.text = "Frame Count: " + VideoPlayers[ currentActivePlayerIndex ].clip.frameCount.ToString ();
 
-                CurrentVideoText.text = "Current Video: " + curClipCounter.ToString();
+                CurrentVideoText.text = "Current Video: " + curClipCounter.ToString ();
 
-                GetNextVideoValue(isChangingScene);
+                GetNextVideoValue ( isChangingScene );
 
                 isLoadingNextVideo = false;
                 waiting = false;
-                collectPredictionPerSecond = true;
+                isCollectPredictionPerSecond = true;
             }
 
-            yield return new WaitForEndOfFrame();
+            yield return new WaitForEndOfFrame ();
         }
     }
 
     #region VideoLogic
 
-    private void CheckAnalysisOption(BSocialUnity.BSocialPredictions prediction) {
-        if(settingsManager.analysis == SettingsManager.AnalysisOptions.Valence_Baseline) {
-            if(isCollectingBaseline && baselineCounter < 15 && !isWaitingBaseline && shouldCollectBaseline) {
-                Debug.Log("Collectiong Valence Baseline");
-                baseline += prediction.affect.valence;
-                shouldCollectBaseline = false;
-            } else if (collectPredictionPerSecond && !isWaitingPrediction) {
-                Debug.Log("VIDEO PREDICTION Valence");
-                currentPredictionAverage += prediction.affect.valence;
-                currentPredictionCounter++;
-            }
-        } else if (settingsManager.analysis == SettingsManager.AnalysisOptions.Arousal_Baseline) {
-            if(isCollectingBaseline && baselineCounter < 15 && !isWaitingBaseline && shouldCollectBaseline) {
-                Debug.Log("Collectiong Arousal Baseline");
-                baseline += prediction.affect.arousal;
-                shouldCollectBaseline = false;
-            } else if (collectPredictionPerSecond && !isWaitingPrediction) {
-                Debug.Log("VIDEO PREDICTION Arousal");
-                currentPredictionAverage += prediction.affect.arousal;
-                currentPredictionCounter++;
-            }
-        } else if (settingsManager.analysis == SettingsManager.AnalysisOptions.Arousal_Over_Valence) {
-            if (collectPredictionPerSecond && !isWaitingPrediction) {
-                Debug.Log("VIDEO PREDICTION Arousal Valence");
-                currentArousalAverage += prediction.affect.arousal;
-                currentValenceAverage += prediction.affect.valence;
-                currentPredictionCounter++;
-            }
-        } else if (settingsManager.analysis == SettingsManager.AnalysisOptions.Valence_Over_Arousal) {
-            if (collectPredictionPerSecond && !isWaitingPrediction) {
-                Debug.Log("VIDEO PREDICTION Valence Arousal");
-                currentArousalAverage += prediction.affect.arousal;
-                currentValenceAverage += prediction.affect.valence;
-                currentPredictionCounter++;
-            }
+    private void GatherValenceArousalValues ( BSocialUnity.BSocialPredictions prediction ) {
+        if ( isCollectingBaseline && baselineCounter < 15 && !isWaitingBaseline && shouldCollectBaseline ) {
+            valenceBaseline += prediction.affect.valence;
+            arousalBaseline += prediction.affect.arousal;
+            shouldCollectBaseline = false;
+        } else if ( isCollectPredictionPerSecond && !isWaitingPrediction ) {
+            Debug.Log ( "VIDEO PREDICTION Valence" );
+            currentValenceAverage += prediction.affect.valence;
+            currentArousalAverage += prediction.affect.arousal;
+            currentPredictionCounter++;
         }
     }
 
-    IEnumerator WaitForSecondBaselinePrediction() {
+    IEnumerator WaitForSecondBaselinePrediction () {
         isWaitingBaseline = true;
-        yield return new WaitForSeconds(1);
+        yield return new WaitForSeconds ( 1 );
         shouldCollectBaseline = true;
         isWaitingBaseline = false;
         baselineCounter++;
-        if(baselineCounter == 15) {
-            baseline = baseline / 15;
-            Debug.Log(baseline);
+        if ( baselineCounter == 15 ) {
+            arousalBaseline = arousalBaseline / 15;
+            valenceBaseline = valenceBaseline / 15;
             isCollectingBaseline = false;
-            collectPredictionPerSecond = true;
-        } 
+            isCollectPredictionPerSecond = true;
+        }
     }
 
-    IEnumerator WaitForSecondPrediction() {
+    IEnumerator WaitForSecondPrediction () {
         isWaitingPrediction = true;
-        yield return new WaitForSeconds(1);
+        yield return new WaitForSeconds ( 1 );
         isWaitingPrediction = false;
     }
 
-    private void GetNextVideoValue(bool changePath) {
-        switch (curClipCounter) {
-            case 0:
-                nextClipCounter = changePath == true ? 2 : 1;
-                break;
-            case 1:
-                nextClipCounter = changePath == true ? 6 : 2;
-                break;
-            case 2:
-                nextClipCounter = changePath == true ? 7 : 3;
-                break;
-            case 3:
-                nextClipCounter = changePath == true ? 8 : 4;
-                break;
-            case 4:
-                nextClipCounter = changePath == true ? 9 : 5;
-                break;
-            case 5:
-                nextClipCounter = changePath == true ? 10 : 11;
-                break;
-            case 6:
-                nextClipCounter = 3;
-                break;
-            case 7:
-                nextClipCounter = 4;
-                break;
-            case 8:
-                nextClipCounter = 5;
-                break;
-            case 9:
-                nextClipCounter = 11;
-                break;
-            case 10:
-                nextClipCounter = 11;
-                break;
-            case 11:
-                nextClipCounter = 12;
-                break;
-            case 12:
-                Debug.Log("End Reached");
-                break;
-            default:
-                Debug.LogError("Video counter is outside the video range");
-                break;
+    private void GetNextVideoValue ( bool changePath ) {
+        if ( currentSceneIndex == sceneOrderManager.currentSceneOrder.Count ) {
+            nextClipCounter = 11;
+        } else {
+            nextClipCounter = sceneOrderManager.currentSceneOrder[ currentSceneIndex ].index;
+            currentSceneIndex++;
         }
 
-        NextVideoText.text = "Next Video: " + nextClipCounter.ToString();
+        NextVideoText.text = "Next Video: " + nextClipCounter.ToString ();
     }
 
-    private int GetTimingsForVideoCounter(int val, bool isStart) {
+    private int GetTimingsForVideoCounter ( int val, bool isStart ) {
         int frameVal = 0;
 
-        switch (val) {
+        switch ( val ) {
             case 0:
-                if (isStart) {
+                if ( isStart ) {
                     frameVal = 0;
                 } else {
                     frameVal = 1320;
                 }
                 break;
             case 1:
-                if (isStart) {
+                if ( isStart ) {
                     frameVal = 149;
                 } else {
                     frameVal = 6675;
                 }
                 break;
             case 2:
-                if (isStart) {
+                if ( isStart ) {
                     frameVal = 0;
                 } else {
                     frameVal = 2489;
                 }
                 break;
             case 3:
-                if (isStart) {
+                if ( isStart ) {
                     frameVal = 12;
                 } else {
                     frameVal = 3865;
                 }
                 break;
             case 4:
-                if (isStart) {
+                if ( isStart ) {
                     frameVal = 6;
                 } else {
                     frameVal = 2379;
                 }
                 break;
             case 5:
-                if (isStart) {
+                if ( isStart ) {
                     frameVal = 43;
                 } else {
                     frameVal = 2743;
                 }
                 break;
             case 6:
-                if (isStart) {
+                if ( isStart ) {
                     frameVal = 0;
                 } else {
                     frameVal = 3177;
                 }
                 break;
             case 7:
-                if (isStart) {
+                if ( isStart ) {
                     frameVal = 44;
                 } else {
                     frameVal = 1525;
                 }
                 break;
             case 8:
-                if (isStart) {
+                if ( isStart ) {
                     frameVal = 65;
                 } else {
                     frameVal = 2097;
                 }
                 break;
             case 9:
-                if (isStart) {
+                if ( isStart ) {
                     frameVal = 3;
                 } else {
                     frameVal = 2806;
                 }
                 break;
             case 10:
-                if (isStart) {
+                if ( isStart ) {
                     frameVal = 63;
                 } else {
                     frameVal = 5104;
                 }
                 break;
             case 11:
-                if (isStart) {
+                if ( isStart ) {
                     frameVal = 0;
                 } else {
                     frameVal = 621;
                 }
                 break;
             case 12:
-                Debug.Log("End Reached");
+                Debug.Log ( "End Reached" );
                 break;
             default:
-                Debug.LogError("Video counter is outside the video range");
+                Debug.LogError ( "Video counter is outside the video range" );
                 break;
         }
 
@@ -666,57 +565,56 @@ public class VideoController : MonoBehaviour {
 
     #region UI LISTENER FUNCTIONS
 
-    private void OnPlayClicked() {
-        int val;
-
-        foreach (VideoPlayer player in VideoPlayers) {
-            if (player.isPrepared && (player == VideoPlayers[currentActivePlayerIndex] || isInactivePaused)) {
-                if(player == VideoPlayers[val = currentActivePlayerIndex == 0 ? 1 : 0]) {
+    private void OnPlayClicked () {
+        foreach ( VideoPlayer player in VideoPlayers ) {
+            if ( player.isPrepared && ( player == VideoPlayers[ currentActivePlayerIndex ] || isInactivePaused ) ) {
+                if ( player == VideoPlayers[ currentActivePlayerIndex == 0 ? 1 : 0 ] ) {
                     isInactivePaused = false;
                 }
-                if(curClipCounter == 0) {
-                    if(settingsManager.analysis == SettingsManager.AnalysisOptions.Valence_Baseline ||
-                       settingsManager.analysis == SettingsManager.AnalysisOptions.Arousal_Baseline) {
+                if ( curClipCounter == 0 ) {
+                    if ( baselineCounter < 15 ) {
                         isCollectingBaseline = true;
                     } else {
-                        collectPredictionPerSecond = true;
+                        isCollectPredictionPerSecond = true;
                     }
                 }
-                player.playbackSpeed = 1;
-                player.Play();
             }
+
+            player.playbackSpeed = 1;
+            player.Play ();
         }
     }
 
-    private void OnPauseClicked() {
+
+    private void OnPauseClicked () {
         int val;
 
-        foreach (VideoPlayer player in VideoPlayers) {
-            if (player.isPlaying) {
-                player.Pause();
-                if (player == VideoPlayers[val = currentActivePlayerIndex == 0 ? 1 : 0]) {
+        foreach ( VideoPlayer player in VideoPlayers ) {
+            if ( player.isPlaying ) {
+                player.Pause ();
+                if ( player == VideoPlayers[ val = currentActivePlayerIndex == 0 ? 1 : 0 ] ) {
                     isInactivePaused = true;
                 }
             }
         }
     }
 
-    private void OnStopClicked() {
-        if (VideoPlayers[currentActivePlayerIndex].isPlaying) {
-            VideoPlayers[currentActivePlayerIndex].Stop();
+    private void OnStopClicked () {
+        if ( VideoPlayers[ currentActivePlayerIndex ].isPlaying ) {
+            VideoPlayers[ currentActivePlayerIndex ].Stop ();
         }
 
         curClipCounter = 0;
         nextClipCounter = 0;
 
-        LoadVideo(curClipCounter);
+        LoadVideo ( curClipCounter );
     }
 
-    private void OnSettingsClicked() {
-        viewManager.GoToSettings();
+    private void OnSettingsClicked () {
+        viewManager.GoToSettings ();
     }
 
-    private void OnBackClicked() {
+    private void OnBackClicked () {
         //curClipCounter = prevClipCounter[prevClipCounter.Count - 1];
         //prevClipCounter.RemoveAt(prevClipCounter.Count - 1);
 
@@ -725,7 +623,7 @@ public class VideoController : MonoBehaviour {
         //currentActiveVideoPlayer.Play();
     }
 
-    private void OnNextClicked() {
+    private void OnNextClicked () {
         //prevClipCounter.Add(curClipCounter);
         //curClipCounter = nextClipCounter;
         //NextVideoLogic(VideoPathDropdown.value == 0 ? false : true);
@@ -735,77 +633,124 @@ public class VideoController : MonoBehaviour {
         //currentActiveVideoPlayer.Play();
     }
 
-    private void OnRewindClicked() {
-        foreach (VideoPlayer player in VideoPlayers) {
-            if (player.isPlaying) {
-                if (player.isPlaying) {
-                    player.Stop();
+    private void OnRewindClicked () {
+        foreach ( VideoPlayer player in VideoPlayers ) {
+            if ( player.isPlaying ) {
+                if ( player.isPlaying ) {
+                    player.Stop ();
                 }
             }
         }
     }
 
-    private void OnFastForwardClicked() {
-        foreach (VideoPlayer player in VideoPlayers) {
-            if (player.isPlaying) {
-                if (player.playbackSpeed < 4) {
+    private void OnFastForwardClicked () {
+        foreach ( VideoPlayer player in VideoPlayers ) {
+            if ( player.isPlaying ) {
+                if ( player.playbackSpeed < 4 ) {
                     player.playbackSpeed *= 2;
                 }
             }
         }
     }
 
-    private void OnAudioClicked() {
-        AudioSlider.gameObject.SetActive(AudioSlider.gameObject.activeSelf ? false : true);
+    private void OnAudioClicked () {
+        AudioSlider.gameObject.SetActive ( AudioSlider.gameObject.activeSelf ? false : true );
     }
 
-    private void OnAudioSliderChanged() {
-        foreach (VideoPlayer player in VideoPlayers) {
-            if (player.audioTrackCount > 0) {
-                player.SetDirectAudioVolume(0, AudioSlider.value);
-                player.SetDirectAudioVolume(1, AudioSlider.value);
-                AudioValueText.text = Mathf.Round(AudioSlider.value * 100).ToString() + "%";
+    private void OnAudioSliderChanged () {
+        foreach ( VideoPlayer player in VideoPlayers ) {
+            if ( player.audioTrackCount > 0 ) {
+                player.SetDirectAudioVolume ( 0, AudioSlider.value );
+                player.SetDirectAudioVolume ( 1, AudioSlider.value );
+                AudioValueText.text = Mathf.Round ( AudioSlider.value * 100 ).ToString () + "%";
             }
         }
     }
 
-    private void OnQROverallButtonClicked() {
-        QRPanel.gameObject.SetActive(QRPanel.gameObject.activeSelf ? false : true);
+    private void OnQROverallButtonClicked () {
+        QRPanel.gameObject.SetActive ( QRPanel.gameObject.activeSelf ? false : true );
     }
 
-    private void OnQRButtonClicked(int val) {
+    private void OnQRButtonClicked ( int val ) {
 
         int nextActiveIndex;
 
-        if (currentActivePlayerIndex == 0) {
+        if ( currentActivePlayerIndex == 0 ) {
             nextActiveIndex = 1;
         } else {
             nextActiveIndex = 0;
         }
 
-        if (ExternalQRCodes.enabled == true) { 
-            VideoPlayers[currentActivePlayerIndex].enabled = true;
-            VideoPlayers[nextActiveIndex].enabled = false;
+        if ( ExternalQRCodes.enabled == true ) {
+            VideoPlayers[ currentActivePlayerIndex ].enabled = true;
+            VideoPlayers[ nextActiveIndex ].enabled = false;
             ExternalQRCodes.enabled = false;
         } else {
-            VideoPlayers[currentActivePlayerIndex].enabled = false;
-            VideoPlayers[nextActiveIndex].enabled = false;
+            VideoPlayers[ currentActivePlayerIndex ].enabled = false;
+            VideoPlayers[ nextActiveIndex ].enabled = false;
             ExternalQRCodes.enabled = true;
-            ExternalQRCodes.texture = QRImages[val];
-            ExternalQRCodes.GetComponent<RectTransform>().sizeDelta = new Vector2 (700, 700); 
+            ExternalQRCodes.texture = QRImages[ val ];
+            ExternalQRCodes.GetComponent<RectTransform> ().sizeDelta = new Vector2 ( 700, 700 );
         }
 
     }
 
     #endregion
 
-    private void OnApplicationQuit() {
-        Debug.Log("Quitting ... ");
+    private void ResetValuesForNextScreening () {
+        isCollectingBaseline = false;
+        isWaitingBaseline = false;
+        isWaitingPrediction = false;
+        shouldCollectBaseline = true;
+        isCollectPredictionPerSecond = false;
+        isChangingScene = false;
+        isLoadingNextVideo = false;
+        isInactivePaused = false;
+
+        isFirstScene = true;
+
+        baselineCounter = 0;
+        arousalBaseline = 0;
+        valenceBaseline = 0;
+        currentPredictionCounter = 0;
+        currentValenceAverage = 0;
+        currentArousalAverage = 0;
+
+        currentSceneIndex = 0;
+
+        //AWAKE
+
+        AudioSlider.gameObject.SetActive ( false );
+
+        prevClipCounters = new List<int> ();
+
+        currentActivePlayerIndex = 0;
+
+        VideoPlayers[ 0 ].gameObject.GetComponent<RawImage> ().enabled = true;
+        VideoPlayers[ 1 ].gameObject.GetComponent<RawImage> ().enabled = false;
+
+        ExternalVideoImages[ 0 ].enabled = true;
+        ExternalVideoImages[ 1 ].enabled = false;
+        ExternalQRCodes.enabled = false;
+
+        QRPanel.gameObject.SetActive ( false );
+
+        CurrentVideoText.text = "Current Video: 0";
+        NextVideoText.text = "Next Video: 1";
+
+        //ONSHOW
+
+        curClipCounter = 0;
+
+        LoadVideo ( curClipCounter );
+    }
+
+    private void OnApplicationQuit () {
+        Debug.Log ( "Quitting ... " );
 
         /* Deallocate memory taken by B-Social if it was init-d */
 
-        if (BSocialOK)
-        {
+        if ( BSocialOK ) {
             // BSocialUnity.BSocialWrapper_release();
         }
     }

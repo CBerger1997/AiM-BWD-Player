@@ -1,11 +1,11 @@
-using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
-public class SceneOrderManager : MonoBehaviour {
+public class SceneOrderManager {
     List<Scene> scenes = new List<Scene> ();
 
-    List<Scene> currentSceneOrder = new List<Scene> ();
+    public List<Scene> currentSceneOrder = new List<Scene> ();
     List<List<Scene>> previousSceneOrders = new List<List<Scene>> ();
     List<Scene> requiredScenes = new List<Scene> ();
 
@@ -20,42 +20,22 @@ public class SceneOrderManager : MonoBehaviour {
     int numOfScreenings;
     int currentScreeningIndex = 0;
 
-public void StartOrderManager() {
-        //Program program = new Program ();
-
+    public SceneOrderManager ( int screenings ) {
         //Define the setup for each scene 1 - 10
         SceneSetup ();
 
-        //Set the higher and lower values for valence and arousal
-        SetValenceArousalValues ();
+        ConfigureScreeningsAndSceneCount ( screenings );
+    }
 
-        //Configure the amount of screenings and the total current scene count
-        ConfigureScreeningsAndSceneCount ();
-
-        //Assign weights to scenes based on the higher and lower values for valence and arousal
-        ModifyWeightsForValenceAndArousal ();
-
-        for ( int i = 0; i < numOfScreenings; i++ ) {
+    public void CalculateSceneOrder () {
             //Create the scene order
             CreateSceneOrder ();
-
-            foreach ( Scene scene in currentSceneOrder ) {
-                if ( scene == currentSceneOrder.Last () ) {
-                    //Console.Write ( scene.index );
-                } else {
-                    //Console.Write ( scene.index + ", " );
-                }
-            }
-
-            //Console.WriteLine ( "" );
-            //Console.WriteLine ( "" );
 
             previousSceneOrders.Add ( currentSceneOrder );
 
             currentSceneOrder = new List<Scene> ();
 
             currentScreeningIndex++;
-        }
     }
 
     private void SceneSetup () {
@@ -64,20 +44,28 @@ public void StartOrderManager() {
             scenes.Add ( newScene );
         }
     }
+    /// <summary>
+    /// Set the higher and lower values for valence and arousal
+    /// </summary>
+    /// <param name="valenceHigher"></param>
+    /// <param name="arousalHigher"></param>
+    public void SetValenceArousalValues ( bool valenceHigher, bool arousalHigher ) {
+        isValenceHigher = valenceHigher;
+        isArousalHigher = arousalHigher;
 
-    private void SetValenceArousalValues () {
-        isValenceHigher = Convert.ToBoolean ( new Random ().Next ( 2 ) );
-        isArousalHigher = Convert.ToBoolean ( new Random ().Next ( 2 ) );
+        //Configure the amount of screenings and the total current scene count
+        ModifyWeightsForValenceAndArousal ();
+
     }
 
-    private void ConfigureScreeningsAndSceneCount () {
+    private void ConfigureScreeningsAndSceneCount ( int screenings ) {
         /*
          * Here we want to configure how many screenings there are,
          * then define the scene count range,
          * and finally define the actual scene count for this screening
          */
 
-        numOfScreenings = 5;
+        numOfScreenings = screenings;
 
         switch ( numOfScreenings ) {
             case < 1:
@@ -155,7 +143,7 @@ public void StartOrderManager() {
             }
 
         } else {
-            sceneCount = new Random ().Next ( sceneCountMin, sceneCountMax + 1 );
+            sceneCount = ( int ) Random.Range ( sceneCountMin, sceneCountMax + 1 );
         }
 
         for ( int i = 0; i < sceneCount; i++ ) {
@@ -182,7 +170,7 @@ public void StartOrderManager() {
             }
 
             if ( weightSum > 0 ) {
-                startSceneRandomWeightVal = new Random ().Next ( 0, weightSum + 1 );
+                startSceneRandomWeightVal = ( int ) Random.Range ( 0, weightSum + 1 );
 
                 weightSum = 0;
 
@@ -219,7 +207,7 @@ public void StartOrderManager() {
         }
 
         //Define the randomWeightValue within the total weightSum
-        startSceneRandomWeightVal = new Random ().Next ( 0, weightSum + 1 );
+        startSceneRandomWeightVal = ( int ) Random.Range ( 0, weightSum + 1 );
 
         //Calculate which scene falls within the randomWeightValue and at to scene order
         weightSum = 0;
@@ -261,7 +249,7 @@ public void StartOrderManager() {
             }
 
             if ( weightSum > 0 ) {
-                startSceneRandomWeightVal = new Random ().Next ( 0, weightSum + 1 );
+                startSceneRandomWeightVal = ( int ) Random.Range ( 0, weightSum + 1 );
 
                 weightSum = 0;
 
@@ -332,7 +320,7 @@ public void StartOrderManager() {
         }
 
         //calculate the startSceneRandomWeightVal based off the weightSum
-        startSceneRandomWeightVal = new Random ().Next ( 0, weightSum + 1 );
+        startSceneRandomWeightVal = ( int ) Random.Range ( 0, weightSum + 1 );
 
         //Reset the weightSum
         weightSum = 0;
@@ -423,7 +411,7 @@ public void StartOrderManager() {
             }
 
             if ( weightSum > 0 ) {
-                startSceneRandomWeightVal = new Random ().Next ( 0, weightSum + 1 );
+                startSceneRandomWeightVal = ( int ) Random.Range ( 0, weightSum + 1 );
 
                 weightSum = 0;
 
@@ -467,7 +455,7 @@ public void StartOrderManager() {
             }
         }
 
-        startSceneRandomWeightVal = new Random ().Next ( 0, weightSum + 1 );
+        startSceneRandomWeightVal = ( int ) Random.Range ( 0, weightSum + 1 );
 
         weightSum = 0;
 
