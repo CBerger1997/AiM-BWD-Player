@@ -67,7 +67,7 @@ public class VideoController : MonoBehaviour {
     bool isCollectPredictionPerSecond = false;
     bool isChangingScene = false;
 
-    bool isFirstScene = false;
+    bool isFirstScene = true;
 
     int baselineCounter = 0;
     float arousalBaseline = 0;
@@ -252,9 +252,13 @@ public class VideoController : MonoBehaviour {
 
         if ( isCollectingBaseline && !isWaitingBaseline && !shouldCollectBaseline ) {
             StartCoroutine ( WaitForSecondBaselinePrediction () );
+            Debug.Log("base update");
         } else if ( isCollectPredictionPerSecond && !isWaitingPrediction ) {
+            Debug.Log("predict update");
             StartCoroutine ( WaitForSecondPrediction () );
             if ( ( long ) VideoPlayers[ currentActivePlayerIndex ].frame >= ( endFrame - 288 ) ) {
+                Debug.Log("End of scene 0");
+                
                 isCollectPredictionPerSecond = false;
 
                 currentArousalAverage = currentArousalAverage / currentPredictionCounter;
@@ -262,13 +266,19 @@ public class VideoController : MonoBehaviour {
 
                 sceneOrderManager.SetValenceArousalValues ( currentValenceAverage > valenceBaseline ? true : false, currentArousalAverage > arousalBaseline ? true : false );
 
-                sceneOrderManager.CalculateSceneOrder ();
+                sceneOrderManager.CreateSceneOrder ();
+
+                int count = 1;
 
                 foreach ( Scene scene in sceneOrderManager.currentSceneOrder ) {
+                    Debug.Log(count + ": ");
                     Debug.Log ( scene.index );
+                    count++;
                 }
 
                 isFirstScene = false;
+
+                webcamTexture = new WebCamTexture ( settingsManager.webcam.name, 1280, 720, 30 );
             }
         }
 
@@ -420,11 +430,12 @@ public class VideoController : MonoBehaviour {
 
     private void GatherValenceArousalValues ( BSocialUnity.BSocialPredictions prediction ) {
         if ( isCollectingBaseline && baselineCounter < 15 && !isWaitingBaseline && shouldCollectBaseline ) {
+            Debug.Log ( "VIDEO PREDICTION BASELINE" );
             valenceBaseline += prediction.affect.valence;
             arousalBaseline += prediction.affect.arousal;
             shouldCollectBaseline = false;
         } else if ( isCollectPredictionPerSecond && !isWaitingPrediction ) {
-            Debug.Log ( "VIDEO PREDICTION Valence" );
+            Debug.Log ( "VIDEO PREDICTION VALENCE AROUSAL" );
             currentValenceAverage += prediction.affect.valence;
             currentArousalAverage += prediction.affect.arousal;
             currentPredictionCounter++;
@@ -743,6 +754,8 @@ public class VideoController : MonoBehaviour {
         curClipCounter = 0;
 
         LoadVideo ( curClipCounter );
+
+        sceneOrderManager.ResetSceneOrder();
     }
 
     private void OnApplicationQuit () {

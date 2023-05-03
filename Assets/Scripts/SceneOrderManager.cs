@@ -27,10 +27,7 @@ public class SceneOrderManager {
         ConfigureScreeningsAndSceneCount ( screenings );
     }
 
-    public void CalculateSceneOrder () {
-            //Create the scene order
-            CreateSceneOrder ();
-
+    public void ResetSceneOrder() {
             previousSceneOrders.Add ( currentSceneOrder );
 
             currentSceneOrder = new List<Scene> ();
@@ -96,7 +93,7 @@ public class SceneOrderManager {
         }
     }
 
-    private void CreateSceneOrder () {
+    public void CreateSceneOrder () {
         /*
          * Here we want to create a scene order, 
          * checking for first scene to apply the start weight,
