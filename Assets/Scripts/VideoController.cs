@@ -9,7 +9,8 @@ using System.Threading;
 
 public delegate void NewBSocialData ( BSocialUnity.BSocialPredictions p );
 
-public class VideoController : MonoBehaviour {
+public class VideoController : MonoBehaviour
+{
     [SerializeField] Button settingsButton;
 
     [SerializeField] Button playButton;
@@ -29,7 +30,6 @@ public class VideoController : MonoBehaviour {
     [SerializeField] RenderTexture videoTexture;
     [SerializeField] Slider AudioSlider;
     [SerializeField] TMP_Text AudioValueText;
-    //[SerializeField] TMP_Dropdown VideoPathDropdown;
     [SerializeField] TMP_Text CurrentVideoText;
     [SerializeField] TMP_Text NextVideoText;
     [SerializeField] TMP_Text StartFrameText;
@@ -63,9 +63,7 @@ public class VideoController : MonoBehaviour {
     bool isCollectingBaseline = false;
     bool isWaitingBaseline = false;
     bool isWaitingPrediction = false;
-    bool shouldCollectBaseline = true;
     bool isCollectPredictionPerSecond = false;
-    bool isChangingScene = false;
 
     bool isFirstScene = true;
 
@@ -96,7 +94,8 @@ public class VideoController : MonoBehaviour {
      * Original Setup Code Copyright Timur Almaev, Chief Engineer
      * This Setup Code Copyright Luke Rose, Automotive Engineering Lead
      */
-    private bool InitBSocial () {
+    private bool InitBSocial ()
+    {
 
         BSocialLicenceKeyPath = Path.Combine ( Application.streamingAssetsPath, "bsocial.lic" );
 
@@ -105,7 +104,8 @@ public class VideoController : MonoBehaviour {
         BSocialUnity.BSocialWrapper_create ();
         int rcode = BSocialUnity.BSocialWrapper_load_online_licence_key ( BSocialLicenceKeyPath );
 
-        if ( rcode != 0 ) {
+        if ( rcode != 0 )
+        {
             Debug.LogError ( "Start: ERROR - BSocialWrapper_load_online_license_key() failed" );
             return false;
         }
@@ -118,7 +118,8 @@ public class VideoController : MonoBehaviour {
 
         BSocialOK = rcode == 0;
 
-        if ( rcode != 0 ) {
+        if ( rcode != 0 )
+        {
             Debug.LogError ( "Start: ERROR - BSocialWrapper_init_embedded() failed" );
             return false;
         }
@@ -132,7 +133,8 @@ public class VideoController : MonoBehaviour {
 
         webcamTexture.Play ();
 
-        if ( webcamTexture.isPlaying ) {
+        if ( webcamTexture.isPlaying )
+        {
             Debug.Log ( $"Using webcam: {webcamTexture.name}" );
         }
 
@@ -141,16 +143,19 @@ public class VideoController : MonoBehaviour {
         return BSocialOK;
     }
 
-    private void BSocialUpdate () {
+    private void BSocialUpdate ()
+    {
         if ( !( BSocialOK && BSocialThreadIsFree && webcamTexture.isPlaying ) )
             return;
 
-        if ( webcamTexture.width != 1280 ) {
+        if ( webcamTexture.width != 1280 )
+        {
             Debug.Log ( "UNEXPECTED WEBCAM TEXTURE DIMENSIONS" );
             return;
         }
 
-        if ( webcamTexture.height != 720 ) {
+        if ( webcamTexture.height != 720 )
+        {
             Debug.Log ( "UNEXPECTED WEBCAM TEXTURE DIMENSIONS" );
             return;
         }
@@ -179,7 +184,8 @@ public class VideoController : MonoBehaviour {
         txBuffer.Apply ();
     }
 
-    private void BSocialProcessing () {
+    private void BSocialProcessing ()
+    {
         //Debug.Log("Processing");
         BSocialUnity.BSocialWrapper_run ();
 
@@ -197,8 +203,8 @@ public class VideoController : MonoBehaviour {
     }
     #endregion
 
-    private void Awake () {
-
+    private void Awake ()
+    {
         SetupListeners ();
 
         AudioSlider.gameObject.SetActive ( false );
@@ -217,48 +223,70 @@ public class VideoController : MonoBehaviour {
         QRPanel.gameObject.SetActive ( false );
 
         CurrentVideoText.text = "Current Video: 0";
-        NextVideoText.text = "Next Video: 1";
+        NextVideoText.text = "Next Video: -";
 
         isLoadingNextVideo = false;
 
         isInactivePaused = false;
     }
 
-    private void SetupListeners () {
-        settingsButton.onClick.AddListener ( delegate { OnSettingsClicked (); } );
-        playButton.onClick.AddListener ( delegate { OnPlayClicked (); } );
-        pauseButton.onClick.AddListener ( delegate { OnPauseClicked (); } );
-        stopButton.onClick.AddListener ( delegate { OnStopClicked (); } );
-        BackButton.onClick.AddListener ( delegate { OnBackClicked (); } );
-        RewindButton.onClick.AddListener ( delegate { OnRewindClicked (); } );
-        NextButton.onClick.AddListener ( delegate { OnNextClicked (); } );
-        FastForwardButton.onClick.AddListener ( delegate { OnFastForwardClicked (); } );
-        AudioButton.onClick.AddListener ( delegate { OnAudioClicked (); } );
-        AudioSlider.onValueChanged.AddListener ( delegate { OnAudioSliderChanged (); } );
-        QRButton.onClick.AddListener ( delegate { OnQROverallButtonClicked (); } );
-        ResetButton.onClick.AddListener ( delegate { ResetValuesForNextScreening (); } );
+    private void SetupListeners ()
+    {
+        settingsButton.onClick.AddListener ( delegate
+        { OnSettingsClicked (); } );
+        playButton.onClick.AddListener ( delegate
+        { OnPlayClicked (); } );
+        pauseButton.onClick.AddListener ( delegate
+        { OnPauseClicked (); } );
+        stopButton.onClick.AddListener ( delegate
+        { OnStopClicked (); } );
+        BackButton.onClick.AddListener ( delegate
+        { OnBackClicked (); } );
+        RewindButton.onClick.AddListener ( delegate
+        { OnRewindClicked (); } );
+        NextButton.onClick.AddListener ( delegate
+        { OnNextClicked (); } );
+        FastForwardButton.onClick.AddListener ( delegate
+        { OnFastForwardClicked (); } );
+        AudioButton.onClick.AddListener ( delegate
+        { OnAudioClicked (); } );
+        AudioSlider.onValueChanged.AddListener ( delegate
+        { OnAudioSliderChanged (); } );
+        QRButton.onClick.AddListener ( delegate
+        { OnQROverallButtonClicked (); } );
+        ResetButton.onClick.AddListener ( delegate
+        { ResetValuesForNextScreening (); } );
 
-        for ( int i = 0; i < QRButtons.Length; i++ ) {
+        for ( int i = 0; i < QRButtons.Length; i++ )
+        {
             int copy = i;
-            QRButtons[ i ].onClick.AddListener ( delegate { OnQRButtonClicked ( copy ); } );
+            QRButtons[ i ].onClick.AddListener ( delegate
+            { OnQRButtonClicked ( copy ); } );
         }
 
     }
 
-    void Update () {
-        if ( isShowing && isFirstScene ) {
+    void Update ()
+    {
+        if ( isShowing && isFirstScene )
+        {
             BSocialUpdate ();
         }
 
-        if ( isCollectingBaseline && !isWaitingBaseline && !shouldCollectBaseline ) {
+        if ( isCollectingBaseline && !isWaitingBaseline )
+        {
+            Debug.Log ( "base update" );
             StartCoroutine ( WaitForSecondBaselinePrediction () );
-            Debug.Log("base update");
-        } else if ( isCollectPredictionPerSecond && !isWaitingPrediction ) {
-            Debug.Log("predict update");
+        }
+        else if ( isCollectPredictionPerSecond && !isWaitingPrediction )
+        {
+            Debug.Log ( "predict update" );
             StartCoroutine ( WaitForSecondPrediction () );
-            if ( ( long ) VideoPlayers[ currentActivePlayerIndex ].frame >= ( endFrame - 288 ) ) {
-                Debug.Log("End of scene 0");
-                
+
+            if ( ( long ) VideoPlayers[ currentActivePlayerIndex ].frame >= ( endFrame - 288 ) )
+            {
+                Debug.Log ( "End of scene 0" );
+
                 isCollectPredictionPerSecond = false;
 
                 currentArousalAverage = currentArousalAverage / currentPredictionCounter;
@@ -270,28 +298,35 @@ public class VideoController : MonoBehaviour {
 
                 int count = 1;
 
-                foreach ( Scene scene in sceneOrderManager.currentSceneOrder ) {
-                    Debug.Log(count + ": ");
-                    Debug.Log ( scene.index );
+                Debug.Log ( "COUNT: " + sceneOrderManager.currentSceneOrder.Count );
+
+                foreach ( Scene scene in sceneOrderManager.currentSceneOrder )
+                {
+                    Debug.Log ( count + ") >> " + scene.index );
                     count++;
                 }
 
                 isFirstScene = false;
 
                 webcamTexture = new WebCamTexture ( settingsManager.webcam.name, 1280, 720, 30 );
+
+                WebcamOutput.texture = webcamTexture;
+
+                webcamTexture.Play ();
             }
         }
 
-        if ( VideoPlayers[ currentActivePlayerIndex ].isPlaying ) {
+        if ( VideoPlayers[ currentActivePlayerIndex ].isPlaying )
+        {
             //Enable / disable buttons
             playButton.gameObject.SetActive ( false );
             pauseButton.gameObject.SetActive ( true );
             stopButton.interactable = true;
 
-            if ( ( ( long ) VideoPlayers[ currentActivePlayerIndex ].frame >= ( endFrame - 168 ) ) && !isLoadingNextVideo ) {
-
+            if ( ( ( long ) VideoPlayers[ currentActivePlayerIndex ].frame >= ( endFrame - 168 ) ) && !isLoadingNextVideo )
+            {
                 //Get the nextVideoCounter value
-                GetNextVideoValue ( isChangingScene );
+                GetNextVideoValue ();
 
                 //Get the start frame for next video and set the text
                 startFrame = GetTimingsForVideoCounter ( nextClipCounter, true );
@@ -303,19 +338,24 @@ public class VideoController : MonoBehaviour {
                 //Preload the next video
                 PreLoadNextVideo ( nextClipCounter );
             }
-        } else if ( VideoPlayers[ currentActivePlayerIndex ].isPaused ) {
+        }
+        else if ( VideoPlayers[ currentActivePlayerIndex ].isPaused )
+        {
             //Enabel/disable buttons
             playButton.gameObject.SetActive ( true );
             pauseButton.gameObject.SetActive ( false );
             stopButton.interactable = true;
-        } else {
+        }
+        else
+        {
             //Enabel/disable buttons
             playButton.gameObject.SetActive ( true );
             pauseButton.gameObject.SetActive ( false );
             stopButton.interactable = false;
         }
 
-        if ( VideoPlayers[ 1 ].isPlaying ) {
+        if ( VideoPlayers[ 1 ].isPlaying )
+        {
             //Debug.Log(VideoPlayers[1].frame);
         }
 
@@ -323,7 +363,8 @@ public class VideoController : MonoBehaviour {
         NextButton.interactable = curClipCounter == 11 ? false : true;
     }
 
-    public void OnShow () {
+    public void OnShow ()
+    {
         sceneOrderManager = new SceneOrderManager ( settingsManager.numOfScreenings );
 
         videos = Resources.LoadAll<VideoClip> ( settingsManager.videoFilePath ) as VideoClip[];
@@ -333,7 +374,8 @@ public class VideoController : MonoBehaviour {
 
         BSocialOK = InitBSocial ();
 
-        if ( !Display.displays[ settingsManager.displayDevice ].active ) {
+        if ( !Display.displays[ settingsManager.displayDevice ].active )
+        {
             Display.displays[ settingsManager.displayDevice ].Activate ();
         }
 
@@ -342,15 +384,14 @@ public class VideoController : MonoBehaviour {
         LoadVideo ( curClipCounter );
     }
 
-    private void LoadVideo ( int videoVal ) {
+    private void LoadVideo ( int videoVal )
+    {
         VideoPlayers[ currentActivePlayerIndex ].clip = videos[ videoVal ];
 
         VideoPlayers[ currentActivePlayerIndex ].Prepare ();
 
         VideoPlayers[ currentActivePlayerIndex ].SetDirectAudioVolume ( 0, AudioSlider.value );
         VideoPlayers[ currentActivePlayerIndex ].SetDirectAudioVolume ( 1, AudioSlider.value );
-
-        GetNextVideoValue ( isChangingScene );
 
         CurrentVideoText.text = "Current Video: " + videoVal.ToString ();
 
@@ -360,16 +401,21 @@ public class VideoController : MonoBehaviour {
         FrameCountText.text = "Frame Count: " + VideoPlayers[ currentActivePlayerIndex ].clip.frameCount.ToString ();
     }
 
-    private void PreLoadNextVideo ( int videoVal ) {
+    private void PreLoadNextVideo ( int videoVal )
+    {
         int nextActiveIndex;
 
-        if ( currentActivePlayerIndex == 0 ) {
+        if ( currentActivePlayerIndex == 0 )
+        {
             nextActiveIndex = 1;
-        } else {
+        }
+        else
+        {
             nextActiveIndex = 0;
         }
 
-        if ( nextClipCounter < 12 ) {
+        if ( nextClipCounter < 12 )
+        {
             //Prepare the next video a few seconds before
             VideoPlayers[ nextActiveIndex ].clip = videos[ nextClipCounter ];
             VideoPlayers[ nextActiveIndex ].Prepare ();
@@ -379,24 +425,31 @@ public class VideoController : MonoBehaviour {
         }
     }
 
-    IEnumerator CheckForEndOfVideo () {
+    IEnumerator CheckForEndOfVideo ()
+    {
         bool waiting = true;
 
         int nextActiveIndex = 0;
 
-        if ( currentActivePlayerIndex == 0 ) {
+        if ( currentActivePlayerIndex == 0 )
+        {
             nextActiveIndex = 1;
-        } else {
+        }
+        else
+        {
             nextActiveIndex = 0;
         }
-        while ( waiting ) {
+        while ( waiting )
+        {
             //Start playing next video
-            if ( VideoPlayers[ currentActivePlayerIndex ].frame >= endFrame - startFrame && !VideoPlayers[ nextActiveIndex ].isPlaying ) {
+            if ( VideoPlayers[ currentActivePlayerIndex ].frame >= endFrame - startFrame && !VideoPlayers[ nextActiveIndex ].isPlaying )
+            {
                 VideoPlayers[ nextActiveIndex ].Play ();
             }
 
             //Once the overlap time has ended or the video stopped playing, swap the video players
-            if ( VideoPlayers[ currentActivePlayerIndex ].frame >= endFrame || !VideoPlayers[ currentActivePlayerIndex ].isPlaying ) {
+            if ( VideoPlayers[ currentActivePlayerIndex ].frame >= endFrame || !VideoPlayers[ currentActivePlayerIndex ].isPlaying )
+            {
                 VideoPlayers[ currentActivePlayerIndex ].gameObject.GetComponent<RawImage> ().enabled = false;
                 VideoPlayers[ nextActiveIndex ].gameObject.GetComponent<RawImage> ().enabled = true;
 
@@ -415,11 +468,8 @@ public class VideoController : MonoBehaviour {
 
                 CurrentVideoText.text = "Current Video: " + curClipCounter.ToString ();
 
-                GetNextVideoValue ( isChangingScene );
-
                 isLoadingNextVideo = false;
                 waiting = false;
-                isCollectPredictionPerSecond = true;
             }
 
             yield return new WaitForEndOfFrame ();
@@ -428,13 +478,16 @@ public class VideoController : MonoBehaviour {
 
     #region VideoLogic
 
-    private void GatherValenceArousalValues ( BSocialUnity.BSocialPredictions prediction ) {
-        if ( isCollectingBaseline && baselineCounter < 15 && !isWaitingBaseline && shouldCollectBaseline ) {
+    private void GatherValenceArousalValues ( BSocialUnity.BSocialPredictions prediction )
+    {
+        if ( isCollectingBaseline && baselineCounter < 15 && !isWaitingBaseline )
+        {
             Debug.Log ( "VIDEO PREDICTION BASELINE" );
             valenceBaseline += prediction.affect.valence;
             arousalBaseline += prediction.affect.arousal;
-            shouldCollectBaseline = false;
-        } else if ( isCollectPredictionPerSecond && !isWaitingPrediction ) {
+        }
+        else if ( isCollectPredictionPerSecond && !isWaitingPrediction )
+        {
             Debug.Log ( "VIDEO PREDICTION VALENCE AROUSAL" );
             currentValenceAverage += prediction.affect.valence;
             currentArousalAverage += prediction.affect.arousal;
@@ -442,13 +495,14 @@ public class VideoController : MonoBehaviour {
         }
     }
 
-    IEnumerator WaitForSecondBaselinePrediction () {
+    IEnumerator WaitForSecondBaselinePrediction ()
+    {
         isWaitingBaseline = true;
         yield return new WaitForSeconds ( 1 );
-        shouldCollectBaseline = true;
         isWaitingBaseline = false;
         baselineCounter++;
-        if ( baselineCounter == 15 ) {
+        if ( baselineCounter == 15 )
+        {
             arousalBaseline = arousalBaseline / 15;
             valenceBaseline = valenceBaseline / 15;
             isCollectingBaseline = false;
@@ -456,16 +510,21 @@ public class VideoController : MonoBehaviour {
         }
     }
 
-    IEnumerator WaitForSecondPrediction () {
+    IEnumerator WaitForSecondPrediction ()
+    {
         isWaitingPrediction = true;
         yield return new WaitForSeconds ( 1 );
         isWaitingPrediction = false;
     }
 
-    private void GetNextVideoValue ( bool changePath ) {
-        if ( currentSceneIndex == sceneOrderManager.currentSceneOrder.Count ) {
+    private void GetNextVideoValue ()
+    {
+        if ( currentSceneIndex == sceneOrderManager.currentSceneOrder.Count )
+        {
             nextClipCounter = 11;
-        } else {
+        }
+        else
+        {
             nextClipCounter = sceneOrderManager.currentSceneOrder[ currentSceneIndex ].index;
             currentSceneIndex++;
         }
@@ -473,91 +532,130 @@ public class VideoController : MonoBehaviour {
         NextVideoText.text = "Next Video: " + nextClipCounter.ToString ();
     }
 
-    private int GetTimingsForVideoCounter ( int val, bool isStart ) {
+    private int GetTimingsForVideoCounter ( int val, bool isStart )
+    {
         int frameVal = 0;
 
-        switch ( val ) {
+        switch ( val )
+        {
             case 0:
-                if ( isStart ) {
+                if ( isStart )
+                {
                     frameVal = 0;
-                } else {
+                }
+                else
+                {
                     frameVal = 1320;
                 }
                 break;
             case 1:
-                if ( isStart ) {
+                if ( isStart )
+                {
                     frameVal = 149;
-                } else {
+                }
+                else
+                {
                     frameVal = 6675;
                 }
                 break;
             case 2:
-                if ( isStart ) {
+                if ( isStart )
+                {
                     frameVal = 0;
-                } else {
+                }
+                else
+                {
                     frameVal = 2489;
                 }
                 break;
             case 3:
-                if ( isStart ) {
+                if ( isStart )
+                {
                     frameVal = 12;
-                } else {
+                }
+                else
+                {
                     frameVal = 3865;
                 }
                 break;
             case 4:
-                if ( isStart ) {
+                if ( isStart )
+                {
                     frameVal = 6;
-                } else {
+                }
+                else
+                {
                     frameVal = 2379;
                 }
                 break;
             case 5:
-                if ( isStart ) {
+                if ( isStart )
+                {
                     frameVal = 43;
-                } else {
+                }
+                else
+                {
                     frameVal = 2743;
                 }
                 break;
             case 6:
-                if ( isStart ) {
+                if ( isStart )
+                {
                     frameVal = 0;
-                } else {
+                }
+                else
+                {
                     frameVal = 3177;
                 }
                 break;
             case 7:
-                if ( isStart ) {
+                if ( isStart )
+                {
                     frameVal = 44;
-                } else {
+                }
+                else
+                {
                     frameVal = 1525;
                 }
                 break;
             case 8:
-                if ( isStart ) {
+                if ( isStart )
+                {
                     frameVal = 65;
-                } else {
+                }
+                else
+                {
                     frameVal = 2097;
                 }
                 break;
             case 9:
-                if ( isStart ) {
+                if ( isStart )
+                {
                     frameVal = 3;
-                } else {
+                }
+                else
+                {
                     frameVal = 2806;
                 }
                 break;
             case 10:
-                if ( isStart ) {
+                if ( isStart )
+                {
                     frameVal = 63;
-                } else {
-                    frameVal = 5104;
+                }
+                else
+                {
+                    //frameVal = 5104; Changed as video shorter than this frame count
+                    frameVal = 4992;
                 }
                 break;
             case 11:
-                if ( isStart ) {
+                if ( isStart )
+                {
                     frameVal = 0;
-                } else {
+                }
+                else
+                {
                     frameVal = 621;
                 }
                 break;
@@ -576,16 +674,24 @@ public class VideoController : MonoBehaviour {
 
     #region UI LISTENER FUNCTIONS
 
-    private void OnPlayClicked () {
-        foreach ( VideoPlayer player in VideoPlayers ) {
-            if ( player.isPrepared && ( player == VideoPlayers[ currentActivePlayerIndex ] || isInactivePaused ) ) {
-                if ( player == VideoPlayers[ currentActivePlayerIndex == 0 ? 1 : 0 ] ) {
+    private void OnPlayClicked ()
+    {
+        foreach ( VideoPlayer player in VideoPlayers )
+        {
+            if ( player.isPrepared && ( player == VideoPlayers[ currentActivePlayerIndex ] || isInactivePaused ) )
+            {
+                if ( player == VideoPlayers[ currentActivePlayerIndex == 0 ? 1 : 0 ] )
+                {
                     isInactivePaused = false;
                 }
-                if ( curClipCounter == 0 ) {
-                    if ( baselineCounter < 15 ) {
+                if ( curClipCounter == 0 )
+                {
+                    if ( baselineCounter < 15 )
+                    {
                         isCollectingBaseline = true;
-                    } else {
+                    }
+                    else
+                    {
                         isCollectPredictionPerSecond = true;
                     }
                 }
@@ -597,21 +703,27 @@ public class VideoController : MonoBehaviour {
     }
 
 
-    private void OnPauseClicked () {
+    private void OnPauseClicked ()
+    {
         int val;
 
-        foreach ( VideoPlayer player in VideoPlayers ) {
-            if ( player.isPlaying ) {
+        foreach ( VideoPlayer player in VideoPlayers )
+        {
+            if ( player.isPlaying )
+            {
                 player.Pause ();
-                if ( player == VideoPlayers[ val = currentActivePlayerIndex == 0 ? 1 : 0 ] ) {
+                if ( player == VideoPlayers[ val = currentActivePlayerIndex == 0 ? 1 : 0 ] )
+                {
                     isInactivePaused = true;
                 }
             }
         }
     }
 
-    private void OnStopClicked () {
-        if ( VideoPlayers[ currentActivePlayerIndex ].isPlaying ) {
+    private void OnStopClicked ()
+    {
+        if ( VideoPlayers[ currentActivePlayerIndex ].isPlaying )
+        {
             VideoPlayers[ currentActivePlayerIndex ].Stop ();
         }
 
@@ -621,11 +733,13 @@ public class VideoController : MonoBehaviour {
         LoadVideo ( curClipCounter );
     }
 
-    private void OnSettingsClicked () {
+    private void OnSettingsClicked ()
+    {
         viewManager.GoToSettings ();
     }
 
-    private void OnBackClicked () {
+    private void OnBackClicked ()
+    {
         //curClipCounter = prevClipCounter[prevClipCounter.Count - 1];
         //prevClipCounter.RemoveAt(prevClipCounter.Count - 1);
 
@@ -634,7 +748,8 @@ public class VideoController : MonoBehaviour {
         //currentActiveVideoPlayer.Play();
     }
 
-    private void OnNextClicked () {
+    private void OnNextClicked ()
+    {
         //prevClipCounter.Add(curClipCounter);
         //curClipCounter = nextClipCounter;
         //NextVideoLogic(VideoPathDropdown.value == 0 ? false : true);
@@ -644,33 +759,45 @@ public class VideoController : MonoBehaviour {
         //currentActiveVideoPlayer.Play();
     }
 
-    private void OnRewindClicked () {
-        foreach ( VideoPlayer player in VideoPlayers ) {
-            if ( player.isPlaying ) {
-                if ( player.isPlaying ) {
+    private void OnRewindClicked ()
+    {
+        foreach ( VideoPlayer player in VideoPlayers )
+        {
+            if ( player.isPlaying )
+            {
+                if ( player.isPlaying )
+                {
                     player.Stop ();
                 }
             }
         }
     }
 
-    private void OnFastForwardClicked () {
-        foreach ( VideoPlayer player in VideoPlayers ) {
-            if ( player.isPlaying ) {
-                if ( player.playbackSpeed < 4 ) {
+    private void OnFastForwardClicked ()
+    {
+        foreach ( VideoPlayer player in VideoPlayers )
+        {
+            if ( player.isPlaying )
+            {
+                if ( player.playbackSpeed < 4 )
+                {
                     player.playbackSpeed *= 2;
                 }
             }
         }
     }
 
-    private void OnAudioClicked () {
+    private void OnAudioClicked ()
+    {
         AudioSlider.gameObject.SetActive ( AudioSlider.gameObject.activeSelf ? false : true );
     }
 
-    private void OnAudioSliderChanged () {
-        foreach ( VideoPlayer player in VideoPlayers ) {
-            if ( player.audioTrackCount > 0 ) {
+    private void OnAudioSliderChanged ()
+    {
+        foreach ( VideoPlayer player in VideoPlayers )
+        {
+            if ( player.audioTrackCount > 0 )
+            {
                 player.SetDirectAudioVolume ( 0, AudioSlider.value );
                 player.SetDirectAudioVolume ( 1, AudioSlider.value );
                 AudioValueText.text = Mathf.Round ( AudioSlider.value * 100 ).ToString () + "%";
@@ -678,25 +805,33 @@ public class VideoController : MonoBehaviour {
         }
     }
 
-    private void OnQROverallButtonClicked () {
+    private void OnQROverallButtonClicked ()
+    {
         QRPanel.gameObject.SetActive ( QRPanel.gameObject.activeSelf ? false : true );
     }
 
-    private void OnQRButtonClicked ( int val ) {
+    private void OnQRButtonClicked ( int val )
+    {
 
         int nextActiveIndex;
 
-        if ( currentActivePlayerIndex == 0 ) {
+        if ( currentActivePlayerIndex == 0 )
+        {
             nextActiveIndex = 1;
-        } else {
+        }
+        else
+        {
             nextActiveIndex = 0;
         }
 
-        if ( ExternalQRCodes.enabled == true ) {
+        if ( ExternalQRCodes.enabled == true )
+        {
             VideoPlayers[ currentActivePlayerIndex ].enabled = true;
             VideoPlayers[ nextActiveIndex ].enabled = false;
             ExternalQRCodes.enabled = false;
-        } else {
+        }
+        else
+        {
             VideoPlayers[ currentActivePlayerIndex ].enabled = false;
             VideoPlayers[ nextActiveIndex ].enabled = false;
             ExternalQRCodes.enabled = true;
@@ -708,13 +843,12 @@ public class VideoController : MonoBehaviour {
 
     #endregion
 
-    private void ResetValuesForNextScreening () {
+    private void ResetValuesForNextScreening ()
+    {
         isCollectingBaseline = false;
         isWaitingBaseline = false;
         isWaitingPrediction = false;
-        shouldCollectBaseline = true;
         isCollectPredictionPerSecond = false;
-        isChangingScene = false;
         isLoadingNextVideo = false;
         isInactivePaused = false;
 
@@ -755,15 +889,17 @@ public class VideoController : MonoBehaviour {
 
         LoadVideo ( curClipCounter );
 
-        sceneOrderManager.ResetSceneOrder();
+        sceneOrderManager.ResetSceneOrder ();
     }
 
-    private void OnApplicationQuit () {
+    private void OnApplicationQuit ()
+    {
         Debug.Log ( "Quitting ... " );
 
         /* Deallocate memory taken by B-Social if it was init-d */
 
-        if ( BSocialOK ) {
+        if ( BSocialOK )
+        {
             // BSocialUnity.BSocialWrapper_release();
         }
     }

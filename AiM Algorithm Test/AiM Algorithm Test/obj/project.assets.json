@@ -8,24 +8,19 @@
     "net6.0": []
   },
   "packageFolders": {
-    "C:\\Users\\callu\\.nuget\\packages\\": {},
-    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+    "C:\\Users\\callu\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\callu\\Documents\\GitHub\\AiM-BWD-Player\\AiM Algorithm Test\\AiM Algorithm Test\\AiM Algorithm Test.csproj",
+      "projectUniqueName": "E:\\Unity\\AiM BWD Player\\AiM Algorithm Test\\AiM Algorithm Test\\AiM Algorithm Test.csproj",
       "projectName": "AiM Algorithm Test",
-      "projectPath": "C:\\Users\\callu\\Documents\\GitHub\\AiM-BWD-Player\\AiM Algorithm Test\\AiM Algorithm Test\\AiM Algorithm Test.csproj",
+      "projectPath": "E:\\Unity\\AiM BWD Player\\AiM Algorithm Test\\AiM Algorithm Test\\AiM Algorithm Test.csproj",
       "packagesPath": "C:\\Users\\callu\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\callu\\Documents\\GitHub\\AiM-BWD-Player\\AiM Algorithm Test\\AiM Algorithm Test\\obj\\",
+      "outputPath": "E:\\Unity\\AiM BWD Player\\AiM Algorithm Test\\AiM Algorithm Test\\obj\\",
       "projectStyle": "PackageReference",
-      "fallbackFolders": [
-        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-      ],
       "configFilePaths": [
         "C:\\Users\\callu\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [

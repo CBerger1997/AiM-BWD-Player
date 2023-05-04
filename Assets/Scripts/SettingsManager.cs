@@ -158,7 +158,7 @@ public class SettingsManager : MonoBehaviour {
     private void OnScreeningsValueChanged () {
         if ( screeningsDropdown.value > 0 ) {
             analysis = ( AnalysisOptions ) screeningsDropdown.value - 1;
-            numOfScreenings = screeningsDropdown.value + 1;
+            numOfScreenings = screeningsDropdown.value;
             isScreeningsSet = true;
         } else {
             isScreeningsSet = false;
