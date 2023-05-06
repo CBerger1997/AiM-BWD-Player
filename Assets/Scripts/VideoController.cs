@@ -232,36 +232,23 @@ public class VideoController : MonoBehaviour
 
     private void SetupListeners ()
     {
-        settingsButton.onClick.AddListener ( delegate
-        { OnSettingsClicked (); } );
-        playButton.onClick.AddListener ( delegate
-        { OnPlayClicked (); } );
-        pauseButton.onClick.AddListener ( delegate
-        { OnPauseClicked (); } );
-        stopButton.onClick.AddListener ( delegate
-        { OnStopClicked (); } );
-        BackButton.onClick.AddListener ( delegate
-        { OnBackClicked (); } );
-        RewindButton.onClick.AddListener ( delegate
-        { OnRewindClicked (); } );
-        NextButton.onClick.AddListener ( delegate
-        { OnNextClicked (); } );
-        FastForwardButton.onClick.AddListener ( delegate
-        { OnFastForwardClicked (); } );
-        AudioButton.onClick.AddListener ( delegate
-        { OnAudioClicked (); } );
-        AudioSlider.onValueChanged.AddListener ( delegate
-        { OnAudioSliderChanged (); } );
-        QRButton.onClick.AddListener ( delegate
-        { OnQROverallButtonClicked (); } );
-        ResetButton.onClick.AddListener ( delegate
-        { ResetValuesForNextScreening (); } );
+        settingsButton.onClick.AddListener ( delegate { OnSettingsClicked (); } );
+        playButton.onClick.AddListener ( delegate { OnPlayClicked (); } );
+        pauseButton.onClick.AddListener ( delegate { OnPauseClicked (); } );
+        stopButton.onClick.AddListener ( delegate { OnStopClicked (); } );
+        BackButton.onClick.AddListener ( delegate { OnBackClicked (); } );
+        RewindButton.onClick.AddListener ( delegate { OnRewindClicked (); } );
+        NextButton.onClick.AddListener ( delegate { OnNextClicked (); } );
+        FastForwardButton.onClick.AddListener ( delegate { OnFastForwardClicked (); } );
+        AudioButton.onClick.AddListener ( delegate { OnAudioClicked (); } );
+        AudioSlider.onValueChanged.AddListener ( delegate { OnAudioSliderChanged (); } );
+        QRButton.onClick.AddListener ( delegate { OnQROverallButtonClicked (); } );
+        ResetButton.onClick.AddListener ( delegate { ResetValuesForNextScreening (); } );
 
         for ( int i = 0; i < QRButtons.Length; i++ )
         {
             int copy = i;
-            QRButtons[ i ].onClick.AddListener ( delegate
-            { OnQRButtonClicked ( copy ); } );
+            QRButtons[ i ].onClick.AddListener ( delegate { OnQRButtonClicked ( copy ); } );
         }
 
     }
@@ -468,6 +455,11 @@ public class VideoController : MonoBehaviour
 
                 CurrentVideoText.text = "Current Video: " + curClipCounter.ToString ();
 
+                if ( currentSceneIndex < sceneOrderManager.currentSceneOrder.Count )
+                {
+                    NextVideoText.text = "Next Video: " + sceneOrderManager.currentSceneOrder[ currentSceneIndex ].index.ToString ();
+                }
+
                 isLoadingNextVideo = false;
                 waiting = false;
             }
@@ -519,17 +511,13 @@ public class VideoController : MonoBehaviour
 
     private void GetNextVideoValue ()
     {
-        if ( currentSceneIndex == sceneOrderManager.currentSceneOrder.Count )
-        {
-            nextClipCounter = 11;
-        }
-        else
+        if ( currentSceneIndex != sceneOrderManager.currentSceneOrder.Count )
         {
             nextClipCounter = sceneOrderManager.currentSceneOrder[ currentSceneIndex ].index;
             currentSceneIndex++;
-        }
 
-        NextVideoText.text = "Next Video: " + nextClipCounter.ToString ();
+            NextVideoText.text = "Next Video: " + nextClipCounter.ToString ();
+        }
     }
 
     private int GetTimingsForVideoCounter ( int val, bool isStart )
@@ -646,7 +634,7 @@ public class VideoController : MonoBehaviour
                 else
                 {
                     //frameVal = 5104; Changed as video shorter than this frame count
-                    frameVal = 4992;
+                    frameVal = 4968;
                 }
                 break;
             case 11:

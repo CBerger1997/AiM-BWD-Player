@@ -184,6 +184,8 @@ public class SceneOrderManager
                 ConfigureNextScene ();
             }
         }
+
+        currentSceneOrder.Add ( new Scene ( 11 ) );
     }
 
     private void ConfigureFirstScene ()
