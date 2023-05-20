@@ -77,7 +77,7 @@ public class VideoController : MonoBehaviour
 
     int currentSceneIndex = 0;
 
-    SceneOrderManager sceneOrderManager;
+    SceneOrderManager2 sceneOrderManager;
 
     #region BSocial
 
@@ -362,7 +362,7 @@ public class VideoController : MonoBehaviour
 
     public void OnShow ()
     {
-        sceneOrderManager = new SceneOrderManager ( settingsManager.numOfScreenings );
+        sceneOrderManager = new SceneOrderManager2 ( settingsManager.numOfScreenings );
 
         videos = Resources.LoadAll<VideoClip> ( settingsManager.videoFilePath ) as VideoClip[];
 
