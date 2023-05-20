@@ -295,7 +295,7 @@ public class VideoController : MonoBehaviour
                 {
                     ScreeningOrderText.text += scene.index;
 
-                    if(count != sceneOrderManager.currentSceneOrder.Count)
+                    if ( count != sceneOrderManager.currentSceneOrder.Count )
                     {
                         ScreeningOrderText.text += ", ";
                     }
@@ -872,6 +872,10 @@ public class VideoController : MonoBehaviour
         VideoPlayers[ 0 ].gameObject.GetComponent<RawImage> ().enabled = true;
         VideoPlayers[ 1 ].gameObject.GetComponent<RawImage> ().enabled = false;
 
+        VideoPlayers[ 0 ].gameObject.GetComponent<VideoPlayer> ().clip = null;
+        VideoPlayers[ 1 ].gameObject.GetComponent<VideoPlayer> ().clip = null;
+
+
         ExternalVideoImages[ 0 ].enabled = true;
         ExternalVideoImages[ 1 ].enabled = false;
         ExternalQRCodes.enabled = false;
@@ -880,6 +884,7 @@ public class VideoController : MonoBehaviour
 
         CurrentVideoText.text = "Current Video: 0";
         NextVideoText.text = "Next Video: 1";
+        ScreeningOrderText.text = "Screening Order: -";
 
         //ONSHOW
 

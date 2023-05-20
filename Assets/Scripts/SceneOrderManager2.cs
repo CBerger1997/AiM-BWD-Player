@@ -37,6 +37,13 @@ public class SceneOrderManager2 {
         currentSceneOrder = new List<Scene> ();
 
         currentScreeningIndex++;
+
+        startScenes = new List<Scene> ();
+        middleScenes = new List<Scene> ();
+        endScenes = new List<Scene> ();
+        allScenes = new List<Scene> ();
+
+        SceneSetup ();
     }
 
     private void SceneSetup () {
@@ -150,6 +157,14 @@ public class SceneOrderManager2 {
         } else if ( currentScreeningIndex == numOfScreenings - 1 ) {
             List<int> sceneIndexes = new List<int> ();
 
+            List<Scene> modifiedStartScenes = new List<Scene> ();
+            List<Scene> modifiedMiddleScenes = new List<Scene> ();
+            List<Scene> modifiedEndScenes = new List<Scene> ();
+
+            modifiedStartScenes = startScenes;
+            modifiedMiddleScenes = middleScenes;
+            modifiedEndScenes = endScenes;
+
             bool isSceneAlreadyIncluded = false;
 
             foreach ( List<Scene> sceneOrders in previousSceneOrders ) {
@@ -181,25 +196,6 @@ public class SceneOrderManager2 {
                     }
                 }
             }
-
-            foreach ( Scene scene in requiredScenes ) {
-                foreach ( Scene startScene in startScenes ) {
-                    if ( scene.index == startScene.index ) {
-                        startScenes.Remove ( startScene );
-                    }
-                }
-                foreach ( Scene midScene in middleScenes ) {
-                    if ( scene.index == midScene.index ) {
-                        middleScenes.Remove ( midScene );
-                    }
-                }
-                foreach ( Scene endScene in endScenes ) {
-                    if ( scene.index == endScene.index ) {
-                        endScenes.Remove ( endScene );
-                    }
-                }
-            }
-
         } else {
             sceneCount = ( int ) Random.Range ( sceneCountMin, sceneCountMax + 1 );
         }
@@ -213,20 +209,25 @@ public class SceneOrderManager2 {
                 foreach ( Scene midScene in middleScenes ) {
                     if ( scene.index == midScene.index ) {
                         middleScenes.Remove ( midScene );
+                        break;
                     }
                 }
                 foreach ( Scene endScene in endScenes ) {
                     if ( scene.index == endScene.index ) {
                         endScenes.Remove ( endScene );
+                        break;
                     }
                 }
             }
 
             if ( i == 0 ) {
+                Debug.Log ( "Start" );
                 ConfigureFirstScene ();
             } else if ( currentSceneIndex == sceneCount - 1 ) {
+                Debug.Log ( "End" );
                 ConfigureEndScene ();
             } else {
+                Debug.Log ( "Mid" );
                 ConfigureNextScene ();
             }
         }
@@ -241,6 +242,16 @@ public class SceneOrderManager2 {
 
         if ( currentScreeningIndex == numOfScreenings - 1 ) {
             foreach ( Scene scene in requiredScenes ) {
+                foreach (Scene startScene in startScenes)
+                {
+                    if(startScene.index == scene.index)
+                    {
+                        currentSceneOrder.Add ( scene );
+                        requiredScenes.Remove ( scene );
+                        currentSceneIndex++;
+                        return;
+                    }
+                }
                 weightSum += scene.startWeighting * 2;
             }
 
@@ -320,6 +331,16 @@ public class SceneOrderManager2 {
 
         if ( currentScreeningIndex == numOfScreenings - 1 ) {
             foreach ( Scene scene in requiredScenes ) {
+                foreach ( Scene midScene in middleScenes )
+                {
+                    if ( midScene.index == scene.index )
+                    {
+                        currentSceneOrder.Add ( scene );
+                        requiredScenes.Remove ( scene );
+                        currentSceneIndex++;
+                        return;
+                    }
+                }
                 weightSum += scene.weight;
             }
 
@@ -482,6 +503,16 @@ public class SceneOrderManager2 {
 
         if ( currentScreeningIndex == numOfScreenings - 1 ) {
             foreach ( Scene scene in requiredScenes ) {
+                foreach ( Scene endScene in endScenes )
+                {
+                    if ( endScene.index == scene.index )
+                    {
+                        currentSceneOrder.Add ( scene );
+                        requiredScenes.Remove ( scene );
+                        currentSceneIndex++;
+                        return;
+                    }
+                }
                 weightSum += scene.endWeighting;
             }
 
