@@ -31,6 +31,7 @@ public class VideoController : MonoBehaviour
     [SerializeField] Slider AudioSlider;
     [SerializeField] TMP_Text AudioValueText;
     [SerializeField] TMP_Text CurrentVideoText;
+    [SerializeField] TMP_Text ScreeningOrderText;
     [SerializeField] TMP_Text NextVideoText;
     [SerializeField] TMP_Text StartFrameText;
     [SerializeField] TMP_Text EndFrameText;
@@ -224,6 +225,7 @@ public class VideoController : MonoBehaviour
 
         CurrentVideoText.text = "Current Video: 0";
         NextVideoText.text = "Next Video: -";
+        ScreeningOrderText.text = "Screening Order: -";
 
         isLoadingNextVideo = false;
 
@@ -287,8 +289,16 @@ public class VideoController : MonoBehaviour
 
                 Debug.Log ( "COUNT: " + sceneOrderManager.currentSceneOrder.Count );
 
+                ScreeningOrderText.text = "Screening Order: ";
+
                 foreach ( Scene scene in sceneOrderManager.currentSceneOrder )
                 {
+                    ScreeningOrderText.text += scene.index;
+
+                    if(count != sceneOrderManager.currentSceneOrder.Count)
+                    {
+                        ScreeningOrderText.text += ", ";
+                    }
                     Debug.Log ( count + ") >> " + scene.index );
                     count++;
                 }

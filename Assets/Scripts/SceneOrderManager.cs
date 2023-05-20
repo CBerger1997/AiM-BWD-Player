@@ -74,16 +74,20 @@ public class SceneOrderManager
         switch ( numOfScreenings )
         {
             case < 2:
-                sceneCountMin = 10;
-                sceneCountMax = 10;
+                sceneCountMin = 7;
+                sceneCountMax = 7;
+                break;
+            case < 3:
+                sceneCountMin = 5;
+                sceneCountMax = 7;
                 break;
             case < 4:
-                sceneCountMin = 5;
-                sceneCountMax = 8;
+                sceneCountMin = 4;
+                sceneCountMax = 6;
                 break;
             case >= 4:
                 sceneCountMin = 3;
-                sceneCountMax = 6;
+                sceneCountMax = 5;
                 break;
         }
     }
@@ -112,7 +116,7 @@ public class SceneOrderManager
          */
         if ( numOfScreenings == 1 )
         {
-            sceneCount = 10;
+            sceneCount = 7;
         }
         else if ( currentScreeningIndex == numOfScreenings - 1 )
         {
@@ -167,6 +171,10 @@ public class SceneOrderManager
         }
 
         Debug.Log ( "SCENE COUNT FROM ALGORITHM: " + sceneCount );
+
+        List<int> startSceneIndexes = new List<int> ();
+        List<int> middleSceneIndexes = new List<int> ();
+        List<int> endSceneIndexes = new List<int> ();
 
         for ( int i = 0; i < sceneCount; i++ )
         {
