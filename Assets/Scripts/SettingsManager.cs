@@ -40,9 +40,9 @@ public class SettingsManager : MonoBehaviour {
 
     [SerializeField] private TMP_Dropdown cameraDropdown;
     [SerializeField] private RawImage cameraImage;
-    [SerializeField] private TMP_Dropdown screeningsDropdown;
-    [SerializeField] private TMP_Dropdown resolutionDropdown;
-    [SerializeField] private TMP_Dropdown displayDeviceDropdown;
+    //[SerializeField] private TMP_Dropdown screeningsDropdown;
+    //[SerializeField] private TMP_Dropdown resolutionDropdown;
+    //[SerializeField] private TMP_Dropdown displayDeviceDropdown;
     [SerializeField] private Button SaveButton;
     [SerializeField] private Button DisplayTestButton;
     [SerializeField] private ViewManager viewManager;
@@ -54,16 +54,16 @@ public class SettingsManager : MonoBehaviour {
     #region DEVICE VARIABLES
 
     private WebCamDevice[] cameraDevices;
-    private Display[] displayDevices;
+    //private Display[] displayDevices;
 
     #endregion
 
     #region BOOLEANS
 
     private bool isCameraSet;
-    private bool isScreeningsSet;
-    private bool isResolutionSet;
-    private bool isDisplaySet;
+    //private bool isScreeningsSet
+    //private bool isResolutionSet;
+    //private bool isDisplaySet;
 
     #endregion
 
@@ -74,27 +74,34 @@ public class SettingsManager : MonoBehaviour {
 
     private void Awake () {
         cameraDropdown.onValueChanged.AddListener ( delegate { OnCameraOptionChanged (); } );
-        screeningsDropdown.onValueChanged.AddListener ( delegate { OnScreeningsValueChanged (); } );
-        resolutionDropdown.onValueChanged.AddListener ( delegate { OnResolutionOptionChanged (); } );
-        displayDeviceDropdown.onValueChanged.AddListener ( delegate { OnDisplayDeviceChanged (); } );
+        //screeningsDropdown.onValueChanged.AddListener ( delegate { OnScreeningsValueChanged (); } );
+        //resolutionDropdown.onValueChanged.AddListener ( delegate { OnResolutionOptionChanged (); } );
+        //displayDeviceDropdown.onValueChanged.AddListener ( delegate { OnDisplayDeviceChanged (); } );
         SaveButton.onClick.AddListener ( delegate { OnSavebuttonClicked (); } );
-        DisplayTestButton.onClick.AddListener ( delegate { OnDisplayTestClicked (); } );
+        //DisplayTestButton.onClick.AddListener ( delegate { OnDisplayTestClicked (); } );
 
         blankTempData = new TMP_Dropdown.OptionData ( "-" );
 
         GetWebcamDevices ();
-        GetScreeningOptions ();
-        GetDisplayDevices ();
-        GetResolutionOptions ();
+        //GetScreeningOptions ();
+        numOfScreenings = 2;
+        //GetDisplayDevices ();
+        displayDevice = 0;
+        //GetResolutionOptions ();
         SaveButton.interactable = false;
         webcam = new WebCamTexture ();
         webcam.requestedFPS = 30;
 
         SetFilePathDestinations ();
+
+        
+
+        
     }
 
     private void Update () {
-        if ( isCameraSet && isScreeningsSet && isResolutionSet && isDisplaySet ) {
+        if ( isCameraSet)//  && isDisplaySet )
+        { //&& isScreeningsSet && isResolutionSet
             SaveButton.interactable = true;
         } else {
             SaveButton.interactable = false;
@@ -155,7 +162,7 @@ public class SettingsManager : MonoBehaviour {
 
     #region SCREENING SETTINGS
 
-    private void OnScreeningsValueChanged () {
+    /*private void OnScreeningsValueChanged () {
         if ( screeningsDropdown.value > 0 ) {
             analysis = ( AnalysisOptions ) screeningsDropdown.value - 1;
             numOfScreenings = screeningsDropdown.value;
@@ -163,9 +170,9 @@ public class SettingsManager : MonoBehaviour {
         } else {
             isScreeningsSet = false;
         }
-    }
+    }*/
 
-    private void GetScreeningOptions () {
+    /*private void GetScreeningOptions () {
         screeningsDropdown.ClearOptions ();
 
         List<string> options = new List<string> ();
@@ -177,13 +184,13 @@ public class SettingsManager : MonoBehaviour {
         screeningsDropdown.options.Add ( blankTempData );
 
         screeningsDropdown.AddOptions ( options );
-    }
+    }*/
 
     #endregion
 
     #region RESOLUTION SETTINGS
 
-    private void OnResolutionOptionChanged () {
+    /*private void OnResolutionOptionChanged () {
         if ( resolutionDropdown.value > 0 ) {
             resolution = ( ResolutionOptions ) resolutionDropdown.value - 1;
             isResolutionSet = true;
@@ -196,9 +203,9 @@ public class SettingsManager : MonoBehaviour {
         } else {
             isResolutionSet = false;
         }
-    }
+    }*/
 
-    private void GetResolutionOptions () {
+    /*private void GetResolutionOptions () {
         resolutionDropdown.ClearOptions ();
 
         List<string> options = new List<string> ();
@@ -210,23 +217,23 @@ public class SettingsManager : MonoBehaviour {
         resolutionDropdown.options.Add ( blankTempData );
 
         resolutionDropdown.AddOptions ( options );
-    }
+    }*/
 
-    private void CheckVideosFromFolder ( bool is2K ) {
+    /*private void CheckVideosFromFolder ( bool is2K ) {
         string folder = is2K == true ? "BWD 2K" : "BWD 4K";
         videoFilePath = folder;
-    }
+    }*/
 
     #endregion
 
     #region DISPLAY SETTINGS
 
-    private void OnDisplayDeviceChanged () {
+    /*private void OnDisplayDeviceChanged () {
         displayDevice = displayDeviceDropdown.value - 1;
         isDisplaySet = true;
-    }
+    }*/
 
-    private void GetDisplayDevices () {
+    /*private void GetDisplayDevices () {
         displayDeviceDropdown.ClearOptions ();
 
         displayDevices = Display.displays;
@@ -241,11 +248,11 @@ public class SettingsManager : MonoBehaviour {
         displayDeviceDropdown.options.Add ( blankTempData );
 
         displayDeviceDropdown.AddOptions ( deviceNames );
-    }
+    }*/
 
-    private void OnDisplayTestClicked () {
+    /*private void OnDisplayTestClicked () {
         Display.displays[ displayDevice ].Activate ();
-    }
+    }*/
 
     #endregion
 
@@ -259,7 +266,7 @@ public class SettingsManager : MonoBehaviour {
     private void SetFilePathDestinations () {
         videoFilePath = Application.streamingAssetsPath + "/BWD 2K/";
 
-        VideoFilePathText.text = videoFilePath;
+        //VideoFilePathText.text = videoFilePath;
     }
 
     #endregion

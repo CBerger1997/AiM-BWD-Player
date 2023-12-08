@@ -122,3 +122,6 @@ Assets/Resources/BWD 4K/911.mp4.meta
 Assets/Resources/BWD 2K/d.mp4.meta
 Assets/Resources/BWD 2K/a.webm
 Assets/Resources/BWD 2K/a.webm.meta
+Assets/Resources/BWD 2K/*
+*/.DS_Store
+.DS_Store
