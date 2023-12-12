@@ -81,7 +81,8 @@ public class VideoController : MonoBehaviour
 
     #region BSocial
 
-    public static event NewBSocialData EvNewBSocialData;
+    //BENN DISABLED
+    //public static event NewBSocialData EvNewBSocialData;
     private Thread BSocialThread;
     private bool BSocialThreadIsFree = true;
     private bool BSocialOK = false;
@@ -89,6 +90,7 @@ public class VideoController : MonoBehaviour
     public Color32[] textureData;
     public Texture2D txBuffer;
 
+    //BENN DISABLED
     /*
      * BSocial SDK v1.4.0 Copyright BlueSkeye AI LTD.
      * For Academic Use Only
@@ -97,7 +99,8 @@ public class VideoController : MonoBehaviour
      */
     private bool InitBSocial ()
     {
-
+        /*
+        //BENN DISABLED
         BSocialLicenceKeyPath = Path.Combine ( Application.streamingAssetsPath, "bsocial.lic" );
 
         Debug.Log ( "B-Social licence key path : " + BSocialLicenceKeyPath );
@@ -127,7 +130,7 @@ public class VideoController : MonoBehaviour
 
         BSocialUnity.BSocialWrapper_set_nthreads ( 4 ); // Change for optimal performance, BSocial needs at least 10FPS, 15FPS+ preferred
         BSocialUnity.BSocialWrapper_reset ();
-
+        */
         webcamTexture = new WebCamTexture ( settingsManager.webcam.name, 1280, 720, 30 );
 
         WebcamOutput.texture = webcamTexture;
@@ -141,9 +144,10 @@ public class VideoController : MonoBehaviour
 
         isShowing = true;
 
-        return BSocialOK;
+        return true; // BSocialOK; //BENN DISABLED
     }
 
+    
     private void BSocialUpdate ()
     {
         if ( !( BSocialOK && BSocialThreadIsFree && webcamTexture.isPlaying ) )
@@ -175,6 +179,8 @@ public class VideoController : MonoBehaviour
         BSocialThreadIsFree = false;
         BSocialThread.Start ();
 
+        /*
+        //BENN DISABLED
         if ( !txBuffer )
             txBuffer = new Texture2D ( 1280, 720 );
 
@@ -183,19 +189,20 @@ public class VideoController : MonoBehaviour
         txBuffer.name = $"BSocial Webcam Capture";
         txBuffer.SetPixels32 ( textureData );
         txBuffer.Apply ();
+        */
     }
 
     private void BSocialProcessing ()
     {
         //Debug.Log("Processing");
-        BSocialUnity.BSocialWrapper_run ();
+        //BSocialUnity.BSocialWrapper_run (); //BENN DISABLED
 
-        BSocialUnity.BSocialPredictions predictions = BSocialUnity.BSocialWrapper_get_predictions ();
+        //BSocialUnity.BSocialPredictions predictions = BSocialUnity.BSocialWrapper_get_predictions (); //BENN DISABLED
 
-        GatherValenceArousalValues ( predictions );
+        GatherValenceArousalValues();//  predictions ); //BENN DISABLED
 
         //trigger any registered events
-        EvNewBSocialData?.Invoke ( predictions );
+        //EvNewBSocialData?.Invoke ( predictions ); //BENN DISABLED
 
         // Sleep a little bit and set the signal to get the next frame
         Thread.Sleep ( 1 );
@@ -259,7 +266,7 @@ public class VideoController : MonoBehaviour
     {
         if ( isShowing && isFirstScene )
         {
-            BSocialUpdate ();
+            //BSocialUpdate (); //BENN DISABLED
         }
 
         if ( isCollectingBaseline && !isWaitingBaseline )
@@ -369,7 +376,7 @@ public class VideoController : MonoBehaviour
         videoCamera.targetDisplay = settingsManager.displayDevice;
         VideoPlayers[ currentActivePlayerIndex ].targetCamera = videoCamera;
 
-        BSocialOK = InitBSocial ();
+        //BSocialOK = InitBSocial ();//BENN DISABLED
 
         if ( !Display.displays[ settingsManager.displayDevice ].active )
         {
@@ -480,23 +487,25 @@ public class VideoController : MonoBehaviour
 
     #region VideoLogic
 
-    private void GatherValenceArousalValues ( BSocialUnity.BSocialPredictions prediction )
+    
+    private void GatherValenceArousalValues ( )// BSocialUnity.BSocialPredictions prediction) //BENN DISABLED
     {
         if ( isCollectingBaseline && baselineCounter < 15 && !isWaitingBaseline )
         {
             Debug.Log ( "VIDEO PREDICTION BASELINE" );
-            valenceBaseline += prediction.affect.valence;
-            arousalBaseline += prediction.affect.arousal;
+            valenceBaseline += 0.1f;//  prediction.affect.valence; //BENN DISABLED
+            arousalBaseline += 0.15f;//  prediction.affect.arousal; //BENN DISABLED
         }
         else if ( isCollectPredictionPerSecond && !isWaitingPrediction )
         {
             Debug.Log ( "VIDEO PREDICTION VALENCE AROUSAL" );
-            currentValenceAverage += prediction.affect.valence;
-            currentArousalAverage += prediction.affect.arousal;
+            currentValenceAverage += 0.1f;//  prediction.affect.valence; //BENN DISABLED
+            currentArousalAverage += 0.105f;//  prediction.affect.arousal; //BENN DISABLED
             currentPredictionCounter++;
         }
     }
 
+    
     IEnumerator WaitForSecondBaselinePrediction ()
     {
         isWaitingBaseline = true;
@@ -901,7 +910,7 @@ public class VideoController : MonoBehaviour
 
         /* Deallocate memory taken by B-Social if it was init-d */
 
-        if ( BSocialOK )
+        if ( true ) //BSocialOK ) //BENN DISABLED
         {
             // BSocialUnity.BSocialWrapper_release();
         }

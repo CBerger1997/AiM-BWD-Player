@@ -122,6 +122,7 @@ Assets/Resources/BWD 4K/911.mp4.meta
 Assets/Resources/BWD 2K/d.mp4.meta
 Assets/Resources/BWD 2K/a.webm
 Assets/Resources/BWD 2K/a.webm.meta
+<<<<<<< Updated upstream
 Assets/Resources/BWD 2K/0.mov
 Assets/Resources/BWD 2K/1.mov
 Assets/Resources/BWD 2K/10.mov
@@ -174,3 +175,7 @@ Assets/Resources/BWD 4K/6.mov.meta
 Assets/Resources/BWD 4K/7.mov.meta
 Assets/Resources/BWD 4K/8.mov.meta
 Assets/Resources/BWD 4K/9.mov.meta
+=======
+
+Assets/Resources/BWD 2K/*
+>>>>>>> Stashed changes
