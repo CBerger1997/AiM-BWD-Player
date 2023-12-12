@@ -80,7 +80,7 @@ public class SettingsManager : MonoBehaviour {
         SaveButton.onClick.AddListener ( delegate { OnSavebuttonClicked (); } );
         //DisplayTestButton.onClick.AddListener ( delegate { OnDisplayTestClicked (); } );
 
-        blankTempData = new TMP_Dropdown.OptionData ( "-" );
+        //blankTempData = new TMP_Dropdown.OptionData ( "-" );
 
         GetWebcamDevices ();
         //GetScreeningOptions ();
@@ -153,7 +153,7 @@ public class SettingsManager : MonoBehaviour {
             deviceNames.Add ( device.name );
         }
 
-        cameraDropdown.options.Add ( blankTempData );
+        //cameraDropdown.options.Add ( blankTempData );
 
         cameraDropdown.AddOptions ( deviceNames );
     }

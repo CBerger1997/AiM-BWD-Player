@@ -110,6 +110,10 @@ public class VideoController : MonoBehaviour
             Debug.LogError ( "Start: ERROR - BSocialWrapper_load_online_license_key() failed" );
             return false;
         }
+        else
+        {
+            Debug.Log("Start: HOORAY!!!! - BSocialWrapper_load_online_license_key() SUCCESS!");
+        }
 
         BSocialUnity.BSocialWrapper_set_body_tracking_enabled ( false );
 
@@ -123,6 +127,10 @@ public class VideoController : MonoBehaviour
         {
             Debug.LogError ( "Start: ERROR - BSocialWrapper_init_embedded() failed" );
             return false;
+        }
+        else
+        {
+            Debug.Log("Start: HOORAY!!!! - BSocialWrapper_init_embedded() SUCCESS!");
         }
 
         BSocialUnity.BSocialWrapper_set_nthreads ( 4 ); // Change for optimal performance, BSocial needs at least 10FPS, 15FPS+ preferred
