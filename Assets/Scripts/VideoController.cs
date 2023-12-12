@@ -169,11 +169,11 @@ public class VideoController : MonoBehaviour
 
         webcamTexture.GetPixels32 ( textureData );
 
-        BSocialUnity.BSocialWrapper_set_image_native (
-                ref textureData, webcamTexture.width, webcamTexture.height, true, false, BSocialUnity.BSocialWrapper_Rotation.BM_NO_ROTATION );
+        //BSocialUnity.BSocialWrapper_set_image_native (
+        //ref textureData, webcamTexture.width, webcamTexture.height, true, false, BSocialUnity.BSocialWrapper_Rotation.BM_NO_ROTATION ); //BENN DISABLED
 
-        BSocialUnity.BSocialWrapper_overlay_native (
-                ref textureData, webcamTexture.width, webcamTexture.height, true, false, BSocialUnity.BSocialWrapper_Rotation.BM_NO_ROTATION );
+        //BSocialUnity.BSocialWrapper_overlay_native (
+        //ref textureData, webcamTexture.width, webcamTexture.height, true, false, BSocialUnity.BSocialWrapper_Rotation.BM_NO_ROTATION ); //BENN DISABLED
 
         BSocialThread = new Thread ( BSocialProcessing );
         BSocialThreadIsFree = false;
@@ -681,7 +681,7 @@ public class VideoController : MonoBehaviour
 
     #region UI LISTENER FUNCTIONS
 
-    private void OnPlayClicked ()
+    public void OnPlayClicked ()
     {
         foreach ( VideoPlayer player in VideoPlayers )
         {
@@ -704,8 +704,12 @@ public class VideoController : MonoBehaviour
                 }
             }
 
+            Debug.Log("Play Video : " + player.name);//.clip.name);
+
             player.playbackSpeed = 1;
             player.Play ();
+
+            Debug.Log("Video : " + player.name+" is Playing? : "+ player.isPlaying);//.clip.name);
         }
     }
 
@@ -841,9 +845,9 @@ public class VideoController : MonoBehaviour
         {
             VideoPlayers[ currentActivePlayerIndex ].enabled = false;
             VideoPlayers[ nextActiveIndex ].enabled = false;
-            ExternalQRCodes.enabled = true;
-            ExternalQRCodes.texture = QRImages[ val ];
-            ExternalQRCodes.GetComponent<RectTransform> ().sizeDelta = new Vector2 ( 700, 700 );
+            //ExternalQRCodes.enabled = true; //BENN DISABLED
+            //ExternalQRCodes.texture = QRImages[ val ];
+            //ExternalQRCodes.GetComponent<RectTransform> ().sizeDelta = new Vector2 ( 700, 700 );
         }
 
     }
