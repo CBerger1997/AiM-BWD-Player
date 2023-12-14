@@ -11,6 +11,10 @@ public delegate void NewBSocialData ( BSocialUnity.BSocialPredictions p );
 
 public class VideoController : MonoBehaviour
 {
+    //Now attached to Video Parent GameObject (within Canvas)
+
+    //Video controls such as play fast forward etc
+
     [SerializeField] Button settingsButton;
 
     [SerializeField] Button playButton;
@@ -703,13 +707,15 @@ public class VideoController : MonoBehaviour
                     }
                 }
             }
-
-            Debug.Log("Play Video : " + player.name);//.clip.name);
+            Debug.Log("Play Video isInactivePaused : " + isInactivePaused);
+            Debug.Log("Play Video isCollectingBaseline : " + isCollectingBaseline);
+            Debug.Log("Play Video isCollectPredictionPerSecond : " + isCollectPredictionPerSecond);
+            Debug.Log("Play Video : " + player.name);
 
             player.playbackSpeed = 1;
             player.Play ();
 
-            Debug.Log("Video : " + player.name+" is Playing? : "+ player.isPlaying);//.clip.name);
+            Debug.Log("Video : " + player.name+" is Playing? : "+ player.isPlaying);
         }
     }
 

@@ -9,6 +9,9 @@ using System.IO;
 
 public class SettingsManager : MonoBehaviour {
 
+    //Attahced to Settings Manager GameObject
+
+    //Configures web cam, video resolution etc, num of screenings
     #region ENUMS
 
     public enum AnalysisOptions {
