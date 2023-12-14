@@ -22,8 +22,7 @@ public class SettingsManager : MonoBehaviour {
     }
 
     public enum ResolutionOptions {
-        _2K,
-        _4K
+        _2K
     }
 
     #endregion
@@ -44,20 +43,17 @@ public class SettingsManager : MonoBehaviour {
     [SerializeField] private TMP_Dropdown cameraDropdown;
     [SerializeField] private RawImage cameraImage;
     //[SerializeField] private TMP_Dropdown screeningsDropdown;
-    //[SerializeField] private TMP_Dropdown resolutionDropdown;
-    //[SerializeField] private TMP_Dropdown displayDeviceDropdown;
+
     [SerializeField] private Button SaveButton;
-    [SerializeField] private Button DisplayTestButton;
     [SerializeField] private ViewManager viewManager;
     [SerializeField] private TMP_Text VideoFilePathText;
-    private TMP_Dropdown.OptionData blankTempData;
 
-    #endregion 
+    #endregion
 
     #region DEVICE VARIABLES
 
     private WebCamDevice[] cameraDevices;
-    //private Display[] displayDevices;
+    private int webcamNumSelected = 0;
 
     #endregion
 
@@ -65,8 +61,6 @@ public class SettingsManager : MonoBehaviour {
 
     private bool isCameraSet;
     //private bool isScreeningsSet
-    //private bool isResolutionSet;
-    //private bool isDisplaySet;
 
     #endregion
 
@@ -76,37 +70,32 @@ public class SettingsManager : MonoBehaviour {
     private int maxScreenings = 10;
 
     private void Awake () {
-        cameraDropdown.onValueChanged.AddListener ( delegate { OnCameraOptionChanged (); } );
+        
         //screeningsDropdown.onValueChanged.AddListener ( delegate { OnScreeningsValueChanged (); } );
-        //resolutionDropdown.onValueChanged.AddListener ( delegate { OnResolutionOptionChanged (); } );
-        //displayDeviceDropdown.onValueChanged.AddListener ( delegate { OnDisplayDeviceChanged (); } );
         SaveButton.onClick.AddListener ( delegate { OnSavebuttonClicked (); } );
-        //DisplayTestButton.onClick.AddListener ( delegate { OnDisplayTestClicked (); } );
-
-        //blankTempData = new TMP_Dropdown.OptionData ( "-" );
+        cameraDropdown.onValueChanged.AddListener(delegate { OnCameraOptionChanged(); });
 
         GetWebcamDevices ();
         //GetScreeningOptions ();
         numOfScreenings = 2;
-        //GetDisplayDevices ();
         displayDevice = 0;
-        //GetResolutionOptions ();
-        SaveButton.interactable = false;
+        videoFilePath = Application.streamingAssetsPath + "/BWD 2K/";
+
         webcam = new WebCamTexture ();
         webcam.requestedFPS = 30;
 
-        SetFilePathDestinations ();
-
-        
-
-        
+        if (cameraDevices.Length > 0) webcamNumSelected = 1;
+        SetWebcam();
     }
 
     private void Update () {
-        if ( isCameraSet)//  && isDisplaySet )
-        { //&& isScreeningsSet && isResolutionSet
+        if (isCameraSet)
+        {
             SaveButton.interactable = true;
-        } else {
+            Debug.Log("Webcam Playing ? : " + webcam.isPlaying);
+        }
+        else
+        {
             SaveButton.interactable = false;
         }
     }
@@ -116,35 +105,52 @@ public class SettingsManager : MonoBehaviour {
     //FIX CORRECT WEBCAM BEING SELECTED 
     //FIX MAC PERMISSIONS FOR WEBCAM
     private void OnCameraOptionChanged () {
-        if ( cameraDropdown.value > 0 ) {
+        Debug.Log("OnCameraOptionChanged...");
+        webcamNumSelected = cameraDropdown.value;
+        SetWebcam();
+    }
 
+    private void SetWebcam()
+    {
+        Debug.Log("SetWebcam...");
+
+        if (webcamNumSelected > 0)
+        {
+            Debug.Log("SetWebcam : webcamNumSelected :  "+ webcamNumSelected);
             //Application.RequestUserAuthorization(UserAuthorization.WebCam);
 
-            if ( webcam != null ) {
-                webcam.Stop ();
+            if (webcam != null)
+            {
+                webcam.Stop();
             }
 
-            webcam = new WebCamTexture (
-                cameraDevices[ cameraDropdown.value - 1 ].name,
+            webcam = new WebCamTexture(
+                cameraDevices[webcamNumSelected - 1].name,
                 textureRequestedWidth,
                 textureRequestedHeight,
                 wTextureRequestedFPS
             );
+            Debug.Log("SetWebcam : created new webcam texture");
 
-            webcam.name = cameraDevices[ cameraDropdown.value - 1 ].name;
+            webcam.name = cameraDevices[webcamNumSelected - 1].name;
 
             cameraImage.texture = webcam;
 
-            if ( webcam.isReadable ) {
-                webcam.Play ();
+            Debug.Log("SetWebcam : Set image texture to Webcam texture");
+
+            if (webcam.isReadable)
+            {
+                Debug.Log("SetWebcam : webcam.isReadable, Play webcam : "+ webcam.name);
+                webcam.Play();
             }
 
             isCameraSet = true;
-        } else {
+        }
+        else
+        {
             isCameraSet = false;
         }
     }
-
     private void GetWebcamDevices () {
         cameraDropdown.ClearOptions ();
 
@@ -154,11 +160,17 @@ public class SettingsManager : MonoBehaviour {
 
         foreach ( WebCamDevice device in cameraDevices ) {
             deviceNames.Add ( device.name );
+            Debug.Log("Webcam available  : "+device.name);
         }
 
-        //cameraDropdown.options.Add ( blankTempData );
-
         cameraDropdown.AddOptions ( deviceNames );
+
+
+        if (deviceNames.Count == 0) 
+        {
+            //NO WEBCAMS ATTACHED!!
+            Debug.LogError("No camera devices found!"); //WARN THE USER !!!!!!!!!!!!!!!!!!
+        } 
     }
 
     #endregion
@@ -191,95 +203,15 @@ public class SettingsManager : MonoBehaviour {
 
     #endregion
 
-    #region RESOLUTION SETTINGS
-
-    /*private void OnResolutionOptionChanged () {
-        if ( resolutionDropdown.value > 0 ) {
-            resolution = ( ResolutionOptions ) resolutionDropdown.value - 1;
-            isResolutionSet = true;
-            if ( resolutionDropdown.value == 1 ) {
-                CheckVideosFromFolder ( true );
-            } else {
-                CheckVideosFromFolder ( false );
-            }
-            VideoFilePathText.text = videoFilePath;
-        } else {
-            isResolutionSet = false;
-        }
-    }*/
-
-    /*private void GetResolutionOptions () {
-        resolutionDropdown.ClearOptions ();
-
-        List<string> options = new List<string> ();
-
-        foreach ( string option in System.Enum.GetNames ( typeof ( ResolutionOptions ) ) ) {
-            options.Add ( option );
-        }
-
-        resolutionDropdown.options.Add ( blankTempData );
-
-        resolutionDropdown.AddOptions ( options );
-    }*/
-
-    /*private void CheckVideosFromFolder ( bool is2K ) {
-        string folder = is2K == true ? "BWD 2K" : "BWD 4K";
-        videoFilePath = folder;
-    }*/
-
-    #endregion
-
-    #region DISPLAY SETTINGS
-
-    /*private void OnDisplayDeviceChanged () {
-        displayDevice = displayDeviceDropdown.value - 1;
-        isDisplaySet = true;
-    }*/
-
-    /*private void GetDisplayDevices () {
-        displayDeviceDropdown.ClearOptions ();
-
-        displayDevices = Display.displays;
-
-        List<string> deviceNames = new List<string> ();
-
-        foreach ( Display device in displayDevices ) {
-            //Find way for actual device name
-            deviceNames.Add ( device.ToString () );
-        }
-
-        displayDeviceDropdown.options.Add ( blankTempData );
-
-        displayDeviceDropdown.AddOptions ( deviceNames );
-    }*/
-
-    /*private void OnDisplayTestClicked () {
-        Display.displays[ displayDevice ].Activate ();
-    }*/
-
-    #endregion
-
-    #region FILENAME SETTINGS
-
-    /// <summary>
-    /// Function to define the file path for the videos and output files
-    /// Change the path variable to string to define the location of the videos
-    /// The output files are located within a folder called Data Output, if this doesn't exist within the video folder, please create it
-    /// </summary>
-    private void SetFilePathDestinations () {
-        videoFilePath = Application.streamingAssetsPath + "/BWD 2K/";
-
-        //VideoFilePathText.text = videoFilePath;
-    }
-
-    #endregion
 
     /// <summary>
     /// Function triggered when the save button is clicked
     /// Sets the output filename, stops the webcam and goes to the main menu
     /// </summary>
     private void OnSavebuttonClicked () {
+
         webcam.Stop ();
+        Debug.Log("OnSavebuttonClicked, webcam.Stopped, go to MainMenu");
 
         viewManager.GoToMainMenu ();
     }
