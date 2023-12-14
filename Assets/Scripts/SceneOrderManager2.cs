@@ -88,8 +88,8 @@ public class SceneOrderManager2 {
     /// <param name="valenceHigher"></param>
     /// <param name="arousalHigher"></param>
     public void SetValenceArousalValues ( bool valenceHigher, bool arousalHigher ) {
-        isValenceHigher = valenceHigher;
-        isArousalHigher = arousalHigher;
+        isValenceHigher = true; // valenceHigher; //BENN DISBALED
+        isArousalHigher = false;//  arousalHigher; //BENN DISBALED
 
         //Configure the amount of screenings and the total current scene count
         ModifyWeightsForValenceAndArousal ();
