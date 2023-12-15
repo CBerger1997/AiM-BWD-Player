@@ -680,16 +680,16 @@ RectTransform:
   m_GameObject: {fileID: 91045375}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 0.65, y: 0.65, z: 0.65}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 466045496}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 400, y: 100}
-  m_SizeDelta: {x: 600, y: 600}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 4096, y: 2160}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &91045377
 MonoBehaviour:
@@ -698,7 +698,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 91045375}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1344c3c82d62a2a41a3576d8abb8e3ea, type: 3}
   m_Name: 
@@ -1412,6 +1412,7 @@ MonoBehaviour:
   viewManager: {fileID: 1633040942}
   VideoFilePathText: {fileID: 835164439}
   NoWebcamWarning: {fileID: 1028488705}
+  webcamNumSelected: 0
 --- !u!1 &166770809
 GameObject:
   m_ObjectHideFlags: 0
@@ -1430,7 +1431,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &166770810
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1480,7 +1481,7 @@ Canvas:
   m_GameObject: {fileID: 166770809}
   m_Enabled: 1
   serializedVersion: 3
-  m_RenderMode: 1
+  m_RenderMode: 0
   m_Camera: {fileID: 519420031}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
@@ -1755,6 +1756,7 @@ MonoBehaviour:
   viewManager: {fileID: 1633040942}
   VideoFilePathText: {fileID: 835164439}
   NoWebcamWarning: {fileID: 1028488705}
+  webcamNumSelected: 0
 --- !u!1 &234079340
 GameObject:
   m_ObjectHideFlags: 0
@@ -2380,7 +2382,7 @@ GameObject:
   - component: {fileID: 299463625}
   - component: {fileID: 299463627}
   - component: {fileID: 299463626}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Video 2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4067,7 +4069,7 @@ Camera:
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 2147483647
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -6610,16 +6612,16 @@ RectTransform:
   m_GameObject: {fileID: 861879847}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 0.65, y: 0.65, z: 0.65}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 466045496}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 400, y: 100}
-  m_SizeDelta: {x: 600, y: 600}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 4096, y: 2160}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &861879849
 MonoBehaviour:
@@ -6628,7 +6630,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 861879847}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1344c3c82d62a2a41a3576d8abb8e3ea, type: 3}
   m_Name: 
@@ -7291,7 +7293,7 @@ GameObject:
   - component: {fileID: 914301839}
   - component: {fileID: 914301841}
   - component: {fileID: 914301840}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Video 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8263,7 +8265,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: 0, y: 124.99997}
+  m_AnchoredPosition: {x: 0, y: 125}
   m_SizeDelta: {x: 1200, y: 200}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1029538213
@@ -12442,9 +12444,9 @@ Canvas:
   m_GameObject: {fileID: 1633040937}
   m_Enabled: 1
   serializedVersion: 3
-  m_RenderMode: 1
+  m_RenderMode: 0
   m_Camera: {fileID: 519420031}
-  m_PlaneDistance: 100
+  m_PlaneDistance: 1
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
   m_OverrideSorting: 0
@@ -12471,7 +12473,6 @@ MonoBehaviour:
   videoCamera: {fileID: 645958679}
   videoCanvas: {fileID: 166770809}
   videoManager: {fileID: 466045495}
-  videoController: {fileID: 466045497}
 --- !u!1 &1637607181
 GameObject:
   m_ObjectHideFlags: 0

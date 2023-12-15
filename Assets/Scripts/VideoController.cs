@@ -335,9 +335,9 @@ public class VideoController : MonoBehaviour
         if ( VideoPlayers[ currentActivePlayerIndex ].isPlaying )
         {
             //Enable / disable buttons
-            playButton.gameObject.SetActive ( false );
-            pauseButton.gameObject.SetActive ( true );
-            stopButton.interactable = true;
+            //playButton.gameObject.SetActive ( false );
+            //pauseButton.gameObject.SetActive ( true );
+            //stopButton.interactable = true;
 
             if ( ( ( long ) VideoPlayers[ currentActivePlayerIndex ].frame >= ( endFrame - 168 ) ) && !isLoadingNextVideo )
             {
@@ -358,16 +358,16 @@ public class VideoController : MonoBehaviour
         else if ( VideoPlayers[ currentActivePlayerIndex ].isPaused )
         {
             //Enabel/disable buttons
-            playButton.gameObject.SetActive ( true );
-            pauseButton.gameObject.SetActive ( false );
-            stopButton.interactable = true;
+            //playButton.gameObject.SetActive ( true );
+            //pauseButton.gameObject.SetActive ( false );
+            //stopButton.interactable = true;
         }
         else
         {
             //Enabel/disable buttons
-            playButton.gameObject.SetActive ( true );
-            pauseButton.gameObject.SetActive ( false );
-            stopButton.interactable = false;
+            //playButton.gameObject.SetActive ( true );
+            //pauseButton.gameObject.SetActive ( false );
+            //stopButton.interactable = false;
         }
 
         if ( VideoPlayers[ 1 ].isPlaying )
@@ -383,17 +383,23 @@ public class VideoController : MonoBehaviour
     {
         sceneOrderManager = new SceneOrderManager2 ( settingsManager.numOfScreenings );
 
-        videos = Resources.LoadAll<VideoClip> ( settingsManager.videoFilePath ) as VideoClip[];
+        Debug.Log("OnShow : settingsManager.videoFilePath : " + settingsManager.videoFilePath);
+
+        //videos = Resources.LoadAll<VideoClip> ( settingsManager.videoFilePath ) as VideoClip[];
+        videos = Resources.LoadAll<VideoClip>("BWD 2K");//, typeof(VideoClip)); //BENN - SEEMS TO WORK ON WINDOWS WHEN THE ABOVE DOES NOT...
+
+        Debug.Log("OnShow : videos found : "+ videos.Length);
+        //currentActivePlayerIndex = 0;//BENN FORCED
 
         videoCamera.targetDisplay = settingsManager.displayDevice;
         VideoPlayers[ currentActivePlayerIndex ].targetCamera = videoCamera;
 
         //BSocialOK = InitBSocial ();//BENN DISABLED
 
-        if ( !Display.displays[ settingsManager.displayDevice ].active )
+        /*if ( !Display.displays[ settingsManager.displayDevice ].active )
         {
             Display.displays[ settingsManager.displayDevice ].Activate ();
-        }
+        }*/
 
         curClipCounter = 0;
 
@@ -415,6 +421,9 @@ public class VideoController : MonoBehaviour
 
         EndFrameText.text = "End Frame: " + endFrame.ToString ();
         FrameCountText.text = "Frame Count: " + VideoPlayers[ currentActivePlayerIndex ].clip.frameCount.ToString ();
+
+
+        Debug.Log("LoadVideo : Current Video: " + videoVal.ToString() + ", End Frame:"+ endFrame.ToString() + ", Frame Count:" + VideoPlayers[currentActivePlayerIndex].clip.frameCount.ToString());
     }
 
     private void PreLoadNextVideo ( int videoVal )

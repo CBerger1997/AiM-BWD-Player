@@ -90,10 +90,18 @@ public class SettingsManager : MonoBehaviour {
         NoWebcamWarning.SetActive(false);
 
         GetWebcamDevices();
-        if (cameraDevices.Length > 0) webcamNumSelected = 1;
+        if (cameraDevices.Length > 0)
+        {
+            webcamNumSelected = 1;
+            SaveButton.interactable = true;
+        }
+        else
+        {
+            SaveButton.interactable = false;
+        }
         SetWebcam();
 
-        SaveButton.interactable = false;
+        
     }
 
   

@@ -9,9 +9,8 @@ public class ViewManager : MonoBehaviour {
     [SerializeField] private GameObject SettingsMenu;
     [SerializeField] private GameObject MainMenu;
     [SerializeField] private GameObject videoCamera;
-    [SerializeField] private GameObject videoCanvas;
+    //[SerializeField] private GameObject videoCanvas;
     [SerializeField] private GameObject videoManager;
-    public VideoController videoController;
 
     private void Awake() {
         
@@ -19,11 +18,11 @@ public class ViewManager : MonoBehaviour {
 
 #if UNITY_EDITOR_WIN || UNITY_EDITOR_OSX
         videoCamera.SetActive(false);
-        videoCanvas.SetActive(false);
+        //videoCanvas.SetActive(false);
         videoManager.SetActive(false);
 #elif UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX
         videoCamera.SetActive(true);
-        videoCanvas.SetActive(true);
+        //videoCanvas.SetActive(true);
 #endif
     }
 
@@ -41,12 +40,20 @@ public class ViewManager : MonoBehaviour {
     //BENN CHANGED
     public void GoToMainMenu()
     {
+        
+
+        //Hide Settings
         SettingsMenu.SetActive(false);
         MainMenu.SetActive(false);
-        videoCamera.SetActive(true);
-        videoCanvas.SetActive(true);
 
+        //Show Videos
+        videoCamera.SetActive(true);
+        //videoCanvas.SetActive(true);
         videoManager.SetActive(true);
-        videoController.OnPlayClicked();
+
+        videoManager.GetComponent<VideoController>().OnShow();
+
+        //Play the video
+        videoManager.GetComponent<VideoController>().OnPlayClicked();
     }
 }
