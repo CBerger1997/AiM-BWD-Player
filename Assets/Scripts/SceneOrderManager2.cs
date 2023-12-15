@@ -152,6 +152,9 @@ public class SceneOrderManager2 {
          * 
          * Later apply previous scene orders as additional weightings for current scene order
          */
+
+        Debug.Log($"[{GetType().Name}] CreateSceneOrder");
+
         if ( numOfScreenings == 1 ) {
             sceneCount = 7;
         } else if ( currentScreeningIndex == numOfScreenings - 1 ) {

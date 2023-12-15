@@ -47,7 +47,7 @@ public class SettingsManager : MonoBehaviour {
 
     [SerializeField] private Button SaveButton;
     [SerializeField] private ViewManager viewManager;
-    [SerializeField] private TMP_Text VideoFilePathText;
+    //[SerializeField] private TMP_Text VideoFilePathText;
 
     [SerializeField] private GameObject NoWebcamWarning;
 
@@ -90,6 +90,7 @@ public class SettingsManager : MonoBehaviour {
         NoWebcamWarning.SetActive(false);
 
         GetWebcamDevices();
+        //If we can auto-select the first webcam make the Continue button available
         if (cameraDevices.Length > 0)
         {
             webcamNumSelected = 1;
@@ -112,7 +113,7 @@ public class SettingsManager : MonoBehaviour {
     //FIX MAC PERMISSIONS FOR WEBCAM
     private void OnCameraOptionChanged (int index) {
         webcamNumSelected = cameraDropdown.value+1;
-        Debug.Log("webcamNumSelected : " + webcamNumSelected);
+        Debug.Log($"[{GetType().Name}] webcamNumSelected : " + webcamNumSelected);
         SetWebcam();
     }
 
@@ -120,18 +121,18 @@ public class SettingsManager : MonoBehaviour {
 
     private void SetWebcam()
     {
-        Debug.Log("SetWebcam...");
+        Debug.Log($"[{GetType().Name}] SetWebcam...");
 
         if (webcamNumSelected > 0)
         {
-            Debug.Log("SetWebcam : webcamNumSelected :  "+ webcamNumSelected);
+            Debug.Log($"[{GetType().Name}] SetWebcam : webcamNumSelected :  "+ webcamNumSelected);
             //Application.RequestUserAuthorization(UserAuthorization.WebCam);
 
             if (webcam != null)
             {
                 
                 webcam.Stop();
-                Debug.Log("SetWebcam : webcam Stopped");
+                Debug.Log($"[{GetType().Name}] SetWebcam : webcam Stopped");
             }
 
            /* if (!webcam) Debug.LogError("webcam : IS NULL");
@@ -149,17 +150,17 @@ public class SettingsManager : MonoBehaviour {
                 wTextureRequestedFPS
             );
            
-            Debug.Log("SetWebcam : created new webcam texture");
+            Debug.Log($"[{GetType().Name}] SetWebcam : created new webcam texture");
 
             webcam.name = cameraDevices[webcamNumSelected - 1].name;
 
             cameraImage.texture = webcam;
 
-            Debug.Log("SetWebcam : Set image texture to Webcam texture");
+            Debug.Log($"[{GetType().Name}] SetWebcam : Set image texture to Webcam texture");
 
             if (webcam.isReadable)
             {
-                Debug.Log("SetWebcam : webcam.isReadable, Play webcam : "+ webcam.name);
+                Debug.Log($"[{GetType().Name}] SetWebcam : webcam.isReadable, Play webcam : "+ webcam.name);
                 webcam.Play();
             }
 
@@ -184,7 +185,7 @@ public class SettingsManager : MonoBehaviour {
 
         foreach ( WebCamDevice device in cameraDevices ) {
             deviceNames.Add ( device.name );
-            Debug.Log("Webcam available  : "+device.name);
+            Debug.Log($"[{GetType().Name}] Webcam available  : "+device.name);
         }
 
         cameraDropdown.AddOptions ( deviceNames );
@@ -235,7 +236,7 @@ public class SettingsManager : MonoBehaviour {
     private void OnSavebuttonClicked () {
 
         webcam.Stop ();
-        Debug.Log("OnSavebuttonClicked, webcam.Stopped, go to MainMenu");
+        Debug.Log($"[{GetType().Name}] OnSavebuttonClicked, webcam.Stopped, go to MainMenu");
 
         viewManager.GoToMainMenu ();
     }
