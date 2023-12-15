@@ -35,7 +35,7 @@ public class SettingsManager : MonoBehaviour {
     public ResolutionOptions resolution { get; set; }
     public int displayDevice { get; set; }
     public int numOfScreenings { get; set; }
-    public string videoFilePath { get; set; }
+    //public string videoFilePath { get; set; }
 
     #endregion
 
@@ -82,7 +82,7 @@ public class SettingsManager : MonoBehaviour {
         //GetScreeningOptions ();
         numOfScreenings = 2;
         displayDevice = 0;
-        videoFilePath = Application.streamingAssetsPath + "/BWD 2K/";
+        //videoFilePath = Application.streamingAssetsPath + "/BWD 2K/";
 
         webcam = new WebCamTexture();
         webcam.requestedFPS = 30;

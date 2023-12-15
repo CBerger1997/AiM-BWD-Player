@@ -2,56 +2,38 @@ using UnityEngine;
 
 public class ViewManager : MonoBehaviour {
 
-    //Attached to Canvas GameObject
-
-    //Controls which Menu shown
+    //Controls what is shown
 
     [SerializeField] private GameObject SettingsMenu;
-    //[SerializeField] private GameObject MainMenu;
     //[SerializeField] private GameObject videoCamera;
     //[SerializeField] private GameObject videoCanvas;
     [SerializeField] private GameObject videoPlayer;
 
     private void Awake() {
         SettingsMenu.SetActive(true);
-        //GoToSettings();
 
 #if UNITY_EDITOR_WIN || UNITY_EDITOR_OSX
         //videoCamera.SetActive(false);
         //videoCanvas.SetActive(false);
         videoPlayer.SetActive(false);
 #elif UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX
-        videoCamera.SetActive(true);
+        //videoCamera.SetActive(true);
         //videoCanvas.SetActive(true);
 #endif
     }
 
-    //public void GoToSettings() {
-        //SettingsMenu.SetActive(true);
-        //MainMenu.SetActive(false);
-    //}
-
-    /*public void GoToMainMenu() {
-        SettingsMenu.SetActive(false);
-        MainMenu.SetActive(true);
-        MainMenu.GetComponent<VideoController>().OnShow();
-    }*/
-
-    //BENN CHANGED
     public void GoToVideoView()
     {
         //Hide Settings
         SettingsMenu.SetActive(false);
-        //MainMenu.SetActive(false);
 
-        //Show Videos
+        //Show
         //videoCamera.SetActive(true);
         //videoCanvas.SetActive(true);
-        videoPlayer.SetActive(true);
-
-        videoPlayer.GetComponent<VideoController>().OnShow();
 
         //Play the video
+        videoPlayer.SetActive(true);
+        videoPlayer.GetComponent<VideoController>().OnShow();
         videoPlayer.GetComponent<VideoController>().OnPlayClicked();
     }
 }

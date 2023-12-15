@@ -47,6 +47,7 @@ public class SceneOrderManager2 {
     }
 
     private void SceneSetup () {
+        Debug.Log($"[{GetType().Name}] Scene Setup");
 
         allScenes.Add ( new Scene ( 1 ) );
         allScenes.Add ( new Scene ( 2 ) );
@@ -93,10 +94,12 @@ public class SceneOrderManager2 {
 
         //Configure the amount of screenings and the total current scene count
         ModifyWeightsForValenceAndArousal ();
-
     }
 
     private void ConfigureScreeningsAndSceneCount ( int screenings ) {
+
+        Debug.Log($"[{GetType().Name}] Configure Screenings And Scene Count");
+
         /*
          * Here we want to configure how many screenings there are,
          * then define the scene count range,
@@ -153,7 +156,7 @@ public class SceneOrderManager2 {
          * Later apply previous scene orders as additional weightings for current scene order
          */
 
-        Debug.Log($"[{GetType().Name}] CreateSceneOrder");
+        Debug.Log($"[{GetType().Name}] Create Scene Order");
 
         if ( numOfScreenings == 1 ) {
             sceneCount = 7;

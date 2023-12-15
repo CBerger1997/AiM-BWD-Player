@@ -339,6 +339,9 @@ RectTransform:
   m_Children:
   - {fileID: 1780777805}
   - {fileID: 515913581}
+  - {fileID: 234079341}
+  - {fileID: 1260329821}
+  - {fileID: 1028488706}
   - {fileID: 807606638}
   m_Father: {fileID: 726011605}
   m_RootOrder: 2
@@ -441,12 +444,12 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 515913581}
-  m_RootOrder: 1
+  m_Father: {fileID: 164487146}
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: -150, y: -935.99994}
+  m_AnchoredPosition: {x: 408, y: -1078.9999}
   m_SizeDelta: {x: 400, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &234079342
@@ -785,7 +788,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3f2c6300675dbce41be7301e1eeb82d0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  viewManager: {fileID: 0}
+  viewManager: {fileID: 453873419}
   WebcamOutput: {fileID: 0}
   videoTexture: {fileID: 8400000, guid: 1a9ca48056f877243befa5121b11e846, type: 2}
   VideoPlayers:
@@ -904,9 +907,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1572016933}
-  - {fileID: 234079341}
-  - {fileID: 1028488706}
-  - {fileID: 1260329821}
   m_Father: {fileID: 164487146}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1147,7 +1147,7 @@ RectTransform:
   m_Children:
   - {fileID: 430204645}
   m_Father: {fileID: 164487146}
-  m_RootOrder: 2
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
@@ -1648,12 +1648,12 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 515913581}
-  m_RootOrder: 2
+  m_Father: {fileID: 164487146}
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 351.99994, y: -1003}
+  m_AnchoredPosition: {x: 910, y: -1146}
   m_SizeDelta: {x: 700, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1028488707
@@ -1959,12 +1959,12 @@ RectTransform:
   - {fileID: 1533945018}
   - {fileID: 2147078452}
   - {fileID: 974095536}
-  m_Father: {fileID: 515913581}
+  m_Father: {fileID: 164487146}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 383, y: -936}
+  m_AnchoredPosition: {x: 940.99994, y: -1079}
   m_SizeDelta: {x: 640, y: 60}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1260329822
