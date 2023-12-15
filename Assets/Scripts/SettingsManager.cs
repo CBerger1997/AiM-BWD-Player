@@ -6,6 +6,7 @@ using UnityEngine.UI;
 using UnityEditor;
 using UnityEngine.Networking;
 using System.IO;
+using UnityEngine.Windows.WebCam;
 
 public class SettingsManager : MonoBehaviour {
 
@@ -48,12 +49,14 @@ public class SettingsManager : MonoBehaviour {
     [SerializeField] private ViewManager viewManager;
     [SerializeField] private TMP_Text VideoFilePathText;
 
+    [SerializeField] private GameObject NoWebcamWarning;
+
     #endregion
 
     #region DEVICE VARIABLES
 
     private WebCamDevice[] cameraDevices;
-    private int webcamNumSelected = 0;
+    [SerializeField] private int webcamNumSelected;
 
     #endregion
 
@@ -67,48 +70,45 @@ public class SettingsManager : MonoBehaviour {
     public readonly int textureRequestedWidth = 1280;
     public readonly int textureRequestedHeight = 720;
     private readonly int wTextureRequestedFPS = 30;
-    private int maxScreenings = 10;
+    //private int maxScreenings = 10;
 
-    private void Awake () {
-        
+
+    private void Start()
+    {
         //screeningsDropdown.onValueChanged.AddListener ( delegate { OnScreeningsValueChanged (); } );
-        SaveButton.onClick.AddListener ( delegate { OnSavebuttonClicked (); } );
-        cameraDropdown.onValueChanged.AddListener(delegate { OnCameraOptionChanged(); });
+        SaveButton.onClick.AddListener(delegate { OnSavebuttonClicked(); });
+        cameraDropdown.onValueChanged.AddListener(OnCameraOptionChanged);
 
-        GetWebcamDevices ();
         //GetScreeningOptions ();
         numOfScreenings = 2;
         displayDevice = 0;
         videoFilePath = Application.streamingAssetsPath + "/BWD 2K/";
 
-        webcam = new WebCamTexture ();
+        webcam = new WebCamTexture();
         webcam.requestedFPS = 30;
 
+        NoWebcamWarning.SetActive(false);
+
+        GetWebcamDevices();
         if (cameraDevices.Length > 0) webcamNumSelected = 1;
         SetWebcam();
+
+        SaveButton.interactable = false;
     }
 
-    private void Update () {
-        if (isCameraSet)
-        {
-            SaveButton.interactable = true;
-            Debug.Log("Webcam Playing ? : " + webcam.isPlaying);
-        }
-        else
-        {
-            SaveButton.interactable = false;
-        }
-    }
+  
 
     #region CAMERA SETTINGS
 
     //FIX CORRECT WEBCAM BEING SELECTED 
     //FIX MAC PERMISSIONS FOR WEBCAM
-    private void OnCameraOptionChanged () {
-        Debug.Log("OnCameraOptionChanged...");
-        webcamNumSelected = cameraDropdown.value;
+    private void OnCameraOptionChanged (int index) {
+        webcamNumSelected = cameraDropdown.value+1;
+        Debug.Log("webcamNumSelected : " + webcamNumSelected);
         SetWebcam();
     }
+
+    
 
     private void SetWebcam()
     {
@@ -121,8 +121,18 @@ public class SettingsManager : MonoBehaviour {
 
             if (webcam != null)
             {
+                
                 webcam.Stop();
+                Debug.Log("SetWebcam : webcam Stopped");
             }
+
+           /* if (!webcam) Debug.LogError("webcam : IS NULL");
+            if (cameraDevices.Length == 0) Debug.LogError("cameraDevices : EMPTY LIST");
+            if (webcamNumSelected == 0) Debug.LogError("webcamNumSelected : IS 0");
+            if (cameraDevices[webcamNumSelected - 1].name != "") Debug.LogError("cameraDevices[webcamNumSelected - 1].name : IS EMPTY");
+            if (textureRequestedWidth == 0) Debug.LogError("textureRequestedWidth : IS 0");
+            if (textureRequestedHeight == 0) Debug.LogError("textureRequestedHeight : IS 0");
+            if (wTextureRequestedFPS == 0) Debug.LogError("wTextureRequestedFPS : IS 0");*/
 
             webcam = new WebCamTexture(
                 cameraDevices[webcamNumSelected - 1].name,
@@ -130,6 +140,7 @@ public class SettingsManager : MonoBehaviour {
                 textureRequestedHeight,
                 wTextureRequestedFPS
             );
+           
             Debug.Log("SetWebcam : created new webcam texture");
 
             webcam.name = cameraDevices[webcamNumSelected - 1].name;
@@ -145,15 +156,20 @@ public class SettingsManager : MonoBehaviour {
             }
 
             isCameraSet = true;
+            SaveButton.interactable = true;
         }
         else
         {
             isCameraSet = false;
         }
     }
-    private void GetWebcamDevices () {
+    private void GetWebcamDevices () 
+    {
+        //Init
         cameraDropdown.ClearOptions ();
+        webcamNumSelected = 0;
 
+        //Populate list of devices
         cameraDevices = WebCamTexture.devices;
 
         List<string> deviceNames = new List<string> ();
@@ -165,11 +181,11 @@ public class SettingsManager : MonoBehaviour {
 
         cameraDropdown.AddOptions ( deviceNames );
 
-
-        if (deviceNames.Count == 0) 
-        {
-            //NO WEBCAMS ATTACHED!!
-            Debug.LogError("No camera devices found!"); //WARN THE USER !!!!!!!!!!!!!!!!!!
+        //Warn if none found
+        if (deviceNames.Count == 0)
+        {            
+            NoWebcamWarning.SetActive(true);
+            Debug.LogError("No camera devices found!");
         } 
     }
 

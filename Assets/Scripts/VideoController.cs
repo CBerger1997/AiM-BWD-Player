@@ -119,7 +119,7 @@ public class VideoController : MonoBehaviour
         }
         else
         {
-            Debug.Log("Start: HOORAY!!!! - BSocialWrapper_load_online_license_key() SUCCESS!");
+            Debug.Log($"[{GetType().Name}] Start: HOORAY!!!! - BSocialWrapper_load_online_license_key() SUCCESS!");
         }
 
         BSocialUnity.BSocialWrapper_set_body_tracking_enabled ( false );
@@ -137,7 +137,7 @@ public class VideoController : MonoBehaviour
         }
         else
         {
-            Debug.Log("Start: HOORAY!!!! - BSocialWrapper_init_embedded() SUCCESS!");
+            Debug.Log($"[{GetType().Name}] Start: HOORAY!!!! - BSocialWrapper_init_embedded() SUCCESS!");
         }
 
         BSocialUnity.BSocialWrapper_set_nthreads ( 4 ); // Change for optimal performance, BSocial needs at least 10FPS, 15FPS+ preferred
@@ -206,7 +206,7 @@ public class VideoController : MonoBehaviour
 
     private void BSocialProcessing ()
     {
-        //Debug.Log("Processing");
+        //Debug.Log($"[{GetType().Name}] Processing");
         //BSocialUnity.BSocialWrapper_run (); //BENN DISABLED
 
         //BSocialUnity.BSocialPredictions predictions = BSocialUnity.BSocialWrapper_get_predictions (); //BENN DISABLED
@@ -715,15 +715,15 @@ public class VideoController : MonoBehaviour
                     }
                 }
             }
-            Debug.Log("Play Video isInactivePaused : " + isInactivePaused);
-            Debug.Log("Play Video isCollectingBaseline : " + isCollectingBaseline);
-            Debug.Log("Play Video isCollectPredictionPerSecond : " + isCollectPredictionPerSecond);
-            Debug.Log("Play Video : " + player.name);
+            Debug.Log($"[{GetType().Name}] Play Video isInactivePaused : " + isInactivePaused);
+            Debug.Log($"[{GetType().Name}] Play Video isCollectingBaseline : " + isCollectingBaseline);
+            Debug.Log($"[{GetType().Name}] Play Video isCollectPredictionPerSecond : " + isCollectPredictionPerSecond);
+            Debug.Log($"[{GetType().Name}] Play Video : " + player.name);
 
             player.playbackSpeed = 1;
             player.Play ();
 
-            Debug.Log("Video : " + player.name+" is Playing? : "+ player.isPlaying);
+            Debug.Log($"[{GetType().Name}] Video : " + player.name+" is Playing? : "+ player.isPlaying);
         }
     }
 
