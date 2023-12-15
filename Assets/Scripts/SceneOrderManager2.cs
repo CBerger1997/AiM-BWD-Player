@@ -203,7 +203,7 @@ public class SceneOrderManager2 {
             sceneCount = ( int ) Random.Range ( sceneCountMin, sceneCountMax + 1 );
         }
 
-        Debug.Log ( "SCENE COUNT FROM ALGORITHM: " + sceneCount );
+        Debug.Log($"[{GetType().Name}] SCENE COUNT FROM ALGORITHM: " + sceneCount );
 
         for ( int i = 0; i < sceneCount; i++ ) {
             //Check if this is the first screening
@@ -224,13 +224,13 @@ public class SceneOrderManager2 {
             }
 
             if ( i == 0 ) {
-                Debug.Log ( "Start" );
+                Debug.Log($"[{GetType().Name}] Start" );
                 ConfigureFirstScene ();
             } else if ( currentSceneIndex == sceneCount - 1 ) {
-                Debug.Log ( "End" );
+                Debug.Log($"[{GetType().Name}] End" );
                 ConfigureEndScene ();
             } else {
-                Debug.Log ( "Mid" );
+                Debug.Log($"[{GetType().Name}] Mid" );
                 ConfigureNextScene ();
             }
         }

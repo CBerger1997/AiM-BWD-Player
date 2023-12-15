@@ -7,29 +7,29 @@ public class ViewManager : MonoBehaviour {
     //Controls which Menu shown
 
     [SerializeField] private GameObject SettingsMenu;
-    [SerializeField] private GameObject MainMenu;
-    [SerializeField] private GameObject videoCamera;
+    //[SerializeField] private GameObject MainMenu;
+    //[SerializeField] private GameObject videoCamera;
     //[SerializeField] private GameObject videoCanvas;
-    [SerializeField] private GameObject videoManager;
+    [SerializeField] private GameObject videoPlayer;
 
     private void Awake() {
-        
-        GoToSettings();
+        SettingsMenu.SetActive(true);
+        //GoToSettings();
 
 #if UNITY_EDITOR_WIN || UNITY_EDITOR_OSX
-        videoCamera.SetActive(false);
+        //videoCamera.SetActive(false);
         //videoCanvas.SetActive(false);
-        videoManager.SetActive(false);
+        videoPlayer.SetActive(false);
 #elif UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX
         videoCamera.SetActive(true);
         //videoCanvas.SetActive(true);
 #endif
     }
 
-    public void GoToSettings() {
-        SettingsMenu.SetActive(true);
-        MainMenu.SetActive(false);
-    }
+    //public void GoToSettings() {
+        //SettingsMenu.SetActive(true);
+        //MainMenu.SetActive(false);
+    //}
 
     /*public void GoToMainMenu() {
         SettingsMenu.SetActive(false);
@@ -38,22 +38,20 @@ public class ViewManager : MonoBehaviour {
     }*/
 
     //BENN CHANGED
-    public void GoToMainMenu()
+    public void GoToVideoView()
     {
-        
-
         //Hide Settings
         SettingsMenu.SetActive(false);
-        MainMenu.SetActive(false);
+        //MainMenu.SetActive(false);
 
         //Show Videos
-        videoCamera.SetActive(true);
+        //videoCamera.SetActive(true);
         //videoCanvas.SetActive(true);
-        videoManager.SetActive(true);
+        videoPlayer.SetActive(true);
 
-        videoManager.GetComponent<VideoController>().OnShow();
+        videoPlayer.GetComponent<VideoController>().OnShow();
 
         //Play the video
-        videoManager.GetComponent<VideoController>().OnPlayClicked();
+        videoPlayer.GetComponent<VideoController>().OnPlayClicked();
     }
 }

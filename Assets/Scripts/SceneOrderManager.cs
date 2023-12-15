@@ -170,7 +170,7 @@ public class SceneOrderManager
             sceneCount = ( int ) Random.Range ( sceneCountMin, sceneCountMax + 1 );
         }
 
-        Debug.Log ( "SCENE COUNT FROM ALGORITHM: " + sceneCount );
+        Debug.Log($"[{GetType().Name}] SCENE COUNT FROM ALGORITHM: " + sceneCount );
 
         List<int> startSceneIndexes = new List<int> ();
         List<int> middleSceneIndexes = new List<int> ();

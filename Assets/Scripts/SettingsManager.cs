@@ -76,7 +76,7 @@ public class SettingsManager : MonoBehaviour {
     private void Start()
     {
         //screeningsDropdown.onValueChanged.AddListener ( delegate { OnScreeningsValueChanged (); } );
-        SaveButton.onClick.AddListener(delegate { OnSavebuttonClicked(); });
+        SaveButton.onClick.AddListener(delegate { OnContinueButtonClicked(); });
         cameraDropdown.onValueChanged.AddListener(OnCameraOptionChanged);
 
         //GetScreeningOptions ();
@@ -90,6 +90,18 @@ public class SettingsManager : MonoBehaviour {
         NoWebcamWarning.SetActive(false);
 
         GetWebcamDevices();
+
+        DefaultToFirstWebcam();
+
+        SetWebcam();
+    }
+
+  
+
+    #region CAMERA SETTINGS
+
+    private void DefaultToFirstWebcam()
+    {
         //If we can auto-select the first webcam make the Continue button available
         if (cameraDevices.Length > 0)
         {
@@ -100,14 +112,8 @@ public class SettingsManager : MonoBehaviour {
         {
             SaveButton.interactable = false;
         }
-        SetWebcam();
-
-        
     }
 
-  
-
-    #region CAMERA SETTINGS
 
     //FIX CORRECT WEBCAM BEING SELECTED 
     //FIX MAC PERMISSIONS FOR WEBCAM
@@ -233,11 +239,12 @@ public class SettingsManager : MonoBehaviour {
     /// Function triggered when the save button is clicked
     /// Sets the output filename, stops the webcam and goes to the main menu
     /// </summary>
-    private void OnSavebuttonClicked () {
+    private void OnContinueButtonClicked () {
 
-        webcam.Stop ();
-        Debug.Log($"[{GetType().Name}] OnSavebuttonClicked, webcam.Stopped, go to MainMenu");
+        webcam.Stop();
 
-        viewManager.GoToMainMenu ();
+        Debug.Log($"[{GetType().Name}] OnContinueButtonClicked, webcam Stopped, Go To Video View");
+
+        viewManager.GoToVideoView();
     }
 }
