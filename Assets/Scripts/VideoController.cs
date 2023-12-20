@@ -25,6 +25,7 @@ public class VideoController : MonoBehaviour
     //[SerializeField] RawImage[] ExternalVideoImages;
 
     [SerializeField] SettingsManager settingsManager;
+    [SerializeField] SceneOrderManager2 sceneOrderManager;
 
     public int currentClipCounter;
     public int nextClipCounter;
@@ -38,27 +39,27 @@ public class VideoController : MonoBehaviour
 
     public VideoClip[] videos;
 
-    private bool isInactivePaused;
+    //private bool isInactivePaused;
     private WebCamTexture webcamTexture;
 
-    bool isShowingBsocialOverlay = false;
-    bool isCollectingBaseline = false;
-    bool isWaitingBaseline = false;
-    bool isWaitingPrediction = false;
-    bool isCollectPredictionPerSecond = false;
+    bool isShowingBsocialOverlay;
 
-    bool isFirstScene = true;
+    bool isCollectingBaseline;
+    bool isWaitingBaseline;
+    bool isWaitingPrediction;
+    bool isCollectPredictionPerSecond;
 
-    int baselineCounter = 0;
-    float arousalBaseline = 0;
-    float valenceBaseline = 0;
-    int currentPredictionCounter = 0;
-    float currentValenceAverage = 0;
-    float currentArousalAverage = 0;
+    bool isFirstScene;
 
-    int currentSceneIndex = 0;
+    int baselineCounter;
+    float arousalBaseline;
+    float valenceBaseline;
+    int currentPredictionCounter;
+    float currentValenceAverage;
+    float currentArousalAverage;
 
-    SceneOrderManager2 sceneOrderManager;
+    int currentSceneIndex;
+
 
     #region BSocial
 
@@ -140,7 +141,7 @@ public class VideoController : MonoBehaviour
     
     private void BSocialUpdate ()
     {
-        Debug.Log($"[{GetType().Name}] BSocialUpdating...");
+        //Debug.Log($"[{GetType().Name}] BSocialUpdating...");
 
         //if ( !( BSocialOK && BSocialThreadIsFree && webcamTexture.isPlaying ) ) //BENN DISABLED
         //    return; //BENN DISABLED
@@ -187,7 +188,7 @@ public class VideoController : MonoBehaviour
 
     private void BSocialProcessing ()
     {
-        Debug.Log($"[{GetType().Name}] BSocialProcessing...");
+        //Debug.Log($"[{GetType().Name}] BSocialProcessing...");
 
         //BSocialUnity.BSocialWrapper_run (); //BENN DISABLED
 
@@ -206,17 +207,17 @@ public class VideoController : MonoBehaviour
     
     private void GatherValenceArousalValues()// BSocialUnity.BSocialPredictions prediction) //BENN DISABLED
     {
-        Debug.Log($"[{GetType().Name}] Gathering Valence & Arousal Values...");
+        //Debug.Log($"[{GetType().Name}] Gathering Valence & Arousal Values...");
 
         if (isCollectingBaseline && baselineCounter < 15 && !isWaitingBaseline)
         {
-            Debug.Log($"[{GetType().Name}] Gathering Valence & Arousal Values - VIDEO PREDICTION BASELINE DATA GATHERED");
+            //Debug.Log($"[{GetType().Name}] Gathering Valence & Arousal Values - VIDEO PREDICTION BASELINE DATA GATHERED");
             valenceBaseline += 0.1f;//  prediction.affect.valence; //BENN DISABLED
             arousalBaseline += 0.15f;//  prediction.affect.arousal; //BENN DISABLED
         }
         else if (isCollectPredictionPerSecond && !isWaitingPrediction)
         {
-            Debug.Log($"[{GetType().Name}] Gathering Valence & Arousal Values - VIDEO PREDICTION VALENCE AROUSAL DATA GATHERED");
+            //Debug.Log($"[{GetType().Name}] Gathering Valence & Arousal Values - VIDEO PREDICTION VALENCE AROUSAL DATA GATHERED");
             currentValenceAverage += 0.1f;//  prediction.affect.valence; //BENN DISABLED
             currentArousalAverage += 0.105f;//  prediction.affect.arousal; //BENN DISABLED
             currentPredictionCounter++;
@@ -227,46 +228,50 @@ public class VideoController : MonoBehaviour
 
     private void Awake ()
     {
-        prevClipCounters = new List<int> ();
-
-        currentActivePlayerIndex = 0;
-
-        VideoPlayers[ 0 ].gameObject.GetComponent<RawImage> ().enabled = true;
-        VideoPlayers[ 1 ].gameObject.GetComponent<RawImage> ().enabled = false;
-
-        //ExternalVideoImages[ 0 ].enabled = true;
-        //ExternalVideoImages[ 1 ].enabled = false;
-
-        isLoadingNextVideo = false;
-
-        isInactivePaused = false;
+        ResetValues();
+        ResetPlayers();        
     }
 
+    private void Start()
+    {
+        sceneOrderManager = new SceneOrderManager2(settingsManager.numOfScreenings);
+    }
 
     void Update ()
     {
+#if UNITY_EDITOR_WIN || UNITY_EDITOR_OSX
+        //BENN DEBUG ONLY
+        if (currentClipCounter > 0 && VideoPlayers[currentActivePlayerIndex].isPlaying && Input.GetKeyDown("n"))
+        {
+            VideoPlayers[currentActivePlayerIndex].frame = (endFrame - 300);
+
+            Debug.Log("N key pressed - Skip towards end of video");
+        }
+#endif
+
+
         //BENN FORCED!!!!!
-        isCollectingBaseline = true;
-        isCollectPredictionPerSecond = true;
-        isWaitingPrediction = false;
-        //BENN FORCED!!!!!
+        if (baselineCounter <= 15) {
+            isCollectingBaseline = true; 
+        }
+        
 
         if ( isShowingBsocialOverlay && isFirstScene )
         {
             BSocialUpdate ();
-            Debug.Log($"[{GetType().Name}] Bsocial - Stage 1...");
+            //Debug.Log($"[{GetType().Name}] Bsocial - Stage 1...");
         }
 
         if ( isCollectingBaseline && !isWaitingBaseline )
         {
-            Debug.Log($"[{GetType().Name}] Bsocial - Stage 2...");
-            Debug.Log($"[{GetType().Name}] base update" );
+            //Debug.Log($"[{GetType().Name}] Bsocial - Stage 2...");
+            //Debug.Log($"[{GetType().Name}] base update" );
             StartCoroutine ( WaitForSecondBaselinePrediction () );
         }
         else if ( isCollectPredictionPerSecond && !isWaitingPrediction )
         {
-            Debug.Log($"[{GetType().Name}] Bsocial - Stage 3...");
-            Debug.Log($"[{GetType().Name}] predict update" );
+            //Debug.Log($"[{GetType().Name}] Bsocial - Stage 3...");
+            //Debug.Log($"[{GetType().Name}] predict update" );
             StartCoroutine ( WaitForSecondPrediction () );
 
             if ( ( long ) VideoPlayers[ currentActivePlayerIndex ].frame >= ( endFrame - 288 ) )
@@ -278,25 +283,25 @@ public class VideoController : MonoBehaviour
                 currentArousalAverage = currentArousalAverage / currentPredictionCounter;
                 currentValenceAverage = currentValenceAverage / currentPredictionCounter;
 
+                Debug.Log($"[{GetType().Name}] sceneOrderManager : "+ sceneOrderManager+", currentArousalAverage: " + currentArousalAverage + ", currentValenceAverage: "+ currentValenceAverage +", "+ currentPredictionCounter);
                 sceneOrderManager.SetValenceArousalValues ( currentValenceAverage > valenceBaseline ? true : false, currentArousalAverage > arousalBaseline ? true : false );
 
-                sceneOrderManager.CreateSceneOrder ();
+                sceneOrderManager.CreateSceneOrder (); //BENN - THIS SEEMS TO CREATE HUGE SCENE ORDERS - POSSIBLY BECAUSE WE ARE FORCING IT'S REPETITION !!!
 
                 int count = 1;
 
                 //Debug.Log($"[{GetType().Name}] COUNT: " + sceneOrderManager.currentSceneOrder.Count );
-
-                Debug.Log($"[{GetType().Name}] Screening Order : "+ sceneOrderManager.currentSceneOrder);
+                
 
                 foreach ( Scene scene in sceneOrderManager.currentSceneOrder )
                 {
                     //ScreeningOrderText.text += scene.index;
-                    Debug.Log($"[{GetType().Name}] " + scene.index);
+                    //Debug.Log($"[{GetType().Name}] " + scene.index);
 
                     if ( count != sceneOrderManager.currentSceneOrder.Count )
                     {
                         //ScreeningOrderText.text += ", ";
-                        Debug.Log($"[{GetType().Name}] , ");
+                        //Debug.Log($"[{GetType().Name}] , ");
                     }
                     //Debug.Log($"[{GetType().Name}] "+ count + ") >> " + scene.index );
                     count++;
@@ -316,7 +321,7 @@ public class VideoController : MonoBehaviour
         {
             if ( ( ( long ) VideoPlayers[ currentActivePlayerIndex ].frame >= ( endFrame - 168 ) ) && !isLoadingNextVideo )
             {
-                Debug.Log($"[{GetType().Name}] Preparing to play next video (at end of this video)");
+                //Debug.Log($"[{GetType().Name}] Preparing to play another video at end of this video...");
 
                 //Get the nextVideoCounter value
                 GetNextVideoValue ();
@@ -325,9 +330,6 @@ public class VideoController : MonoBehaviour
                 startFrame = GetTimingsForVideoCounter ( nextClipCounter, true );
                 
                 //Debug.Log($"[{GetType().Name}] Start Frame: " + startFrame.ToString());
-
-                //Set video loading to true
-                isLoadingNextVideo = true;
 
                 //Preload the next video
                 
@@ -343,14 +345,12 @@ public class VideoController : MonoBehaviour
 
     public void OnShow ()
     {
-        sceneOrderManager = new SceneOrderManager2 ( settingsManager.numOfScreenings );
-
         //Debug.Log($"[{GetType().Name}] OnShow : settingsManager.videoFilePath : " + settingsManager.videoFilePath);
 
         //videos = Resources.LoadAll<VideoClip> ( settingsManager.videoFilePath ) as VideoClip[];
         videos = Resources.LoadAll<VideoClip>("BWD 2K");//, typeof(VideoClip)); //BENN - SEEMS TO WORK ON WINDOWS WHEN THE ABOVE DOES NOT... PROB BECUASE videoFilePath contained the application path too
 
-        Debug.Log($"[{GetType().Name}] Show Video Player - num of videos found : "+ videos.Length);
+        //Debug.Log($"[{GetType().Name}] Number of video files found : "+ videos.Length);
         //currentActivePlayerIndex = 0;//BENN FORCED
 
         //videoCamera.targetDisplay = settingsManager.displayDevice;
@@ -359,9 +359,7 @@ public class VideoController : MonoBehaviour
         //BSocialOK = InitBSocial ();//BENN DISABLED
         BSocialOK = true; InitBSocial(); //BENN TEMP FOR ABOVE
 
-        currentClipCounter = 0;
-
-        LoadVideo ( currentClipCounter );
+        ResetAndLoadFirstVideo();
     }
 
     private void LoadVideo ( int videoVal )
@@ -377,32 +375,59 @@ public class VideoController : MonoBehaviour
 
     private void PreLoadNextVideo ( int videoVal )
     {
-        int nextActiveIndex;
+        if (currentSceneIndex > sceneOrderManager.currentSceneOrder.Count)
+        {
+            //DON'T PRELOAD A VIDEO - WEVE WATCHED THE CREDITS...
 
-        if ( currentActivePlayerIndex == 0 )
-        {
-            nextActiveIndex = 1;
-        }
-        else
-        {
-            nextActiveIndex = 0;
-        }
-        Debug.Log($"[{GetType().Name}] PreLoad Next Video - nextActiveIndex " + nextActiveIndex);
+            //NOT YET TESTED - REPEAT VIEWING
+            //MAYBE WE JUST SEND THEM TO A SCREEN THAT SAYS - WATCH AGAIN? 
+            //if (currentSceneIndex == sceneOrderManager.currentSceneOrder.Count)
+            //{
+            //Debug.Log($"[{GetType().Name}] <b>Coming to the end of the Video - ResetValues</b>");
+            ResetValues();
 
-        if ( nextClipCounter < 12 )
+            //AWAKE
+            ResetPlayers();
+
+            //ONSHOW
+            ResetAndLoadFirstVideo();
+
+            sceneOrderManager.ResetSceneOrderForNextScreening();
+
+            //OnShow();
+            //OnPlayClicked();
+            viewManager.GoToSettingsView();
+            //}
+        }
+        else if ( nextClipCounter < 12 )
         {
+            int nextActiveIndex;
+
+            if (currentActivePlayerIndex == 0)
+            {
+                nextActiveIndex = 1;
+            }
+            else
+            {
+                nextActiveIndex = 0;
+            }
+            Debug.Log($"[{GetType().Name}] Prepare Video Player " + (nextActiveIndex + 1) + " for use");
+
+            //Set video loading to true
+            isLoadingNextVideo = true;
+
             //Prepare the next video a few seconds before
             VideoPlayers[ nextActiveIndex ].clip = videos[ nextClipCounter ];
             VideoPlayers[ nextActiveIndex ].Prepare ();
 
             //Once the overlap time has ended, swap the video players
-            StartCoroutine ( CheckForEndOfVideo () );
+            StartCoroutine ( VideoIsEnding () );
         }
     }
 
-    IEnumerator CheckForEndOfVideo ()
+    IEnumerator VideoIsEnding()
     {
-        Debug.Log($"[{GetType().Name}] Check For End Of Video...");
+        Debug.Log($"[{GetType().Name}] VideoIsEnding...");
 
         bool waiting = true;
 
@@ -416,7 +441,7 @@ public class VideoController : MonoBehaviour
         {
             nextActiveIndex = 0;
         }
-        Debug.Log($"[{GetType().Name}] Check For End Of Video - nextActiveIndex : " + nextActiveIndex);
+        //Debug.Log($"[{GetType().Name}] Check For End Of Video - nextActiveIndex : " + nextActiveIndex);
 
         while ( waiting )
         {
@@ -424,7 +449,7 @@ public class VideoController : MonoBehaviour
             if ( VideoPlayers[ currentActivePlayerIndex ].frame >= endFrame - startFrame && !VideoPlayers[ nextActiveIndex ].isPlaying )
             {
                 VideoPlayers[ nextActiveIndex ].Play ();
-                Debug.Log($"[{GetType().Name}] CheckForEndOfVideo - Start playing next video...");
+                Debug.Log($"[{GetType().Name}] VideoIsEnding - Preload :" +VideoPlayers[nextActiveIndex].name);
             }
 
             //Once the overlap time has ended or the video stopped playing, swap the video players
@@ -438,25 +463,24 @@ public class VideoController : MonoBehaviour
 
                 endFrame = GetTimingsForVideoCounter ( nextClipCounter, false );
 
-
                 prevClipCounters.Add ( currentClipCounter );
                 currentActivePlayerIndex = nextActiveIndex;
 
                 currentClipCounter = nextClipCounter;
 
 
-                Debug.Log($"[{GetType().Name}] CheckForEndOfVideo - End Frame : " + endFrame.ToString() + " of Frame Count : " + VideoPlayers[currentActivePlayerIndex].clip.frameCount.ToString());
+                //Debug.Log($"[{GetType().Name}] CheckForEndOfVideo - End Frame : " + endFrame.ToString() + " of Frame Count : " + VideoPlayers[currentActivePlayerIndex].clip.frameCount.ToString());
 
-                Debug.Log($"[{GetType().Name}] CheckForEndOfVideo - currentSceneOrder.Count : " + sceneOrderManager.currentSceneOrder.Count);
+                string orderStr = ""; int count = 0;
+                foreach (Scene s in sceneOrderManager.currentSceneOrder) { orderStr += s.index; count++; if (count < sceneOrderManager.currentSceneOrder.Count) orderStr += ","; }
+                Debug.Log($"[{GetType().Name}] VideoIsEnding - Scene Order : " +orderStr+" ("+ sceneOrderManager.currentSceneOrder.Count + " total)");
+                if (sceneOrderManager.currentSceneOrder.Count == 0) Debug.LogError($"[{GetType().Name}] VideoIsEnding - currentSceneOrder.Count == 0. NO SCENES ORDERED!");
 
-                if (sceneOrderManager.currentSceneOrder.Count == 0) Debug.LogError($"[{GetType().Name}] CheckForEndOfVideo - currentSceneOrder.Count == 0. NO SCENES ORDERED!");
-
-                Debug.Log($"[{GetType().Name}] CheckForEndOfVideo - Current Video is : " + currentClipCounter.ToString());
-
+                Debug.Log($"[{GetType().Name}] VideoIsEnding - <b>Current Video : " + currentClipCounter.ToString()+"</b>");
 
                 if ( currentSceneIndex < sceneOrderManager.currentSceneOrder.Count )
                 {
-                    Debug.Log($"[{GetType().Name}] CheckForEndOfVideo - Next Video will be : " + sceneOrderManager.currentSceneOrder[currentSceneIndex].index.ToString());
+                    Debug.Log($"[{GetType().Name}] VideoIsEnding- Next Video : " + sceneOrderManager.currentSceneOrder[currentSceneIndex].index.ToString());
                 }
 
                 isLoadingNextVideo = false;
@@ -467,16 +491,13 @@ public class VideoController : MonoBehaviour
         }
     }
 
+
     #region VideoLogic
-
-    
-
-
     
     IEnumerator WaitForSecondBaselinePrediction ()
     {
         isWaitingBaseline = true;
-        Debug.Log($"[{GetType().Name}] Wait For Second Baseline Prediction...");
+        //Debug.Log($"[{GetType().Name}] Wait For Second Baseline Prediction...");
         yield return new WaitForSeconds ( 1 );
 
         isWaitingBaseline = false;
@@ -489,17 +510,17 @@ public class VideoController : MonoBehaviour
             valenceBaseline = valenceBaseline / 15;
             isCollectingBaseline = false;
             isCollectPredictionPerSecond = true;
-            Debug.Log($"[{GetType().Name}] Wait For Second Baseline Prediction - complete");
+            Debug.Log($"[{GetType().Name}] Second Baseline Prediction Complete");
         }
     }
 
     IEnumerator WaitForSecondPrediction ()
     {
         isWaitingPrediction = true;
-        Debug.Log($"[{GetType().Name}] Wait For Second Prediction...");
+        //Debug.Log($"[{GetType().Name}] Wait For Second Prediction...");
         yield return new WaitForSeconds ( 1 );
         isWaitingPrediction = false;
-        Debug.Log($"[{GetType().Name}] Wait For Second Prediction - complete");
+        //Debug.Log($"[{GetType().Name}] Wait For Second Prediction - complete"); //NOT COMPLETE HERE
     }
 
     private void GetNextVideoValue ()
@@ -507,10 +528,9 @@ public class VideoController : MonoBehaviour
         if ( currentSceneIndex != sceneOrderManager.currentSceneOrder.Count )
         {
             nextClipCounter = sceneOrderManager.currentSceneOrder[ currentSceneIndex ].index;
-            currentSceneIndex++;
-
-            Debug.Log($"[{GetType().Name}] Next Video : " + nextClipCounter.ToString ());
+            //Debug.Log($"[{GetType().Name}] Next Video : " + nextClipCounter.ToString ());
         }
+        currentSceneIndex++;
     }
 
     private int GetTimingsForVideoCounter ( int val, bool isStart )
@@ -653,34 +673,35 @@ public class VideoController : MonoBehaviour
 
     #endregion
 
-    #region UI LISTENER FUNCTIONS
 
-    public void OnPlayClicked ()
+
+    public void OnPlayClicked (VideoPlayer source)
     {
         foreach ( VideoPlayer player in VideoPlayers )
         {
-            Debug.Log($"[{GetType().Name}] OnPlayClicked - Play Video on " + player.name + " : clip " + player.clip);
+            if (player.clip) Debug.Log($"[{GetType().Name}] Play " + player.name + " : clip " + player.clip);
 
-            if ( player.isPrepared && ( player == VideoPlayers[ currentActivePlayerIndex ] || isInactivePaused ) )
+            if ( player.isPrepared && ( player == VideoPlayers[ currentActivePlayerIndex ]))// || isInactivePaused ) )
             {
-                Debug.Log($"[{GetType().Name}] OnPlayClicked - Player isPrepared, isInactivePaused (1) : " + isInactivePaused);
+                //Debug.Log($"[{GetType().Name}] Player isPrepared. isInactivePaused? : " + isInactivePaused);
 
                 if ( player == VideoPlayers[ currentActivePlayerIndex == 0 ? 1 : 0 ] )
                 {
-                    isInactivePaused = false;
-                    Debug.Log($"[{GetType().Name}] OnPlayClicked - isInactivePaused : (2) " + isInactivePaused);
+                    //isInactivePaused = false;
+                    Debug.Log($"[{GetType().Name}] Active Player : " + currentActivePlayerIndex);// + ", isInactivePaused? : " + isInactivePaused);
                 }
+
                 if ( currentClipCounter == 0 )
                 {
                     if ( baselineCounter < 15 )
                     {
                         isCollectingBaseline = true;
-                        Debug.Log($"[{GetType().Name}] OnPlayClicked - isCollectingBaseline : " + isCollectingBaseline);
+                        Debug.Log($"[{GetType().Name}] Collecting Baseline");
                     }
                     else
                     {
                         isCollectPredictionPerSecond = true;
-                        Debug.Log($"[{GetType().Name}] OnPlayClicked - isCollectPredictionPerSecond : " + isCollectPredictionPerSecond);
+                        Debug.Log($"[{GetType().Name}] Collecting Prediction Per Second");
                     }
                 }
             }
@@ -690,16 +711,18 @@ public class VideoController : MonoBehaviour
         }
     }
 
-    #endregion
 
-    private void ResetValuesForNextScreening ()
+
+
+
+    private void ResetValues ()
     {
+        isShowingBsocialOverlay = false;
+
         isCollectingBaseline = false;
         isWaitingBaseline = false;
         isWaitingPrediction = false;
         isCollectPredictionPerSecond = false;
-        isLoadingNextVideo = false;
-        isInactivePaused = false;
 
         isFirstScene = true;
 
@@ -712,32 +735,32 @@ public class VideoController : MonoBehaviour
 
         currentSceneIndex = 0;
 
-        //AWAKE
+        isLoadingNextVideo = false;
+        //isInactivePaused = false;
+    }
 
-        prevClipCounters = new List<int> ();
+    private void ResetPlayers()
+    {
+        prevClipCounters = new List<int>();
 
         currentActivePlayerIndex = 0;
 
-        VideoPlayers[ 0 ].gameObject.GetComponent<RawImage> ().enabled = true;
-        VideoPlayers[ 1 ].gameObject.GetComponent<RawImage> ().enabled = false;
+        VideoPlayers[0].gameObject.GetComponent<RawImage>().enabled = true;
+        VideoPlayers[1].gameObject.GetComponent<RawImage>().enabled = false;
 
-        VideoPlayers[ 0 ].gameObject.GetComponent<VideoPlayer> ().clip = null;
-        VideoPlayers[ 1 ].gameObject.GetComponent<VideoPlayer> ().clip = null;
-
+        VideoPlayers[0].gameObject.GetComponent<VideoPlayer>().clip = null;
+        VideoPlayers[1].gameObject.GetComponent<VideoPlayer>().clip = null;
 
         //ExternalVideoImages[ 0 ].enabled = true;
         //ExternalVideoImages[ 1 ].enabled = false;
-
-
-        //ONSHOW
-
-        currentClipCounter = 0;
-
-        LoadVideo ( currentClipCounter );
-
-        sceneOrderManager.ResetSceneOrder ();
     }
 
+    private void ResetAndLoadFirstVideo()
+    {
+        currentClipCounter = 0;
+        LoadVideo(0);
+        VideoPlayers[currentActivePlayerIndex].prepareCompleted += OnPlayClicked;
+    }
     private void OnApplicationQuit ()
     {
         Debug.Log ( "Quitting..." );

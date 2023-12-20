@@ -29,7 +29,7 @@ public class SceneOrderManager
         ConfigureScreeningsAndSceneCount ( screenings );
     }
 
-    public void ResetSceneOrder ()
+    public void ResetSceneOrderForNextScreening()
     {
         previousSceneOrders.Add ( currentSceneOrder );
 

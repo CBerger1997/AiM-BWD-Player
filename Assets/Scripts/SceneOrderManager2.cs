@@ -31,7 +31,7 @@ public class SceneOrderManager2 {
         ConfigureScreeningsAndSceneCount ( screenings );
     }
 
-    public void ResetSceneOrder () {
+    public void ResetSceneOrderForNextScreening() {
         previousSceneOrders.Add ( currentSceneOrder );
 
         currentSceneOrder = new List<Scene> ();
@@ -47,7 +47,7 @@ public class SceneOrderManager2 {
     }
 
     private void SceneSetup () {
-        Debug.Log($"[{GetType().Name}] Scene Setup");
+        //Debug.Log($"[{GetType().Name}] Scenes Setup");
 
         allScenes.Add ( new Scene ( 1 ) );
         allScenes.Add ( new Scene ( 2 ) );
@@ -98,7 +98,7 @@ public class SceneOrderManager2 {
 
     private void ConfigureScreeningsAndSceneCount ( int screenings ) {
 
-        Debug.Log($"[{GetType().Name}] Configure Screenings And Scene Count");
+        //Debug.Log($"[{GetType().Name}] Configured Scene Count");
 
         /*
          * Here we want to configure how many screenings there are,
@@ -206,7 +206,7 @@ public class SceneOrderManager2 {
             sceneCount = ( int ) Random.Range ( sceneCountMin, sceneCountMax + 1 );
         }
 
-        Debug.Log($"[{GetType().Name}] SCENE COUNT FROM ALGORITHM: " + sceneCount );
+        Debug.Log($"[{GetType().Name}] Scene Count from Algorithm : " + sceneCount );
 
         for ( int i = 0; i < sceneCount; i++ ) {
             //Check if this is the first screening
@@ -227,13 +227,13 @@ public class SceneOrderManager2 {
             }
 
             if ( i == 0 ) {
-                Debug.Log($"[{GetType().Name}] Start" );
+                Debug.Log($"[{GetType().Name}] First Scene set" );
                 ConfigureFirstScene ();
             } else if ( currentSceneIndex == sceneCount - 1 ) {
-                Debug.Log($"[{GetType().Name}] End" );
+                Debug.Log($"[{GetType().Name}] End Scene set" );
                 ConfigureEndScene ();
             } else {
-                Debug.Log($"[{GetType().Name}] Mid" );
+                Debug.Log($"[{GetType().Name}] Middle Scenes set" );
                 ConfigureNextScene ();
             }
         }

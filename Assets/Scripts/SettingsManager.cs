@@ -7,6 +7,7 @@ using UnityEditor;
 using UnityEngine.Networking;
 using System.IO;
 using UnityEngine.Windows.WebCam;
+using System.Linq;
 
 public class SettingsManager : MonoBehaviour {
 
@@ -35,7 +36,6 @@ public class SettingsManager : MonoBehaviour {
     public ResolutionOptions resolution { get; set; }
     public int displayDevice { get; set; }
     public int numOfScreenings { get; set; }
-    //public string videoFilePath { get; set; }
 
     #endregion
 
@@ -43,12 +43,8 @@ public class SettingsManager : MonoBehaviour {
 
     [SerializeField] private TMP_Dropdown cameraDropdown;
     [SerializeField] private RawImage cameraImage;
-    //[SerializeField] private TMP_Dropdown screeningsDropdown;
-
     [SerializeField] private Button SaveButton;
-    [SerializeField] private ViewManager viewManager;
-    //[SerializeField] private TMP_Text VideoFilePathText;
-
+    [SerializeField] private ViewManager viewManager;    
     [SerializeField] private GameObject NoWebcamWarning;
 
     #endregion
@@ -63,7 +59,6 @@ public class SettingsManager : MonoBehaviour {
     #region BOOLEANS
 
     private bool isCameraSet;
-    //private bool isScreeningsSet
 
     #endregion
 
@@ -75,14 +70,16 @@ public class SettingsManager : MonoBehaviour {
 
     private void Start()
     {
-        //screeningsDropdown.onValueChanged.AddListener ( delegate { OnScreeningsValueChanged (); } );
         SaveButton.onClick.AddListener(delegate { OnContinueButtonClicked(); });
         cameraDropdown.onValueChanged.AddListener(OnCameraOptionChanged);
 
-        //GetScreeningOptions ();
+        InitSettings();
+    }
+
+    public void InitSettings()
+    {
         numOfScreenings = 2;
         displayDevice = 0;
-        //videoFilePath = Application.streamingAssetsPath + "/BWD 2K/";
 
         webcam = new WebCamTexture();
         webcam.requestedFPS = 30;
@@ -90,19 +87,28 @@ public class SettingsManager : MonoBehaviour {
         NoWebcamWarning.SetActive(false);
 
         GetWebcamDevices();
-
         DefaultToFirstWebcam();
-
         SetWebcam();
-    }
 
-  
+        /*
+       //Trying to set the size of the dropdown
+       GameObject[] objectsWithName = GameObject.FindObjectsOfType<GameObject>()
+           .Where(obj => obj.name == "Item Label")
+           .ToArray();
+
+       foreach (GameObject obj in objectsWithName)
+       {
+           obj.GetComponent<TextMeshPro>().fontSize = 34;
+           Debug.Log("Found object: " + obj.name);
+       }
+       */
+    }
 
     #region CAMERA SETTINGS
 
     private void DefaultToFirstWebcam()
     {
-        //If we can auto-select the first webcam make the Continue button available
+        //If we can, auto-select the first webcam make the Continue button available
         if (cameraDevices.Length > 0)
         {
             webcamNumSelected = 1;
@@ -119,7 +125,7 @@ public class SettingsManager : MonoBehaviour {
     //FIX MAC PERMISSIONS FOR WEBCAM
     private void OnCameraOptionChanged (int index) {
         webcamNumSelected = cameraDropdown.value+1;
-        Debug.Log($"[{GetType().Name}] webcamNumSelected : " + webcamNumSelected);
+        //Debug.Log($"[{GetType().Name}] webcamNumSelected : " + webcamNumSelected);
         SetWebcam();
     }
 
@@ -127,18 +133,18 @@ public class SettingsManager : MonoBehaviour {
 
     private void SetWebcam()
     {
-        Debug.Log($"[{GetType().Name}] SetWebcam...");
+        //Debug.Log($"[{GetType().Name}] SetWebcam...");
 
         if (webcamNumSelected > 0)
         {
-            Debug.Log($"[{GetType().Name}] SetWebcam : webcamNumSelected :  "+ webcamNumSelected);
+            Debug.Log($"[{GetType().Name}] SetWebcam : Webcam selected :  "+ webcamNumSelected);
             //Application.RequestUserAuthorization(UserAuthorization.WebCam);
 
             if (webcam != null)
             {
                 
                 webcam.Stop();
-                Debug.Log($"[{GetType().Name}] SetWebcam : webcam Stopped");
+                //Debug.Log($"[{GetType().Name}] SetWebcam : webcam Stopped");
             }
 
            /* if (!webcam) Debug.LogError("webcam : IS NULL");
@@ -156,17 +162,17 @@ public class SettingsManager : MonoBehaviour {
                 wTextureRequestedFPS
             );
            
-            Debug.Log($"[{GetType().Name}] SetWebcam : created new webcam texture");
+            //Debug.Log($"[{GetType().Name}] SetWebcam : created new webcam texture");
 
             webcam.name = cameraDevices[webcamNumSelected - 1].name;
 
             cameraImage.texture = webcam;
 
-            Debug.Log($"[{GetType().Name}] SetWebcam : Set image texture to Webcam texture");
+            //Debug.Log($"[{GetType().Name}] SetWebcam : Set image texture to Webcam texture");
 
             if (webcam.isReadable)
             {
-                Debug.Log($"[{GetType().Name}] SetWebcam : webcam.isReadable, Play webcam : "+ webcam.name);
+                Debug.Log($"[{GetType().Name}] SetWebcam : Play Webcam : "+ webcam.name);
                 webcam.Play();
             }
 
@@ -196,6 +202,7 @@ public class SettingsManager : MonoBehaviour {
 
         cameraDropdown.AddOptions ( deviceNames );
 
+
         //Warn if none found
         if (deviceNames.Count == 0)
         {            
@@ -206,44 +213,16 @@ public class SettingsManager : MonoBehaviour {
 
     #endregion
 
-    #region SCREENING SETTINGS
-
-    /*private void OnScreeningsValueChanged () {
-        if ( screeningsDropdown.value > 0 ) {
-            analysis = ( AnalysisOptions ) screeningsDropdown.value - 1;
-            numOfScreenings = screeningsDropdown.value;
-            isScreeningsSet = true;
-        } else {
-            isScreeningsSet = false;
-        }
-    }*/
-
-    /*private void GetScreeningOptions () {
-        screeningsDropdown.ClearOptions ();
-
-        List<string> options = new List<string> ();
-
-        for ( int i = 1; i <= maxScreenings; i++ ) {
-            options.Add ( i.ToString () );
-        }
-
-        screeningsDropdown.options.Add ( blankTempData );
-
-        screeningsDropdown.AddOptions ( options );
-    }*/
-
-    #endregion
-
 
     /// <summary>
-    /// Function triggered when the save button is clicked
-    /// Sets the output filename, stops the webcam and goes to the main menu
+    /// Function triggered when the button is clicked
+    /// Stops the webcam and goes to the main menu
     /// </summary>
     private void OnContinueButtonClicked () {
 
         webcam.Stop();
 
-        Debug.Log($"[{GetType().Name}] OnContinueButtonClicked, webcam Stopped, Go To Video View");
+        Debug.Log($"[{GetType().Name}] Button Clicked : Go To Video View");
 
         viewManager.GoToVideoView();
     }
