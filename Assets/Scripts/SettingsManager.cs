@@ -76,6 +76,15 @@ public class SettingsManager : MonoBehaviour {
         InitSettings();
     }
 
+    private void Update()
+    {
+        if (GameObject.Find("Dropdown List")) //Dummy way to set the height, but can't work out to fix otherwise!
+        {
+            RectTransform myRectTransform = GameObject.Find("Dropdown List").GetComponent<RectTransform>();
+            myRectTransform.sizeDelta = new Vector2(myRectTransform.sizeDelta.x, 100);
+        }
+    }
+
     public void InitSettings()
     {
         numOfScreenings = 2;
@@ -208,7 +217,31 @@ public class SettingsManager : MonoBehaviour {
         {            
             NoWebcamWarning.SetActive(true);
             Debug.LogError("No camera devices found!");
-        } 
+        }
+        else
+        {
+            //RectTransform templateRectTransform = cameraDropdown.template.GetComponent<RectTransform>();
+
+            // Set the desired height for the dropdown list
+            /*if (templateRectTransform != null)
+            {
+                templateRectTransform.sizeDelta = new Vector2(templateRectTransform.sizeDelta.x, 400);
+            }*/
+
+            /*for (int i = 0; i < cameraDropdown.options.Count; i++)
+            {
+                // Access the TextMeshProUGUI component for the item label
+                TextMeshProUGUI itemLabel = cameraDropdown.template.GetChild(0).GetChild(i).GetComponentInChildren<TextMeshProUGUI>();
+
+                // Set the desired font size
+                if (itemLabel != null)
+                {
+                    itemLabel.fontSize = 36;
+                }
+            }*/
+
+            
+        }
     }
 
     #endregion
