@@ -87,7 +87,7 @@ public class SettingsManager : MonoBehaviour {
 
     public void InitSettings()
     {
-        numOfScreenings = 2;
+        numOfScreenings = 2; // HARDCODED IN A 2 SCREENING NUMBER HERE
         displayDevice = 0;
 
         GetWebcamDevices();
