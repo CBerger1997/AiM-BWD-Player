@@ -52,7 +52,7 @@ public class SettingsManager : MonoBehaviour {
     #region DEVICE VARIABLES
 
     private WebCamDevice[] cameraDevices;
-    [SerializeField] private int webcamNumSelected;
+    [SerializeField] private int webcamNumSelected = 0;
 
     #endregion
 
@@ -70,7 +70,7 @@ public class SettingsManager : MonoBehaviour {
 
     private void Start()
     {
-        SaveButton.onClick.AddListener(delegate { OnContinueButtonClicked(); });
+        SaveButton.onClick.AddListener(delegate { OnButtonClicked(); });
         cameraDropdown.onValueChanged.AddListener(OnCameraOptionChanged);
 
         InitSettings();
@@ -89,11 +89,6 @@ public class SettingsManager : MonoBehaviour {
     {
         numOfScreenings = 2;
         displayDevice = 0;
-
-        webcam = new WebCamTexture();
-        webcam.requestedFPS = 30;
-
-        NoWebcamWarning.SetActive(false);
 
         GetWebcamDevices();
         DefaultToFirstWebcam();
@@ -120,7 +115,8 @@ public class SettingsManager : MonoBehaviour {
         //If we can, auto-select the first webcam make the Continue button available
         if (cameraDevices.Length > 0)
         {
-            webcamNumSelected = 1;
+            if (webcamNumSelected == 0) webcamNumSelected = 1;
+
             SaveButton.interactable = true;
         }
         else
@@ -138,7 +134,6 @@ public class SettingsManager : MonoBehaviour {
         SetWebcam();
     }
 
-    
 
     private void SetWebcam()
     {
@@ -146,23 +141,20 @@ public class SettingsManager : MonoBehaviour {
 
         if (webcamNumSelected > 0)
         {
-            Debug.Log($"[{GetType().Name}] SetWebcam : Webcam selected :  "+ webcamNumSelected);
-            //Application.RequestUserAuthorization(UserAuthorization.WebCam);
-
+            //Init camera
             if (webcam != null)
             {
-                
                 webcam.Stop();
-                //Debug.Log($"[{GetType().Name}] SetWebcam : webcam Stopped");
+                //Destroy(webcam);
             }
 
-           /* if (!webcam) Debug.LogError("webcam : IS NULL");
-            if (cameraDevices.Length == 0) Debug.LogError("cameraDevices : EMPTY LIST");
-            if (webcamNumSelected == 0) Debug.LogError("webcamNumSelected : IS 0");
-            if (cameraDevices[webcamNumSelected - 1].name != "") Debug.LogError("cameraDevices[webcamNumSelected - 1].name : IS EMPTY");
-            if (textureRequestedWidth == 0) Debug.LogError("textureRequestedWidth : IS 0");
-            if (textureRequestedHeight == 0) Debug.LogError("textureRequestedHeight : IS 0");
-            if (wTextureRequestedFPS == 0) Debug.LogError("wTextureRequestedFPS : IS 0");*/
+            webcam = new WebCamTexture();
+            webcam.requestedFPS = 30;
+
+            //cameraImage.texture = new WebCamTexture();
+
+            Debug.Log($"[{GetType().Name}] SetWebcam : Webcam selected :  "+ webcamNumSelected);
+            //Application.RequestUserAuthorization(UserAuthorization.WebCam);
 
             webcam = new WebCamTexture(
                 cameraDevices[webcamNumSelected - 1].name,
@@ -195,20 +187,20 @@ public class SettingsManager : MonoBehaviour {
     }
     private void GetWebcamDevices () 
     {
-        //Init
+        //Reset Dropdown
         cameraDropdown.ClearOptions ();
-        webcamNumSelected = 0;
+        //webcamNumSelected = 0;
+        NoWebcamWarning.SetActive(false);
 
         //Populate list of devices
         cameraDevices = WebCamTexture.devices;
-
         List<string> deviceNames = new List<string> ();
-
         foreach ( WebCamDevice device in cameraDevices ) {
             deviceNames.Add ( device.name );
             Debug.Log($"[{GetType().Name}] Webcam available  : "+device.name);
         }
 
+        //Populate the dropdown
         cameraDropdown.AddOptions ( deviceNames );
 
 
@@ -218,30 +210,8 @@ public class SettingsManager : MonoBehaviour {
             NoWebcamWarning.SetActive(true);
             Debug.LogError("No camera devices found!");
         }
-        else
-        {
-            //RectTransform templateRectTransform = cameraDropdown.template.GetComponent<RectTransform>();
 
-            // Set the desired height for the dropdown list
-            /*if (templateRectTransform != null)
-            {
-                templateRectTransform.sizeDelta = new Vector2(templateRectTransform.sizeDelta.x, 400);
-            }*/
-
-            /*for (int i = 0; i < cameraDropdown.options.Count; i++)
-            {
-                // Access the TextMeshProUGUI component for the item label
-                TextMeshProUGUI itemLabel = cameraDropdown.template.GetChild(0).GetChild(i).GetComponentInChildren<TextMeshProUGUI>();
-
-                // Set the desired font size
-                if (itemLabel != null)
-                {
-                    itemLabel.fontSize = 36;
-                }
-            }*/
-
-            
-        }
+        cameraDropdown.value = webcamNumSelected-1;
     }
 
     #endregion
@@ -251,9 +221,9 @@ public class SettingsManager : MonoBehaviour {
     /// Function triggered when the button is clicked
     /// Stops the webcam and goes to the main menu
     /// </summary>
-    private void OnContinueButtonClicked () {
+    private void OnButtonClicked () {
 
-        webcam.Stop();
+        //webcam.Stop(); //We don't want to stop the webcam ... do we?? We need to use it for analysis
 
         Debug.Log($"[{GetType().Name}] Button Clicked : Go To Video View");
 

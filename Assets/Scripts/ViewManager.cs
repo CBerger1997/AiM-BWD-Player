@@ -36,10 +36,14 @@ public class ViewManager : MonoBehaviour {
         //Play the video
         videoPlayer.SetActive(true);
         videoPlayer.GetComponent<VideoController>().OnShow();
+
+        Cursor.visible = false;
     }
 
     public void GoToSettingsView()
     {
+        Cursor.visible = true;
+
         //Hide Settings
         SettingsMenu.SetActive(true);
         settingsManager.InitSettings();

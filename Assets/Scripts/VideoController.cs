@@ -450,7 +450,6 @@ public class VideoController : MonoBehaviour
             {
                 VideoPlayers[ nextActiveIndex ].Play ();
                 Debug.Log($"[{GetType().Name}] VideoIsEnding - Preload :" +VideoPlayers[nextActiveIndex].name);
-            }
 
             //Once the overlap time has ended or the video stopped playing, swap the video players
             if ( VideoPlayers[ currentActivePlayerIndex ].frame >= endFrame || !VideoPlayers[ currentActivePlayerIndex ].isPlaying )
@@ -705,8 +704,9 @@ public class VideoController : MonoBehaviour
                     }
                 }
             }
-            
+
             player.playbackSpeed = 1;
+
             player.Play ();
         }
     }
