@@ -331,8 +331,7 @@ public class VideoController : MonoBehaviour
                 
                 //Debug.Log($"[{GetType().Name}] Start Frame: " + startFrame.ToString());
 
-                //Preload the next video
-                
+                //Preload the next video                
                 PreLoadNextVideo ( nextClipCounter );
             }
         }
@@ -348,10 +347,9 @@ public class VideoController : MonoBehaviour
         //Debug.Log($"[{GetType().Name}] OnShow : settingsManager.videoFilePath : " + settingsManager.videoFilePath);
 
         //videos = Resources.LoadAll<VideoClip> ( settingsManager.videoFilePath ) as VideoClip[];
-        videos = Resources.LoadAll<VideoClip>("BWD 2K");//, typeof(VideoClip)); //BENN - SEEMS TO WORK ON WINDOWS WHEN THE ABOVE DOES NOT... PROB BECUASE videoFilePath contained the application path too
+        videos = Resources.LoadAll<VideoClip>("BWD 2K");//, typeof(VideoClip));
 
         //Debug.Log($"[{GetType().Name}] Number of video files found : "+ videos.Length);
-        //currentActivePlayerIndex = 0;//BENN FORCED
 
         //videoCamera.targetDisplay = settingsManager.displayDevice;
         //VideoPlayers[ currentActivePlayerIndex ].targetCamera = videoCamera;
@@ -377,12 +375,8 @@ public class VideoController : MonoBehaviour
     {
         if (currentSceneIndex > sceneOrderManager.currentSceneOrder.Count)
         {
-            //DON'T PRELOAD A VIDEO - WEVE WATCHED THE CREDITS...
+            //DON'T PRELOAD A VIDEO - WEVE WATCHED THE CREDITS. GO BACK TO START SCREEN
 
-            //NOT YET TESTED - REPEAT VIEWING
-            //MAYBE WE JUST SEND THEM TO A SCREEN THAT SAYS - WATCH AGAIN? 
-            //if (currentSceneIndex == sceneOrderManager.currentSceneOrder.Count)
-            //{
             //Debug.Log($"[{GetType().Name}] <b>Coming to the end of the Video - ResetValues</b>");
             ResetValues();
 
@@ -392,17 +386,16 @@ public class VideoController : MonoBehaviour
             //ONSHOW
             ResetAndLoadFirstVideo();
 
+            //Reset
             sceneOrderManager.ResetSceneOrderForNextScreening();
 
-            //OnShow();
-            //OnPlayClicked();
+            //Return
             viewManager.GoToSettingsView();
-            //}
         }
         else if ( nextClipCounter < 12 )
         {
+            //Set player index
             int nextActiveIndex;
-
             if (currentActivePlayerIndex == 0)
             {
                 nextActiveIndex = 1;

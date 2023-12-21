@@ -11,7 +11,7 @@ using System.Linq;
 
 public class SettingsManager : MonoBehaviour {
 
-    //Attahced to Settings Manager GameObject
+    //Attached to Settings Manager GameObject
 
     //Configures web cam, video resolution etc, num of screenings
     #region ENUMS
@@ -93,19 +93,6 @@ public class SettingsManager : MonoBehaviour {
         GetWebcamDevices();
         DefaultToFirstWebcam();
         SetWebcam();
-
-        /*
-       //Trying to set the size of the dropdown
-       GameObject[] objectsWithName = GameObject.FindObjectsOfType<GameObject>()
-           .Where(obj => obj.name == "Item Label")
-           .ToArray();
-
-       foreach (GameObject obj in objectsWithName)
-       {
-           obj.GetComponent<TextMeshPro>().fontSize = 34;
-           Debug.Log("Found object: " + obj.name);
-       }
-       */
     }
 
     #region CAMERA SETTINGS
@@ -151,8 +138,6 @@ public class SettingsManager : MonoBehaviour {
             webcam = new WebCamTexture();
             webcam.requestedFPS = 30;
 
-            //cameraImage.texture = new WebCamTexture();
-
             Debug.Log($"[{GetType().Name}] SetWebcam : Webcam selected :  "+ webcamNumSelected);
             //Application.RequestUserAuthorization(UserAuthorization.WebCam);
 
@@ -187,12 +172,11 @@ public class SettingsManager : MonoBehaviour {
     }
     private void GetWebcamDevices () 
     {
-        //Reset Dropdown
+        //Reset
         cameraDropdown.ClearOptions ();
-        //webcamNumSelected = 0;
         NoWebcamWarning.SetActive(false);
 
-        //Populate list of devices
+        //Create list of devices
         cameraDevices = WebCamTexture.devices;
         List<string> deviceNames = new List<string> ();
         foreach ( WebCamDevice device in cameraDevices ) {
@@ -203,7 +187,6 @@ public class SettingsManager : MonoBehaviour {
         //Populate the dropdown
         cameraDropdown.AddOptions ( deviceNames );
 
-
         //Warn if none found
         if (deviceNames.Count == 0)
         {            
@@ -211,6 +194,7 @@ public class SettingsManager : MonoBehaviour {
             Debug.LogError("No camera devices found!");
         }
 
+        //Set dropdown to one chosen if set previously
         cameraDropdown.value = webcamNumSelected-1;
     }
 
@@ -221,10 +205,8 @@ public class SettingsManager : MonoBehaviour {
     /// Function triggered when the button is clicked
     /// Stops the webcam and goes to the main menu
     /// </summary>
-    private void OnButtonClicked () {
-
-        //webcam.Stop(); //We don't want to stop the webcam ... do we?? We need to use it for analysis
-
+    private void OnButtonClicked () 
+    {
         Debug.Log($"[{GetType().Name}] Button Clicked : Go To Video View");
 
         viewManager.GoToVideoView();
