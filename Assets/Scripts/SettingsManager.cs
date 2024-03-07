@@ -68,10 +68,11 @@ public class SettingsManager : MonoBehaviour {
     //private int maxScreenings = 10;
 
 
-    private void Start()
+    public void Init()
     {
         SaveButton.onClick.AddListener(delegate { OnButtonClicked(); });
         cameraDropdown.onValueChanged.AddListener(OnCameraOptionChanged);
+
 
         InitSettings();
     }

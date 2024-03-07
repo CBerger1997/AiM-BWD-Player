@@ -9,13 +9,14 @@ public class ViewManager : MonoBehaviour {
     [SerializeField] private GameObject SettingsMenu;
     [SerializeField] private GameObject TrackingMenu;
     [SerializeField] private GameObject TrackingError;
+    [SerializeField] private GameObject NetworkError;
 
     //[SerializeField] private GameObject videoCamera;
     //[SerializeField] private GameObject videoCanvas;
     [SerializeField] private GameObject videoPlayer;
     [SerializeField] private SettingsManager settingsManager;
 
-    private int splashScreenSecs = 1; //set to at least 4 for release
+    private int splashScreenSecs = 6; //set to at least 4 for release
 
     private void Awake() {
         SettingsMenu.SetActive(true);
@@ -38,6 +39,7 @@ public class ViewManager : MonoBehaviour {
 
         Invoke("SettingsViewAfterDelay", splashScreenSecs); //Seconds delay before starting
 
+        NetworkError.SetActive(false);
         SettingsMenu.SetActive(false);
         TrackingMenu.SetActive(false);
         videoPlayer.SetActive(false);
@@ -47,6 +49,7 @@ public class ViewManager : MonoBehaviour {
 
     void SettingsViewAfterDelay()
     {
+        settingsManager.Init();
         Debug.Log("Close Splash Screen.");
         SettingsView();
     }
@@ -80,6 +83,12 @@ public class ViewManager : MonoBehaviour {
     {
         Debug.Log("SettingsView");
         Cursor.visible = true;
+
+        NetworkError.SetActive(false);
+        if (Application.internetReachability == NetworkReachability.NotReachable)
+        {
+            NetworkError.SetActive(true);
+        }
 
         SplashMenu.SetActive(false);
         TrackingMenu.SetActive(false);
