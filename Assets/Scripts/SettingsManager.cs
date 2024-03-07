@@ -209,6 +209,6 @@ public class SettingsManager : MonoBehaviour {
     {
         Debug.Log($"[{GetType().Name}] Button Clicked : Go To Tracking View");
 
-        viewManager.GoToTrackingView();
+        viewManager.TrackingView();
     }
 }

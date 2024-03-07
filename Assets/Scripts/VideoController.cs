@@ -193,7 +193,7 @@ public class VideoController : MonoBehaviour
 
     private void BSocial_GetPredictions ()
     {
-        Debug.Log($"[{GetType().Name}] BSocial_GetPredictions...");
+        //Debug.Log($"[{GetType().Name}] BSocial_GetPredictions...");
 
         BSocialUnity.BSocialWrapper_run ();
 
@@ -212,7 +212,7 @@ public class VideoController : MonoBehaviour
     
     private void GatherValenceArousalValues( BSocialUnity.BSocialPredictions prediction)
     {
-        Debug.Log($"[{GetType().Name}] GatherValenceArousalValues. Valence : " + prediction.affect.valence +", Arousal : "+ prediction.affect.arousal);
+        //Debug.Log($"[{GetType().Name}] GatherValenceArousalValues. Valence : " + prediction.affect.valence +", Arousal : "+ prediction.affect.arousal);
 
         initialValenceBaseline += prediction.affect.valence;
         initialArousalBaseline += prediction.affect.arousal;
@@ -243,6 +243,11 @@ public class VideoController : MonoBehaviour
     private void Start()
     {
         sceneOrderManager = new SceneOrderManager2(settingsManager.numOfScreenings);
+
+        foreach (VideoPlayer vp in VideoPlayers)
+        {
+            vp.gameObject.SetActive(false);
+        }
     }
 
     void Update ()
@@ -345,7 +350,7 @@ public class VideoController : MonoBehaviour
         }
     }
 
-    public void OnShow ()
+    public void InitBSocialAndPlayVideos ()
     {
         //Debug.Log($"[{GetType().Name}] OnShow : settingsManager.videoFilePath : " + settingsManager.videoFilePath);
 
@@ -359,9 +364,6 @@ public class VideoController : MonoBehaviour
 
         BSocialOK = BSocial_Init ();
 
-        //
-
-        
         Invoke("PlayVideosAfterDelay", testTrackingSecs); //Second delay then triggering videos
     }
 
@@ -370,11 +372,17 @@ public class VideoController : MonoBehaviour
     {
         if (initialValenceBaseline != 0 && initialArousalBaseline != 0) //After were sure we are picking up SOME data...
         {
+            foreach (VideoPlayer vp in VideoPlayers)
+            {
+                vp.gameObject.SetActive(true);
+            }
+
+            viewManager.VideoView();
             ResetAndLoadFirstVideo(); //Play Videos with initial analysis 
         }
         else
         {
-            viewManager.GoTrackingErrorView();
+            viewManager.TrackingErrorView();
             Debug.Log("Tracking does not appear to be detecting Valence or Arousal after "+testTrackingSecs+" seconds");
         }
     }
@@ -409,7 +417,7 @@ public class VideoController : MonoBehaviour
             sceneOrderManager.ResetSceneOrderForNextScreening();
 
             //Return
-            viewManager.GoToSettingsView();
+            viewManager.SettingsView();
         }
         else if ( nextClipCounter < 12 )
         {

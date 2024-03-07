@@ -15,6 +15,8 @@ public class ViewManager : MonoBehaviour {
     [SerializeField] private GameObject videoPlayer;
     [SerializeField] private SettingsManager settingsManager;
 
+    private int splashScreenSecs = 1; //set to at least 4 for release
+
     private void Awake() {
         SettingsMenu.SetActive(true);
 
@@ -31,115 +33,69 @@ public class ViewManager : MonoBehaviour {
 
     void Start()
     {
-        //Show Splash
+        Debug.Log("SplashMenuView");
         SplashMenu.SetActive(true); //Start with this menu
 
-        Invoke("MoveToSettings", 4); //4 second delay before starting
-        
-        //Hide Settings
+        Invoke("SettingsViewAfterDelay", splashScreenSecs); //Seconds delay before starting
+
         SettingsMenu.SetActive(false);
-
-        //Hide Tracking
         TrackingMenu.SetActive(false);
-
-        //Hide the video
         videoPlayer.SetActive(false);
-
-        //Hide the tracking error
         TrackingError.SetActive(false);
 
     }
 
-    void MoveToSettings()
-    {   
+    void SettingsViewAfterDelay()
+    {
         Debug.Log("Close Splash Screen.");
-        GoToSettingsView();
+        SettingsView();
     }
 
-    public void GoTrackingErrorView()
+    
+
+    public void VideoView()
     {
-        Cursor.visible = true;
-
-        //Hide Splash
-        SplashMenu.SetActive(false);
-
-        SettingsManager.SetActive(true);
-        TrackingError.SetActive(true);
-
-        //Show Settings
-        SettingsMenu.SetActive(true);
-        settingsManager.InitSettings();
-
-        //Old...
-        //videoCamera.SetActive(false);
-        //videoCanvas.SetActive(false);
-
-        //Hide Tracking
-        TrackingMenu.SetActive(false);
-
-        //Hide the video
-        videoPlayer.SetActive(false);
-    }
-
-    public void GoToVideoView()
-    {
-        //Hide Settings
-        SettingsMenu.SetActive(false);
-
-        //Old...
-        //videoCamera.SetActive(true);
-        //videoCanvas.SetActive(true);
-
-        //Hide Tracking
-        TrackingMenu.SetActive(false);
-
-        //Play the video
-        videoPlayer.SetActive(true);
-        videoPlayer.GetComponent<VideoController>().OnShow();
-
+        Debug.Log("VideoView");
         Cursor.visible = false;
+
+        SettingsMenu.SetActive(false);
+        TrackingMenu.SetActive(false);
+
     }
 
-    public void GoToTrackingView()
+    public void TrackingView()
     {
+        Debug.Log("TrackingView");
+
         Cursor.visible = true;
 
-        //Hide Settings
         SettingsMenu.SetActive(false);
 
-        //Old...
-        //videoCamera.SetActive(true); //Was second display screen
-        //videoCanvas.SetActive(true);//Was old Video Player
-
-        //Show Tracking
         TrackingMenu.SetActive(true);
-
-        //Show the video
-        videoPlayer.SetActive(true); //TEMP - BENN - MAY NOT NEED THIS...  SORT OF NEGATES THE VIDEOVIEW ABOVE
-        videoPlayer.GetComponent<VideoController>().OnShow();
+        videoPlayer.SetActive(true);
+        videoPlayer.GetComponent<VideoController>().InitBSocialAndPlayVideos();
     }
 
-    public void GoToSettingsView()
+    public void SettingsView()
     {
+        Debug.Log("SettingsView");
         Cursor.visible = true;
 
-        //Hide Splash
         SplashMenu.SetActive(false);
+        TrackingMenu.SetActive(false);
+        videoPlayer.SetActive(false);
 
         SettingsManager.SetActive(true);
 
-        //Show Settings
         SettingsMenu.SetActive(true);
         settingsManager.InitSettings();
+    }
 
-        //Old...
-        //videoCamera.SetActive(false);
-        //videoCanvas.SetActive(false);
+    public void TrackingErrorView()
+    {
+        Debug.Log("TrackingErrorView");
+        SettingsView();
 
-        //Hide Tracking
-        TrackingMenu.SetActive(false);
-
-        //Hide the video
-        videoPlayer.SetActive(false);
+        TrackingError.SetActive(true);
     }
 }
