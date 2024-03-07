@@ -4,8 +4,12 @@ public class ViewManager : MonoBehaviour {
 
     //Controls what is shown
 
+    [SerializeField] private GameObject SplashMenu;
+    [SerializeField] private GameObject SettingsManager;
     [SerializeField] private GameObject SettingsMenu;
     [SerializeField] private GameObject TrackingMenu;
+    [SerializeField] private GameObject TrackingError;
+
     //[SerializeField] private GameObject videoCamera;
     //[SerializeField] private GameObject videoCanvas;
     [SerializeField] private GameObject videoPlayer;
@@ -27,8 +31,13 @@ public class ViewManager : MonoBehaviour {
 
     void Start()
     {
+        //Show Splash
+        SplashMenu.SetActive(true); //Start with this menu
+
+        Invoke("MoveToSettings", 4); //4 second delay before starting
+        
         //Hide Settings
-        SettingsMenu.SetActive(true); //Start with this menu
+        SettingsMenu.SetActive(false);
 
         //Hide Tracking
         TrackingMenu.SetActive(false);
@@ -36,8 +45,41 @@ public class ViewManager : MonoBehaviour {
         //Hide the video
         videoPlayer.SetActive(false);
 
+        //Hide the tracking error
+        TrackingError.SetActive(false);
+
     }
 
+    void MoveToSettings()
+    {   
+        Debug.Log("Close Splash Screen.");
+        GoToSettingsView();
+    }
+
+    public void GoTrackingErrorView()
+    {
+        Cursor.visible = true;
+
+        //Hide Splash
+        SplashMenu.SetActive(false);
+
+        SettingsManager.SetActive(true);
+        TrackingError.SetActive(true);
+
+        //Show Settings
+        SettingsMenu.SetActive(true);
+        settingsManager.InitSettings();
+
+        //Old...
+        //videoCamera.SetActive(false);
+        //videoCanvas.SetActive(false);
+
+        //Hide Tracking
+        TrackingMenu.SetActive(false);
+
+        //Hide the video
+        videoPlayer.SetActive(false);
+    }
 
     public void GoToVideoView()
     {
@@ -73,7 +115,7 @@ public class ViewManager : MonoBehaviour {
         TrackingMenu.SetActive(true);
 
         //Show the video
-        videoPlayer.SetActive(true); //TEMP - BENN - MAY NOT NEED THIS...
+        videoPlayer.SetActive(true); //TEMP - BENN - MAY NOT NEED THIS...  SORT OF NEGATES THE VIDEOVIEW ABOVE
         videoPlayer.GetComponent<VideoController>().OnShow();
     }
 
@@ -81,7 +123,12 @@ public class ViewManager : MonoBehaviour {
     {
         Cursor.visible = true;
 
-        //Hide Settings
+        //Hide Splash
+        SplashMenu.SetActive(false);
+
+        SettingsManager.SetActive(true);
+
+        //Show Settings
         SettingsMenu.SetActive(true);
         settingsManager.InitSettings();
 
