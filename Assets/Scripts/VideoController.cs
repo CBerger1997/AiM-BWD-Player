@@ -63,7 +63,7 @@ public class VideoController : MonoBehaviour
 
     #region BSocial
 
-    //BENN DISABLED
+    
     public static event NewBSocialData EvNewBSocialData;
     private Thread BSocialThread;
     private bool BSocialThreadIsFree = true;
@@ -72,7 +72,7 @@ public class VideoController : MonoBehaviour
     public Color32[] textureData;
     public Texture2D txBuffer;
 
-    //BENN DISABLED
+    
     /*
      * BSocial SDK v1.4.0 Copyright BlueSkeye AI LTD.
      * For Academic Use Only
@@ -238,8 +238,9 @@ public class VideoController : MonoBehaviour
 
     void Update ()
     {
+
 #if UNITY_EDITOR_WIN || UNITY_EDITOR_OSX
-        //BENN DEBUG ONLY
+        // DEBUG ONLY
         if (currentClipCounter > 0 && VideoPlayers[currentActivePlayerIndex].isPlaying && Input.GetKeyDown("n"))
         {
             VideoPlayers[currentActivePlayerIndex].frame = (endFrame - 300);

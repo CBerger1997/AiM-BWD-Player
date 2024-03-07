@@ -5,6 +5,7 @@ public class ViewManager : MonoBehaviour {
     //Controls what is shown
 
     [SerializeField] private GameObject SettingsMenu;
+    [SerializeField] private GameObject TrackingMenu;
     //[SerializeField] private GameObject videoCamera;
     //[SerializeField] private GameObject videoCanvas;
     [SerializeField] private GameObject videoPlayer;
@@ -24,20 +25,56 @@ public class ViewManager : MonoBehaviour {
 #endif
     }
 
+    void Start()
+    {
+        //Hide Settings
+        SettingsMenu.SetActive(true); //Start with this menu
+
+        //Hide Tracking
+        TrackingMenu.SetActive(false);
+
+        //Hide the video
+        videoPlayer.SetActive(false);
+
+    }
+
+
     public void GoToVideoView()
     {
         //Hide Settings
-        SettingsMenu.SetActive(false);        
+        SettingsMenu.SetActive(false);
 
-        //Show
+        //Old...
         //videoCamera.SetActive(true);
         //videoCanvas.SetActive(true);
+
+        //Hide Tracking
+        TrackingMenu.SetActive(false);
 
         //Play the video
         videoPlayer.SetActive(true);
         videoPlayer.GetComponent<VideoController>().OnShow();
 
         Cursor.visible = false;
+    }
+
+    public void GoToTrackingView()
+    {
+        Cursor.visible = true;
+
+        //Hide Settings
+        SettingsMenu.SetActive(false);
+
+        //Old...
+        //videoCamera.SetActive(true); //Was second display screen
+        //videoCanvas.SetActive(true);//Was old Video Player
+
+        //Show Tracking
+        TrackingMenu.SetActive(true);
+
+        //Show the video
+        videoPlayer.SetActive(true); //TEMP - BENN - MAY NOT NEED THIS...
+        videoPlayer.GetComponent<VideoController>().OnShow();
     }
 
     public void GoToSettingsView()
@@ -48,11 +85,14 @@ public class ViewManager : MonoBehaviour {
         SettingsMenu.SetActive(true);
         settingsManager.InitSettings();
 
-        //Show
+        //Old...
         //videoCamera.SetActive(false);
         //videoCanvas.SetActive(false);
 
-        //Play the video
+        //Hide Tracking
+        TrackingMenu.SetActive(false);
+
+        //Hide the video
         videoPlayer.SetActive(false);
     }
 }

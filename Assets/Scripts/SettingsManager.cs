@@ -207,8 +207,8 @@ public class SettingsManager : MonoBehaviour {
     /// </summary>
     private void OnButtonClicked () 
     {
-        Debug.Log($"[{GetType().Name}] Button Clicked : Go To Video View");
+        Debug.Log($"[{GetType().Name}] Button Clicked : Go To Tracking View");
 
-        viewManager.GoToVideoView();
+        viewManager.GoToTrackingView();
     }
 }
