@@ -69,6 +69,7 @@ crashlytics-build.properties
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
 *.mp4
+Assets/StreamingAssets/BWD 2K/*
 Assets/StreamingAssets/BWD 2K/0.mp4.meta
 Assets/StreamingAssets/BWD 2K/1.mp4.meta
 Assets/StreamingAssets/BWD 2K/10.mp4.meta
@@ -93,6 +94,8 @@ Assets/StreamingAssets/BWD 4K/6.mp4.meta
 Assets/StreamingAssets/BWD 4K/7.mp4.meta
 Assets/StreamingAssets/BWD 4K/8.mp4.meta
 Assets/StreamingAssets/BWD 4K/9.mp4.meta
+
+Assets/Resources/BWD 2K/*
 Assets/Resources/BWD 2K/a.mp4.meta
 Assets/Resources/BWD 2K/b.mp4.meta
 Assets/Resources/BWD 2K/c.mp4.meta
@@ -122,6 +125,6 @@ Assets/Resources/BWD 4K/911.mp4.meta
 Assets/Resources/BWD 2K/d.mp4.meta
 Assets/Resources/BWD 2K/a.webm
 Assets/Resources/BWD 2K/a.webm.meta
-Assets/Resources/BWD 2K/*
+
 */.DS_Store
 .DS_Store
