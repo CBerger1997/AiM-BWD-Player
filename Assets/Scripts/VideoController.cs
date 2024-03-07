@@ -64,7 +64,7 @@ public class VideoController : MonoBehaviour
     #region BSocial
 
     //BENN DISABLED
-    //public static event NewBSocialData EvNewBSocialData;
+    public static event NewBSocialData EvNewBSocialData;
     private Thread BSocialThread;
     private bool BSocialThreadIsFree = true;
     private bool BSocialOK = false;
@@ -81,9 +81,8 @@ public class VideoController : MonoBehaviour
      */
     private bool InitBSocial ()
     {
-        /*
-        //BENN DISABLED
-        BSocialLicenceKeyPath = Path.Combine ( Application.streamingAssetsPath, "bsocial.lic" );
+        
+        BSocialLicenceKeyPath = Path.Combine ( UnityEngine.Application.streamingAssetsPath, "bsocial.lic" );
 
         Debug.Log ( "B-Social licence key path : " + BSocialLicenceKeyPath );
 
@@ -120,7 +119,7 @@ public class VideoController : MonoBehaviour
 
         BSocialUnity.BSocialWrapper_set_nthreads ( 4 ); // Change for optimal performance, BSocial needs at least 10FPS, 15FPS+ preferred
         BSocialUnity.BSocialWrapper_reset ();
-        */
+        
 
         webcamTexture = new WebCamTexture ( settingsManager.webcam.name, 1280, 720, 30 );
 
@@ -135,46 +134,46 @@ public class VideoController : MonoBehaviour
 
         isShowingBsocialOverlay = true;
 
-        return true; // BSocialOK; //BENN DISABLED
+        return BSocialOK;
     }
 
     
     private void BSocialUpdate ()
     {
-        //Debug.Log($"[{GetType().Name}] BSocialUpdating...");
+        Debug.Log($"[{GetType().Name}] BSocialUpdating...");
 
-        //if ( !( BSocialOK && BSocialThreadIsFree && webcamTexture.isPlaying ) ) //BENN DISABLED
-        //    return; //BENN DISABLED
+        if ( !( BSocialOK && BSocialThreadIsFree && webcamTexture.isPlaying ) )
+            return;
 
-        //BENN DISABLED - PRESUMABLY THIS IS THE WEBCAM BEING ANALYSED BY BLUESKEYES
-        /*if ( webcamTexture.width != 1280 )//BENN DISABLED
+        //PRESUMABLY THIS IS THE WEBCAM BEING ANALYSED BY BLUESKEYES
+        if ( webcamTexture.width != 1280 )
         {
             Debug.Log($"[{GetType().Name}] BSocialUpdate - UNEXPECTED WEBCAM TEXTURE DIMENSIONS" );
             return;
-        }*/
+        }
 
-        /*if ( webcamTexture.height != 720 )//BENN DISABLED
+        if ( webcamTexture.height != 720 )
         {
             Debug.Log($"[{GetType().Name}] BSocialUpdate - UNEXPECTED WEBCAM TEXTURE DIMENSIONS" );
             return;
-        }*/
+        }
 
-        //textureData = new Color32[ 1280 * 720 ]; //BENN DISABLED
+        textureData = new Color32[ 1280 * 720 ];
 
-        //webcamTexture.GetPixels32 ( textureData ); //BENN DISABLED
+        webcamTexture.GetPixels32 ( textureData );
 
-        //BSocialUnity.BSocialWrapper_set_image_native (
-        //ref textureData, webcamTexture.width, webcamTexture.height, true, false, BSocialUnity.BSocialWrapper_Rotation.BM_NO_ROTATION ); //BENN DISABLED
+        BSocialUnity.BSocialWrapper_set_image_native (
+        ref textureData, webcamTexture.width, webcamTexture.height, true, false, BSocialUnity.BSocialWrapper_Rotation.BM_NO_ROTATION );
 
-        //BSocialUnity.BSocialWrapper_overlay_native (
-        //ref textureData, webcamTexture.width, webcamTexture.height, true, false, BSocialUnity.BSocialWrapper_Rotation.BM_NO_ROTATION ); //BENN DISABLED
+        BSocialUnity.BSocialWrapper_overlay_native (
+        ref textureData, webcamTexture.width, webcamTexture.height, true, false, BSocialUnity.BSocialWrapper_Rotation.BM_NO_ROTATION );
 
         BSocialThread = new Thread ( BSocialProcessing );
         BSocialThreadIsFree = false;
         BSocialThread.Start ();
 
-        /*
-        //BENN DISABLED - PRESUMABLY THIS IS THE OVERLAY FROM BLUESKEYES
+        
+        //PRESUMABLY THIS IS THE OVERLAY FROM BLUESKEYES
         if ( !txBuffer )
             txBuffer = new Texture2D ( 1280, 720 );
 
@@ -183,21 +182,21 @@ public class VideoController : MonoBehaviour
         txBuffer.name = $"BSocial Webcam Capture";
         txBuffer.SetPixels32 ( textureData );
         txBuffer.Apply ();
-        */
+        
     }
 
     private void BSocialProcessing ()
     {
-        //Debug.Log($"[{GetType().Name}] BSocialProcessing...");
+        Debug.Log($"[{GetType().Name}] BSocialProcessing...");
 
-        //BSocialUnity.BSocialWrapper_run (); //BENN DISABLED
+        BSocialUnity.BSocialWrapper_run ();
 
-        //BSocialUnity.BSocialPredictions predictions = BSocialUnity.BSocialWrapper_get_predictions (); //BENN DISABLED
+        BSocialUnity.BSocialPredictions predictions = BSocialUnity.BSocialWrapper_get_predictions ();
 
-        GatherValenceArousalValues();//  predictions ); //BENN DISABLED
+        GatherValenceArousalValues( predictions ); 
 
         //trigger any registered events
-        //EvNewBSocialData?.Invoke ( predictions ); //BENN DISABLED
+        EvNewBSocialData?.Invoke ( predictions );
 
         // Sleep a little bit and set the signal to get the next frame
         Thread.Sleep ( 1 );
@@ -205,21 +204,21 @@ public class VideoController : MonoBehaviour
         BSocialThreadIsFree = true;
     }
     
-    private void GatherValenceArousalValues()// BSocialUnity.BSocialPredictions prediction) //BENN DISABLED
+    private void GatherValenceArousalValues( BSocialUnity.BSocialPredictions prediction)
     {
-        //Debug.Log($"[{GetType().Name}] Gathering Valence & Arousal Values...");
+        Debug.Log($"[{GetType().Name}] Gathering Valence & Arousal Values...");
 
         if (isCollectingBaseline && baselineCounter < 15 && !isWaitingBaseline)
         {
-            //Debug.Log($"[{GetType().Name}] Gathering Valence & Arousal Values - VIDEO PREDICTION BASELINE DATA GATHERED");
-            valenceBaseline += 0.1f;//  prediction.affect.valence; //BENN DISABLED
-            arousalBaseline += 0.15f;//  prediction.affect.arousal; //BENN DISABLED
+            Debug.Log($"[{GetType().Name}] Gathering Valence & Arousal Values - VIDEO PREDICTION BASELINE DATA GATHERED");
+            valenceBaseline += prediction.affect.valence;
+            arousalBaseline += prediction.affect.arousal;
         }
         else if (isCollectPredictionPerSecond && !isWaitingPrediction)
         {
-            //Debug.Log($"[{GetType().Name}] Gathering Valence & Arousal Values - VIDEO PREDICTION VALENCE AROUSAL DATA GATHERED");
-            currentValenceAverage += 0.1f;//  prediction.affect.valence; //BENN DISABLED
-            currentArousalAverage += 0.105f;//  prediction.affect.arousal; //BENN DISABLED
+            Debug.Log($"[{GetType().Name}] Gathering Valence & Arousal Values - VIDEO PREDICTION VALENCE AROUSAL DATA GATHERED");
+            currentValenceAverage += prediction.affect.valence;
+            currentArousalAverage += prediction.affect.arousal;
             currentPredictionCounter++;
         }
     }
@@ -251,27 +250,27 @@ public class VideoController : MonoBehaviour
 
 
         //BENN FORCED!!!!!
-        if (baselineCounter <= 15) {
+        /*if (baselineCounter <= 15) {
             isCollectingBaseline = true; 
-        }
+        }*/
         
 
         if ( isShowingBsocialOverlay && isFirstScene )
         {
             BSocialUpdate ();
-            //Debug.Log($"[{GetType().Name}] Bsocial - Stage 1...");
+            Debug.Log($"[{GetType().Name}] Bsocial - Stage 1...");
         }
 
         if ( isCollectingBaseline && !isWaitingBaseline )
         {
-            //Debug.Log($"[{GetType().Name}] Bsocial - Stage 2...");
-            //Debug.Log($"[{GetType().Name}] base update" );
+            Debug.Log($"[{GetType().Name}] Bsocial - Stage 2...");
+            Debug.Log($"[{GetType().Name}] base update" );
             StartCoroutine ( WaitForSecondBaselinePrediction () );
         }
         else if ( isCollectPredictionPerSecond && !isWaitingPrediction )
         {
-            //Debug.Log($"[{GetType().Name}] Bsocial - Stage 3...");
-            //Debug.Log($"[{GetType().Name}] predict update" );
+            Debug.Log($"[{GetType().Name}] Bsocial - Stage 3...");
+            Debug.Log($"[{GetType().Name}] predict update" );
             StartCoroutine ( WaitForSecondPrediction () );
 
             if ( ( long ) VideoPlayers[ currentActivePlayerIndex ].frame >= ( endFrame - 288 ) )
@@ -290,13 +289,13 @@ public class VideoController : MonoBehaviour
 
                 int count = 1;
 
-                //Debug.Log($"[{GetType().Name}] COUNT: " + sceneOrderManager.currentSceneOrder.Count );
+                Debug.Log($"[{GetType().Name}] COUNT: " + sceneOrderManager.currentSceneOrder.Count );
                 
 
                 foreach ( Scene scene in sceneOrderManager.currentSceneOrder )
                 {
                     //ScreeningOrderText.text += scene.index;
-                    //Debug.Log($"[{GetType().Name}] " + scene.index);
+                    Debug.Log($"[{GetType().Name}] Adding scene of index : " + scene.index);
 
                     if ( count != sceneOrderManager.currentSceneOrder.Count )
                     {
@@ -311,7 +310,7 @@ public class VideoController : MonoBehaviour
 
                 webcamTexture = new WebCamTexture ( settingsManager.webcam.name, 1280, 720, 30 );
 
-                //WebcamOutput.texture = webcamTexture; //BENN DISABLED
+                WebcamOutput.texture = webcamTexture;
 
                 webcamTexture.Play ();
             }
@@ -354,8 +353,8 @@ public class VideoController : MonoBehaviour
         //videoCamera.targetDisplay = settingsManager.displayDevice;
         //VideoPlayers[ currentActivePlayerIndex ].targetCamera = videoCamera;
 
-        //BSocialOK = InitBSocial ();//BENN DISABLED
-        BSocialOK = true; InitBSocial(); //BENN TEMP FOR ABOVE
+        BSocialOK = InitBSocial ();
+        //BSocialOK = true; InitBSocial(); //BENN TEMP FOR ABOVE
 
         ResetAndLoadFirstVideo();
     }
@@ -490,12 +489,12 @@ public class VideoController : MonoBehaviour
     IEnumerator WaitForSecondBaselinePrediction ()
     {
         isWaitingBaseline = true;
-        //Debug.Log($"[{GetType().Name}] Wait For Second Baseline Prediction...");
+        Debug.Log($"[{GetType().Name}] Wait For Second Baseline Prediction...");
         yield return new WaitForSeconds ( 1 );
 
         isWaitingBaseline = false;
         baselineCounter++;
-        //Debug.Log($"[{GetType().Name}] Wait For Second Baseline Prediction - baselineCounter : "+ baselineCounter);
+        Debug.Log($"[{GetType().Name}] Wait For Second Baseline Prediction - baselineCounter : "+ baselineCounter);
 
         if ( baselineCounter == 15 )
         {
@@ -510,10 +509,10 @@ public class VideoController : MonoBehaviour
     IEnumerator WaitForSecondPrediction ()
     {
         isWaitingPrediction = true;
-        //Debug.Log($"[{GetType().Name}] Wait For Second Prediction...");
+        Debug.Log($"[{GetType().Name}] Wait For Second Prediction...");
         yield return new WaitForSeconds ( 1 );
         isWaitingPrediction = false;
-        //Debug.Log($"[{GetType().Name}] Wait For Second Prediction - complete"); //NOT COMPLETE HERE
+        Debug.Log($"[{GetType().Name}] Wait For Second Prediction - nearly complete..."); //NOT COMPLETE HERE
     }
 
     private void GetNextVideoValue ()
@@ -521,7 +520,7 @@ public class VideoController : MonoBehaviour
         if ( currentSceneIndex != sceneOrderManager.currentSceneOrder.Count )
         {
             nextClipCounter = sceneOrderManager.currentSceneOrder[ currentSceneIndex ].index;
-            //Debug.Log($"[{GetType().Name}] Next Video : " + nextClipCounter.ToString ());
+            Debug.Log($"[{GetType().Name}] Next Video : " + nextClipCounter.ToString ());
         }
         currentSceneIndex++;
     }
@@ -761,7 +760,7 @@ public class VideoController : MonoBehaviour
 
         /* Deallocate memory taken by B-Social if it was init-d */
 
-        if ( true ) //BSocialOK ) //BENN DISABLED
+        if ( BSocialOK )
         {
             // BSocialUnity.BSocialWrapper_release();
         }
