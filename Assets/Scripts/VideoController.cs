@@ -76,26 +76,28 @@ public class VideoController : MonoBehaviour
     public Color32[] textureData;
     public Texture2D txBuffer;
 
-    
+    private int camWidth = 1280;
+    private int camHeight = 720;
+
     /*
      * BSocial SDK v1.4.0 Copyright BlueSkeye AI LTD.
      * For Academic Use Only
      * Original Setup Code Copyright Timur Almaev, Chief Engineer
      * This Setup Code Copyright Luke Rose, Automotive Engineering Lead
      */
-    private bool BSocial_Init ()
+    private bool BSocial_Init()
     {
-        
-        BSocialLicenceKeyPath = Path.Combine ( UnityEngine.Application.streamingAssetsPath, "bsocial.lic" );
 
-        Debug.Log ( "B-Social licence key path : " + BSocialLicenceKeyPath );
+        BSocialLicenceKeyPath = Path.Combine(UnityEngine.Application.streamingAssetsPath, "bsocial.lic");
 
-        BSocialUnity.BSocialWrapper_create ();
-        int rcode = BSocialUnity.BSocialWrapper_load_online_licence_key ( BSocialLicenceKeyPath );
+        Debug.Log("B-Social licence key path : " + BSocialLicenceKeyPath);
 
-        if ( rcode != 0 )
+        BSocialUnity.BSocialWrapper_create();
+        int rcode = BSocialUnity.BSocialWrapper_load_online_licence_key(BSocialLicenceKeyPath);
+
+        if (rcode != 0)
         {
-            Debug.LogError ( "Start: ERROR - BSocialWrapper_load_online_license_key() failed" );
+            Debug.LogError("Start: ERROR - BSocialWrapper_load_online_license_key() failed");
             return false;
         }
         else
@@ -103,17 +105,17 @@ public class VideoController : MonoBehaviour
             Debug.Log($"[{GetType().Name}] Start: HOORAY!!!! - BSocialWrapper_load_online_license_key() SUCCESS!");
         }
 
-        BSocialUnity.BSocialWrapper_set_body_tracking_enabled ( false );
+        BSocialUnity.BSocialWrapper_set_body_tracking_enabled(false);
 
-        BSocialUnity.BSocialWrapper_set_min_face_diagonal ( 100 ); // Alter this if you have issues with small faces/bounding boxes (min = 1)
+        BSocialUnity.BSocialWrapper_set_min_face_diagonal(100); // Alter this if you have issues with small faces/bounding boxes (min = 1)
 
-        rcode = BSocialUnity.BSocialWrapper_init_embedded (); // Init with embedded/encrypted models (don't need to pass anything in)
+        rcode = BSocialUnity.BSocialWrapper_init_embedded(); // Init with embedded/encrypted models (don't need to pass anything in)
 
         BSocialOK = rcode == 0;
 
-        if ( rcode != 0 )
+        if (rcode != 0)
         {
-            Debug.LogError ( "Start: ERROR - BSocialWrapper_init_embedded() failed" );
+            Debug.LogError("Start: ERROR - BSocialWrapper_init_embedded() failed");
             return false;
         }
         else
@@ -121,11 +123,27 @@ public class VideoController : MonoBehaviour
             Debug.Log($"[{GetType().Name}] Start: HOORAY!!!! - BSocialWrapper_init_embedded() SUCCESS!");
         }
 
-        BSocialUnity.BSocialWrapper_set_nthreads ( 4 ); // Change for optimal performance, BSocial needs at least 10FPS, 15FPS+ preferred
-        BSocialUnity.BSocialWrapper_reset ();
-        
+        BSocialUnity.BSocialWrapper_set_nthreads(4); // Change for optimal performance, BSocial needs at least 10FPS, 15FPS+ preferred
+        BSocialUnity.BSocialWrapper_reset();
 
-        webcamTexture = new WebCamTexture ( settingsManager.webcam.name, 1280, 720, 30 );
+        //Get webcam dimensions
+        /*WebCamDevice[] devices = WebCamTexture.devices;
+        if (devices.Length > 0)
+        {
+            WebCamDevice selectedDevice = devices[settingsManager.webcamNumSelected]; // Select this right one !!!!! eg. may not be 0
+            WebCamTexture tempTexture = new WebCamTexture(settingsManager.webcam.name);
+            camWidth = tempTexture.width;
+            camHeight = tempTexture.height;
+            Debug.Log($"[{GetType().Name}] BSocial_Init - WebcamDevice - Dimensions: " + camWidth+", x "+camHeight);
+
+        }
+        else
+        {
+            Debug.Log($"[{GetType().Name}] BSocial_Init - WebcamDevice - Using Default Diemnsions: " + camWidth + ", x " + camHeight);
+        }*/
+
+        webcamTexture = new WebCamTexture ( settingsManager.webcam.name, camWidth, camHeight, 30 );
+
 
         //WebcamOutput.texture = webcamTexture;
 
@@ -152,17 +170,17 @@ public class VideoController : MonoBehaviour
         //PRESUMABLY THIS IS THE WEBCAM BEING ANALYSED BY BLUESKEYES
         if ( webcamTexture.width != 1280 )
         {
-            Debug.Log($"[{GetType().Name}] BSocial_UpdateOverlay - UNEXPECTED WEBCAM TEXTURE DIMENSIONS" );
+            Debug.Log($"[{GetType().Name}] BSocial_UpdateOverlay - NEW WEBCAM TEXTURE DIMENSIONS SET" );
             return;
         }
 
         if ( webcamTexture.height != 720 )
         {
-            Debug.Log($"[{GetType().Name}] BSocial_UpdateOverlay - UNEXPECTED WEBCAM TEXTURE DIMENSIONS" );
+            Debug.Log($"[{GetType().Name}] BSocial_UpdateOverlay - NEW WEBCAM TEXTURE DIMENSIONS SET" );
             return;
         }
 
-        textureData = new Color32[ 1280 * 720 ];
+        textureData = new Color32[ camWidth * camHeight ];
 
         webcamTexture.GetPixels32 ( textureData );
 
@@ -180,7 +198,7 @@ public class VideoController : MonoBehaviour
         
         //PRESUMABLY THIS IS THE OVERLAY FROM BLUESKEYES
         if ( !txBuffer )
-            txBuffer = new Texture2D ( 1280, 720 );
+            txBuffer = new Texture2D (camWidth, camHeight);
 
         WebcamOutput.texture = BSocialUnity.OverlayTexture;
         
@@ -317,7 +335,7 @@ public class VideoController : MonoBehaviour
 
                 isFirstScene = false;
 
-                webcamTexture = new WebCamTexture ( settingsManager.webcam.name, 1280, 720, 30 );
+                webcamTexture = new WebCamTexture ( settingsManager.webcam.name, camWidth, camHeight, 30 );
 
                 WebcamOutput.texture = webcamTexture;
 

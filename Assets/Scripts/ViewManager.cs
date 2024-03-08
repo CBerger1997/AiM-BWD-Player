@@ -10,6 +10,7 @@ public class ViewManager : MonoBehaviour {
     [SerializeField] private GameObject TrackingMenu;
     [SerializeField] private GameObject TrackingError;
     [SerializeField] private GameObject NetworkError;
+    [SerializeField] private GameObject BeginButton;
 
     //[SerializeField] private GameObject videoCamera;
     //[SerializeField] private GameObject videoCanvas;
@@ -45,6 +46,11 @@ public class ViewManager : MonoBehaviour {
         videoPlayer.SetActive(false);
         TrackingError.SetActive(false);
 
+    }
+
+    void Update()
+    {
+        if (SettingsMenu.activeSelf) NetworkCheck();
     }
 
     void SettingsViewAfterDelay()
@@ -84,12 +90,6 @@ public class ViewManager : MonoBehaviour {
         Debug.Log("SettingsView");
         Cursor.visible = true;
 
-        NetworkError.SetActive(false);
-        if (Application.internetReachability == NetworkReachability.NotReachable)
-        {
-            NetworkError.SetActive(true);
-        }
-
         SplashMenu.SetActive(false);
         TrackingMenu.SetActive(false);
         videoPlayer.SetActive(false);
@@ -100,6 +100,17 @@ public class ViewManager : MonoBehaviour {
         settingsManager.InitSettings();
     }
 
+    public void NetworkCheck()
+    {
+        NetworkError.SetActive(false);
+        BeginButton.SetActive(true);
+        if (Application.internetReachability == NetworkReachability.NotReachable)
+        {
+            NetworkError.SetActive(true);
+            BeginButton.SetActive(false);
+        }
+    }
+
     public void TrackingErrorView()
     {
         Debug.Log("TrackingErrorView");
@@ -107,4 +118,6 @@ public class ViewManager : MonoBehaviour {
 
         TrackingError.SetActive(true);
     }
+
+    
 }

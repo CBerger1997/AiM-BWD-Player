@@ -52,7 +52,7 @@ public class SettingsManager : MonoBehaviour {
     #region DEVICE VARIABLES
 
     private WebCamDevice[] cameraDevices;
-    [SerializeField] private int webcamNumSelected = 0;
+    public int webcamNumSelected = 0;
 
     #endregion
 

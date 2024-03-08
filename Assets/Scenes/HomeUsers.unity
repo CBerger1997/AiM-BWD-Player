@@ -971,6 +971,7 @@ MonoBehaviour:
   TrackingMenu: {fileID: 1922978601}
   TrackingError: {fileID: 2143557677}
   NetworkError: {fileID: 1612851630}
+  BeginButton: {fileID: 807606637}
   videoPlayer: {fileID: 466045495}
   settingsManager: {fileID: 217848851}
 --- !u!1 &466045495
@@ -2418,7 +2419,7 @@ MonoBehaviour:
   m_fontColor32:
     serializedVersion: 2
     rgba: 4278190335
-  m_fontColor: {r: 1, g: 0, b: 0, a: 1}
+  m_fontColor: {r: 0.8745098, g: 0.30588236, b: 0.40784314, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
