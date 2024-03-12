@@ -2,7 +2,10 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class SceneOrderManager2 {
+public class SceneOrderManager2 : MonoBehaviour {
+
+    [SerializeField] private SettingsManager settingsManager;
+    [SerializeField] private VideoManager videoManager;
 
     List<Scene> startScenes = new List<Scene> ();
     List<Scene> middleScenes = new List<Scene> ();
@@ -13,9 +16,10 @@ public class SceneOrderManager2 {
     List<List<Scene>> previousSceneOrders = new List<List<Scene>> ();
     List<Scene> requiredScenes = new List<Scene> ();
 
-
     bool isValenceHigher;
     bool isArousalHigher;
+
+    public int currentSceneNumber;
 
     int currentSceneIndex;
     int sceneCount;
@@ -24,14 +28,74 @@ public class SceneOrderManager2 {
     int numOfScreenings;
     int currentScreeningIndex = 0;
 
-    public SceneOrderManager2 ( int screenings ) {
-        //Define the setup for each scene 1 - 10
-        SceneSetup ();
+    public bool isFirstScene;
 
-        ConfigureScreeningsAndSceneCount ( screenings );
+    private void Start()
+    {
+        //Define the setup for each scene 1 - 10
+        SceneSetup();
+
+        ConfigureScreeningsAndSceneCount(settingsManager.numOfScreenings);
+
+        //Reset Videos
+        isFirstScene = true;
+        currentSceneNumber = 0;
     }
 
-    public void ResetSceneOrderForNextScreening() {
+    public void IncrementScene()
+    {
+        if (currentSceneNumber != currentSceneOrder.Count)
+        {
+            videoManager.nextClipCounter = currentSceneOrder[currentSceneNumber].index;
+
+            Debug.Log($"[{GetType().Name}] IncrementScene to scene "+ currentSceneNumber + " - Next Video : " + videoManager.nextClipCounter.ToString());
+        }
+        currentSceneNumber++;
+    }
+
+    public void GenerateSceneOrder(float currentArousalAverage, float currentValenceAverage, float currentPredictionCounter, float arousalBaseline, float valenceBaseline)
+    {
+        //SCENE ORDER MANAGER
+        Debug.Log($"[{GetType().Name}] GenerateSceneOrder, currentArousalAverage: " + currentArousalAverage + ", currentValenceAverage: " + currentValenceAverage + ", " + currentPredictionCounter);
+
+        SetValenceArousalValues(currentValenceAverage > valenceBaseline ? true : false, currentArousalAverage > arousalBaseline ? true : false);
+
+        CreateSceneOrder(); //BENN - THIS SEEMS TO CREATE HUGE SCENE ORDERS - POSSIBLY BECAUSE WE ARE FORCING IT'S REPETITION !!!
+
+        int count = 1;
+
+        Debug.Log($"[{GetType().Name}] COUNT: " + currentSceneOrder.Count);
+
+        foreach (Scene scene in currentSceneOrder)
+        {
+            Debug.Log($"[{GetType().Name}] Adding scene of index : " + scene.index);
+
+            if (count != currentSceneOrder.Count)
+            {
+                //ScreeningOrderText.text += ", ";
+                //Debug.Log($"[{GetType().Name}] , ");
+            }
+            //Debug.Log($"[{GetType().Name}] "+ count + ") >> " + scene.index );
+            count++;
+        }
+
+        isFirstScene = false;
+    }
+
+    public bool WatchedAllClips()
+    {
+        Debug.Log($"[{GetType().Name}] WatchedAllClips? : " + (currentSceneNumber > currentSceneOrder.Count));
+        Debug.Log($"[{GetType().Name}] currentSceneNumber : " + currentSceneNumber + ", currentSceneOrder.Count : "+ currentSceneOrder.Count);
+        return currentSceneNumber > currentSceneOrder.Count;
+    }
+
+    public bool ClipsRemaining()
+    {
+        Debug.Log($"[{GetType().Name}] ClipsRemaining? : " + (currentSceneNumber < currentSceneOrder.Count));
+        return currentSceneNumber < currentSceneOrder.Count;
+    }
+
+    public void ResetOrderManager() {
         previousSceneOrders.Add ( currentSceneOrder );
 
         currentSceneOrder = new List<Scene> ();
@@ -83,6 +147,7 @@ public class SceneOrderManager2 {
         endScenes.Add ( new Scene ( 7 ) );
         endScenes.Add ( new Scene ( 10 ) );
     }
+
     /// <summary>
     /// Set the higher and lower values for valence and arousal
     /// </summary>
@@ -229,7 +294,7 @@ public class SceneOrderManager2 {
             if ( i == 0 ) {
                 Debug.Log($"[{GetType().Name}] First Scene set" );
                 ConfigureFirstScene ();
-            } else if ( currentSceneIndex == sceneCount - 1 ) {
+            } else if (currentSceneIndex == sceneCount - 1 ) {
                 Debug.Log($"[{GetType().Name}] End Scene set" );
                 ConfigureEndScene ();
             } else {

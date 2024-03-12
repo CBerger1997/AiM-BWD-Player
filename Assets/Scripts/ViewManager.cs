@@ -1,123 +1,173 @@
 using UnityEngine;
+using UnityEngine.UI;
+using Button = UnityEngine.UI.Button;
+using Cursor = UnityEngine.Cursor;
 
-public class ViewManager : MonoBehaviour {
+public class ViewManager : MonoBehaviour 
+{
+    [SerializeField] private GameObject SplashScreen;
 
-    //Controls what is shown
+#if UNITY_EDITOR
+    private int splashScreenSecs = 1; //set to at least 4 for release
+#else
+    private int splashScreenSecs = 6; //set to at least 4 for release
+#endif
 
-    [SerializeField] private GameObject SplashMenu;
-    [SerializeField] private GameObject SettingsManager;
-    [SerializeField] private GameObject SettingsMenu;
-    [SerializeField] private GameObject TrackingMenu;
-    [SerializeField] private GameObject TrackingError;
+    [SerializeField] private GameObject SettingsScreen;
+    [SerializeField] private SettingsManager settingsManager;
     [SerializeField] private GameObject NetworkError;
+    [SerializeField] private GameObject TrackingError;
+    [SerializeField] private GameObject WebcamError;
     [SerializeField] private GameObject BeginButton;
 
-    //[SerializeField] private GameObject videoCamera;
-    //[SerializeField] private GameObject videoCanvas;
-    [SerializeField] private GameObject videoPlayer;
-    [SerializeField] private SettingsManager settingsManager;
+    [SerializeField] private GameObject Background;
 
-    private int splashScreenSecs = 6; //set to at least 4 for release
+    [SerializeField] private GameObject TrackingScreen;
+    [SerializeField] private TrackingManager trackingManager;
+    [SerializeField] private CameraManager cameraManager;
 
-    private void Awake() {
-        SettingsMenu.SetActive(true);
+    [SerializeField] private GameObject WatchScreen;
+    [SerializeField] private GameObject WebcamTexture;
+    [SerializeField] private VideoManager videoManager;
 
-#if UNITY_EDITOR_WIN || UNITY_EDITOR_OSX
-        //videoCamera.SetActive(false);
-        //videoCanvas.SetActive(false);
-        videoPlayer.SetActive(false);
-#elif UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX
-        //videoCamera.SetActive(true);
-        //videoCanvas.SetActive(true);
-        videoPlayer.SetActive(false);
-#endif
-    }
+    public int testTrackingSecs = 15;
 
     void Start()
     {
-        Debug.Log("SplashMenuView");
-        SplashMenu.SetActive(true); //Start with this menu
+        DisplaySplashScreen();
 
         Invoke("SettingsViewAfterDelay", splashScreenSecs); //Seconds delay before starting
 
-        NetworkError.SetActive(false);
-        SettingsMenu.SetActive(false);
-        TrackingMenu.SetActive(false);
-        videoPlayer.SetActive(false);
-        TrackingError.SetActive(false);
-
+        InvokeRepeating("DisplayNetworkCheck", splashScreenSecs, 4.0f);
     }
 
-    void Update()
+    void DisplaySplashScreen()
     {
-        if (SettingsMenu.activeSelf) NetworkCheck();
+        Debug.Log($"[{GetType().Name}] Display Splash Screen.");
+
+        HideAll();
+
+        Cursor.visible = false;
+        SplashScreen.SetActive(true);
+    }
+
+    void HideAll()
+    {
+        SplashScreen.SetActive(false);
+
+        SettingsScreen.SetActive(false);
+
+        WebcamError.SetActive(false);
+        TrackingError.SetActive(false);
+        NetworkError.SetActive(false);
+
+        Background.SetActive(false);
+        TrackingScreen.SetActive(false);
+        WebcamTexture.SetActive(false);
+        WatchScreen.SetActive(false);
     }
 
     void SettingsViewAfterDelay()
     {
-        settingsManager.Init();
-        Debug.Log("Close Splash Screen.");
-        SettingsView();
+        DisplaySettingsScreen();
     }
 
-    
-
-    public void VideoView()
+    public void DisplayWatchScreen()
     {
-        Debug.Log("VideoView");
+        Debug.Log($"[{GetType().Name}] Display Watch Screen");
+
+        HideAll();
+
         Cursor.visible = false;
-
-        SettingsMenu.SetActive(false);
-        TrackingMenu.SetActive(false);
-
+        WatchScreen.SetActive(true);
     }
 
-    public void TrackingView()
+    public void DisplayTrackingScreen()
     {
-        Debug.Log("TrackingView");
+        Debug.Log($"[{GetType().Name}] Display Tracking Screen");
+
+        HideAll();
 
         Cursor.visible = true;
+        Background.SetActive(true);
+        TrackingScreen.SetActive(true);
+        WebcamTexture.SetActive(true);
 
-        SettingsMenu.SetActive(false);
+        
+        trackingManager.InitBSocialTesting();
+        Invoke("TestTrackingAndPlay", testTrackingSecs); //Second delay then triggering videos
 
-        TrackingMenu.SetActive(true);
-        videoPlayer.SetActive(true);
-        videoPlayer.GetComponent<VideoController>().InitBSocialAndPlayVideos();
+        //cameraManager.UpdateWebcam();
     }
 
-    public void SettingsView()
+    void TestTrackingAndPlay()
     {
-        Debug.Log("SettingsView");
-        Cursor.visible = true;
-
-        SplashMenu.SetActive(false);
-        TrackingMenu.SetActive(false);
-        videoPlayer.SetActive(false);
-
-        SettingsManager.SetActive(true);
-
-        SettingsMenu.SetActive(true);
-        settingsManager.InitSettings();
-    }
-
-    public void NetworkCheck()
-    {
-        NetworkError.SetActive(false);
-        BeginButton.SetActive(true);
-        if (Application.internetReachability == NetworkReachability.NotReachable)
+        if (trackingManager.TestDataGathered()) //After were sure we are picking up SOME data...
         {
-            NetworkError.SetActive(true);
-            BeginButton.SetActive(false);
+            DisplayWatchScreen();
+
+            videoManager.ResetAndPlayWhenPrepared(); //Play Videos with initial analysis 
+        }
+        else
+        {
+            DisplaySettingsScreen();
+            DisplayTrackingError();
+            Debug.Log("Tracking does not appear to be detecting Valence or Arousal after " + testTrackingSecs + " seconds");
         }
     }
 
-    public void TrackingErrorView()
+    public void DisplaySettingsScreen()
     {
-        Debug.Log("TrackingErrorView");
-        SettingsView();
+        Debug.Log($"[{GetType().Name}] Display Settings Screen");
 
-        TrackingError.SetActive(true);
+        HideAll();
+
+        Cursor.visible = true;
+        Background.SetActive(true);
+        SettingsScreen.SetActive(true);
+        WebcamTexture.SetActive(true);
+
+        settingsManager.ResetSettingsManager();
     }
 
-    
+    public void DisplayNetworkCheck()
+    {
+        //Check for network on the settings screen
+        if (SettingsScreen.activeSelf)
+        {
+            NetworkError.SetActive(false);
+            if (Application.internetReachability == NetworkReachability.NotReachable)
+            {
+                NetworkError.SetActive(true);
+                Debug.Log($"[{GetType().Name}] Network Error - Network Unreachable");
+            }
+            BeginButton.SetActive(Application.internetReachability != NetworkReachability.NotReachable);
+        }
+    }
+
+    public void DisplayTrackingError()
+    {
+        if (SettingsScreen.activeSelf)
+        {
+            Debug.Log($"[{GetType().Name}] Display Tracking Error");
+
+            DisplaySettingsScreen();
+
+            TrackingError.SetActive(true);
+
+            trackingManager.ResetTrackingManager();
+        }
+    }
+
+    public void DisplayWebcamError()
+    {
+        if (SettingsScreen.activeSelf)
+        {
+            Debug.Log($"[{GetType().Name}] Display Webcam Error");
+
+            DisplaySettingsScreen();
+
+            WebcamError.SetActive(true);
+        }
+    }
 }
