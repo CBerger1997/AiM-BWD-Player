@@ -12,15 +12,12 @@ public class SettingsManager : MonoBehaviour
     [SerializeField] private CameraManager cameraManager;
     [SerializeField] private ViewManager viewManager;
 
+
     /*public enum AnalysisOptions {
         Valence_Baseline,
         Arousal_Baseline,
         Arousal_Over_Valence,
         Valence_Over_Arousal
-    }*/
-
-    /*public enum ResolutionOptions {
-        _2K
     }*/
 
     //public AnalysisOptions analysis { get; set; }
@@ -35,14 +32,13 @@ public class SettingsManager : MonoBehaviour
 
     //private int maxScreenings = 10;
 
-
-    //FIX CORRECT WEBCAM BEING SELECTED 
     //FIX MAC PERMISSIONS FOR WEBCAM
 
     void Start()
     {
         BeginButton.onClick.AddListener(delegate { BeginTrackingClicked(); });
         cameraDropdown.onValueChanged.AddListener(OnWebcamChanged);
+        //blankTempData = new TMP_Dropdown.OptionData("-");
     }
 
     private void BeginTrackingClicked()
@@ -59,12 +55,6 @@ public class SettingsManager : MonoBehaviour
 
     private void Update()
     {
-        if (GameObject.Find("Dropdown List")) //Dummy way to set the height, but can't work out to fix otherwise!
-        {
-            RectTransform myRectTransform = GameObject.Find("Dropdown List").GetComponent<RectTransform>();
-            myRectTransform.sizeDelta = new Vector2(myRectTransform.sizeDelta.x, 100);
-        }
-
         BeginButton.interactable = (webcamNumSelected > 0);
     }
 
@@ -80,7 +70,7 @@ public class SettingsManager : MonoBehaviour
         //Reset
         cameraDropdown.ClearOptions();
 
-        //Populate the dropdown
+        //Add options from device list
         cameraDropdown.AddOptions(cameraManager.deviceNames);
 
         //Warn if none found
@@ -92,6 +82,8 @@ public class SettingsManager : MonoBehaviour
 
         //Set dropdown to one chosen if set previously
         cameraDropdown.value = webcamNumSelected - 1;
+
+        cameraDropdown.RefreshShownValue();
     }
 
     private void DefaultToFirstWebcam()

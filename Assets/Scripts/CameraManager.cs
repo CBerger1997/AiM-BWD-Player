@@ -113,13 +113,16 @@ public class CameraManager : MonoBehaviour
         if (webcamTexture.isReadable)
         {
             Debug.Log($"[{GetType().Name}] SetWebcam : Play Webcam : " + webcamTexture.name);
+
+            ScaleGameObject();
+
             webcamTexture.Play();
             
             Debug.Log($"[{GetType().Name}] SetWebcam : Webcam Dimensions : " + webcamTexture.width +", "+ webcamTexture.height);
 
             if (webcamTexture.isPlaying)
             {
-                ScaleGameObject();
+                
 
                 Debug.Log($"[{GetType().Name}] SetWebcam - webcam: {webcamTexture.name} is playing.");
             }
