@@ -107,8 +107,6 @@ public class TrackingManager : MonoBehaviour
         //Generate a new scene order
         sceneOrderManager.GenerateSceneOrder(currentArousalAverage, currentValenceAverage, currentPredictionCounter, arousalBaseline, valenceBaseline);
 
-        //cameraManager.UpdateWebcam();
-
         trackingOverlay.texture = cameraManager.webcamTexture;
     }
 
@@ -177,20 +175,6 @@ public class TrackingManager : MonoBehaviour
 
         if (!(BSocialOK && BSocialThreadIsFree && cameraManager.webcamTexture.isPlaying))
             return;
-
-
-        //SET UP CAMERA TEXTURE
-        if (cameraManager.webcamTexture.width != cameraManager.textureRequestedWidth)
-        {
-            Debug.Log($"[{GetType().Name}] UpdateOverlay - UNUSUAL WEBCAM TEXTURE DIMENSIONS SET");
-            return;
-        }
-
-        if (cameraManager.webcamTexture.height != cameraManager.textureRequestedHeight)
-        {
-            Debug.Log($"[{GetType().Name}] UpdateOverlay - UNUSUAL WEBCAM TEXTURE DIMENSIONS SET");
-            return;
-        }
 
         textureData = new Color32[cameraManager.cameraWidth * cameraManager.cameraHeight];
 
