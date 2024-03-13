@@ -124,22 +124,25 @@ public class CameraManager : MonoBehaviour
 
         Vector2 newSizeDelta = new Vector2 (newWidth, newHeight);
 
+        //SET THIS SO THAT THE Blueskyeyes TRACKING INSTATIATES AN OVERLAY WITH THE CORRECT DIMENSIONS - NEEDS TESTING (SEEMS OK ATM)
+        cameraWidth = (int) webcamTexture.width;
+        cameraHeight = (int) webcamTexture.height;
+        //
+
         Debug.Log($"[{GetType().Name}] WaitAndScaleGameObject - Set new dimensions : {newWidth} x {newHeight}");
 
         webcamTextureDisplay.GetComponent<RectTransform>().sizeDelta = newSizeDelta;
 
 
         //WARNING CAMERA TEXTURE
-        if (cameraManager.webcamTexture.width != cameraManager.textureRequestedWidth)
+        if (webcamTexture.width != textureRequestedWidth)
         {
             Debug.LogWarning($"[{GetType().Name}] WaitAndScaleGameObject - WRONG WEBCAM TEXTURE DIMENSIONS");
-            return;
         }
 
-        if (cameraManager.webcamTexture.height != cameraManager.textureRequestedHeight)
+        if (webcamTexture.height != textureRequestedHeight)
         {
             Debug.LogWarning($"[{GetType().Name}] WaitAndScaleGameObject - WRONG WEBCAM TEXTURE DIMENSIONS");
-            return;
         }
     }
 
