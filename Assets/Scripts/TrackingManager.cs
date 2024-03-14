@@ -184,7 +184,7 @@ public class TrackingManager : MonoBehaviour
         BSocialUnity.BSocialWrapper_set_nthreads(4); // Change for optimal performance, BSocial needs at least 10FPS, 15FPS+ preferred
         BSocialUnity.BSocialWrapper_reset();
 
-        isShowingBsocialOverlay = true;
+        
 
         return BSocialOK;
     }
@@ -238,6 +238,8 @@ public class TrackingManager : MonoBehaviour
         txBuffer.name = $"BSocial Webcam Capture";
         txBuffer.SetPixels32(textureData);
         txBuffer.Apply();
+
+        isShowingBsocialOverlay = true;
     }
 
     void SetBSocialThreadFree(bool b)
