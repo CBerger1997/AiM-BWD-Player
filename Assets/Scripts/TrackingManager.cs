@@ -44,8 +44,8 @@ public class TrackingManager : MonoBehaviour
 
     public static event NewBSocialData EvNewBSocialData;
     private Thread BSocialThread;
-    private bool BSocialThreadIsFree = true;
-    private bool BSocialOK = false;
+    private bool BSocialThreadIsFree;
+    private bool BSocialOK;
     private string BSocialLicenceKeyPath;
     public Color32[] textureData;
     public Texture2D txBuffer;
@@ -60,6 +60,14 @@ public class TrackingManager : MonoBehaviour
     public void ResetTrackingManager()
     {
         //Reset Bsocial
+        SetBSocialThreadFree(true);
+
+        BSocialOK = false;
+        Debug.Log($"[{GetType().Name}] ResetTrackingManager - BSocialOK : {BSocialOK}");
+
+        initialValenceBaseline = 0;
+        initialArousalBaseline = 0;
+
         isShowingBsocialOverlay = false;
 
         isCollectingBaseline = false;
@@ -121,7 +129,8 @@ public class TrackingManager : MonoBehaviour
         //Begin
         ResetTrackingManager();
 
-        BSocialOK = Init();        
+        BSocialOK = Init();
+        Debug.Log($"[{GetType().Name}] InitBSocialTesting - BSocialOK : {BSocialOK}");
     }
 
     public bool TestDataGathered()
@@ -137,7 +146,7 @@ public class TrackingManager : MonoBehaviour
         //Init the main BSocial SDK
         BSocialLicenceKeyPath = Path.Combine(UnityEngine.Application.streamingAssetsPath, "bsocial.lic");
 
-        Debug.Log("B-Social licence key path : " + BSocialLicenceKeyPath);
+        Debug.Log($"[{GetType().Name}] Init: B-Social licence key path : " + BSocialLicenceKeyPath);
 
         BSocialUnity.BSocialWrapper_create();
 
@@ -145,12 +154,12 @@ public class TrackingManager : MonoBehaviour
 
         if (rcode != 0)
         {
-            Debug.LogError("Start: ERROR - BSocialWrapper_load_online_license_key() failed");
+            Debug.LogError($"[{GetType().Name}] Init: ERROR - BSocialWrapper_load_online_license_key failed");
             return false;
         }
         else
         {
-            Debug.Log($"[{GetType().Name}] Start: BSocialWrapper_load_online_license_key() SUCCESS!");
+            Debug.Log($"[{GetType().Name}] Init: BSocialWrapper_load_online_license_key SUCCESS!");
         }
 
         BSocialUnity.BSocialWrapper_set_body_tracking_enabled(false);
@@ -160,15 +169,16 @@ public class TrackingManager : MonoBehaviour
         rcode = BSocialUnity.BSocialWrapper_init_embedded(); // Init with embedded/encrypted models (don't need to pass anything in)
 
         BSocialOK = rcode == 0;
+        Debug.Log($"[{GetType().Name}] Init - BSocialOK : {BSocialOK}");
 
         if (rcode != 0)
         {
-            Debug.LogError("Start: ERROR - BSocialWrapper_init_embedded() failed");
+            Debug.LogError($"[{GetType().Name}] Init: ERROR - BSocialWrapper_init_embedded failed");
             return false;
         }
         else
         {
-            Debug.Log($"[{GetType().Name}] Start: BSocialWrapper_init_embedded() SUCCESS!");
+            Debug.Log($"[{GetType().Name}] Init: BSocialWrapper_init_embedded SUCCESS!");
         }
 
         BSocialUnity.BSocialWrapper_set_nthreads(4); // Change for optimal performance, BSocial needs at least 10FPS, 15FPS+ preferred
@@ -185,8 +195,10 @@ public class TrackingManager : MonoBehaviour
         //Debug.Log($"[{GetType().Name}] BSocial overlay updated...");
 
         if (!(BSocialOK && BSocialThreadIsFree && cameraManager.webcamTexture.isPlaying))
+        {
+            //Debug.Log($"[{GetType().Name}] UpdateOverlay - BSocial Thread BUSY - BSocialThreadIsFree : {BSocialThreadIsFree}, BSocialOK : {BSocialOK}, cameraManager.webcamTexture.isPlaying : {cameraManager.webcamTexture.isPlaying}");
             return;
-
+        }
 
         //SET UP CAMERA TEXTURE
 
@@ -214,7 +226,7 @@ public class TrackingManager : MonoBehaviour
 
         //Presumably this starts the analysis
         BSocialThread = new Thread(GetPredictions);
-        BSocialThreadIsFree = false;
+        SetBSocialThreadFree(false);
         BSocialThread.Start();
 
 
@@ -228,7 +240,11 @@ public class TrackingManager : MonoBehaviour
         txBuffer.Apply();
     }
 
-    
+    void SetBSocialThreadFree(bool b)
+    {
+        BSocialThreadIsFree = b;
+        //Debug.Log($"[{GetType().Name}] SetBSocialThreadFree - BSocialThreadIsFree : {b}");
+    }
 
     private void GetPredictions()
     {
@@ -246,7 +262,7 @@ public class TrackingManager : MonoBehaviour
         // Sleep a little bit and set the signal to get the next frame
         Thread.Sleep(1);
 
-        BSocialThreadIsFree = true;
+        SetBSocialThreadFree(true);
     }
 
     private void GatherValenceArousalValues(BSocialUnity.BSocialPredictions prediction)

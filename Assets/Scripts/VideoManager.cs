@@ -143,6 +143,7 @@ public class VideoManager : MonoBehaviour
             StartCoroutine ( VideoIsEnding () );
         }
     }
+
     void SetActivePlayer()
     {
         if (activePlayerIndex == 0)
