@@ -29,6 +29,8 @@ public class CameraManager : MonoBehaviour
     void Start()
     {
         GetWebcamDevices();
+
+        SetAlphaOfWebcamTeture(0); //make ther texture transparent so we can't see it before resizing and applying the webcam,
     }
     
     private void GetWebcamDevices()
@@ -73,8 +75,6 @@ public class CameraManager : MonoBehaviour
 
         webcamTexture.name = cameraDevices[settingsManager.webcamNumSelected - 1].name;
 
-        webcamTextureDisplay.texture = webcamTexture;//put the texture into the object
-
         if (webcamTexture.isReadable)
         {
             webcamTexture.Play();
@@ -84,7 +84,7 @@ public class CameraManager : MonoBehaviour
             if (webcamTexture.isPlaying)
             {
                 StartCoroutine(WaitAndScaleGameObject(webcamTexture));
-
+                
                 //Debug.Log($"[{GetType().Name}] SetWebcam - webcam: {webcamTexture.name} is playing.");
             }
         }
@@ -136,13 +136,25 @@ public class CameraManager : MonoBehaviour
         //WARNING CAMERA TEXTURE
         if (webcamTexture.width != textureRequestedWidth)
         {
-            Debug.LogWarning($"[{GetType().Name}] WaitAndScaleGameObject - WRONG WEBCAM TEXTURE DIMENSIONS");
+            Debug.LogWarning($"[{GetType().Name}] WaitAndScaleGameObject - UNUSUAL WEBCAM TEXTURE DIMENSIONS");
         }
 
         if (webcamTexture.height != textureRequestedHeight)
         {
-            Debug.LogWarning($"[{GetType().Name}] WaitAndScaleGameObject - WRONG WEBCAM TEXTURE DIMENSIONS");
+            Debug.LogWarning($"[{GetType().Name}] WaitAndScaleGameObject - UNUSUAL WEBCAM TEXTURE DIMENSIONS");
         }
+
+
+        //FINALLY - display the webcam
+        SetAlphaOfWebcamTeture(1);
+        webcamTextureDisplay.texture = webcamTexture;//put the texture into the object
     }
 
+
+    void SetAlphaOfWebcamTeture(float f)
+    {
+        Color webcamTextureDisplayColour = webcamTextureDisplay.color;
+        webcamTextureDisplayColour.a = f;
+        webcamTextureDisplay.color = webcamTextureDisplayColour;
+    }
 }
