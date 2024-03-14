@@ -7,8 +7,19 @@ using UnityEngine.UI;
 
 public delegate void NewBSocialData(BSocialUnity.BSocialPredictions p);
 
+/*
+     * BSocial SDK v1.4.0 Copyright BlueSkeye AI LTD.
+     * For Academic Use Only
+     * Original Setup Code Copyright Timur Almaev, Chief Engineer
+     * This Setup Code Copyright Luke Rose, Automotive Engineering Lead
+     */
+
+
 public class TrackingManager : MonoBehaviour
 {
+    //Manages facial tracking and Bluesyeye BSocial
+
+    //Managers
     [SerializeField] private CameraManager cameraManager;
     [SerializeField] private SceneOrderManager2 sceneOrderManager;
     [SerializeField] private VideoManager videoManager;
@@ -40,13 +51,6 @@ public class TrackingManager : MonoBehaviour
     public Texture2D txBuffer;
 
     [SerializeField] RawImage trackingOverlay;
-
-    /*
-     * BSocial SDK v1.4.0 Copyright BlueSkeye AI LTD.
-     * For Academic Use Only
-     * Original Setup Code Copyright Timur Almaev, Chief Engineer
-     * This Setup Code Copyright Luke Rose, Automotive Engineering Lead
-     */
 
     private void Awake()
     {
@@ -114,11 +118,15 @@ public class TrackingManager : MonoBehaviour
 
     public void InitBSocialTesting()
     {
+        //Begin
+        ResetTrackingManager();
+
         BSocialOK = Init();        
     }
 
     public bool TestDataGathered()
     {
+        //Simply returns a boolean to say we've got some valence and arousal data captured
         return initialValenceBaseline != 0 && initialArousalBaseline != 0;
     }
    
@@ -126,6 +134,7 @@ public class TrackingManager : MonoBehaviour
 
     private bool Init()
     {
+        //Init the main BSocial SDK
         BSocialLicenceKeyPath = Path.Combine(UnityEngine.Application.streamingAssetsPath, "bsocial.lic");
 
         Debug.Log("B-Social licence key path : " + BSocialLicenceKeyPath);
@@ -203,13 +212,13 @@ public class TrackingManager : MonoBehaviour
 
         BSocialUnity.BSocialWrapper_overlay_native(ref textureData, cameraManager.webcamTexture.width, cameraManager.webcamTexture.height, true, false, BSocialUnity.BSocialWrapper_Rotation.BM_NO_ROTATION);
 
-        //Presumably this starts the analysis?
+        //Presumably this starts the analysis
         BSocialThread = new Thread(GetPredictions);
         BSocialThreadIsFree = false;
         BSocialThread.Start();
 
 
-        //PRESUMABLY THIS IS THE OVERLAY FROM BLUESKEYES
+        //PRESUMABLY THIS IS THE OVERLAY FROM THE TRACKING
         if (!txBuffer) txBuffer = new Texture2D(cameraManager.cameraWidth, cameraManager.cameraHeight);
 
         trackingOverlay.texture = BSocialUnity.OverlayTexture;
@@ -231,7 +240,7 @@ public class TrackingManager : MonoBehaviour
 
         GatherValenceArousalValues(predictions);
 
-        //trigger any registered events
+        //Trigger any registered events
         EvNewBSocialData?.Invoke(predictions);
 
         // Sleep a little bit and set the signal to get the next frame
@@ -268,7 +277,7 @@ public class TrackingManager : MonoBehaviour
         if (baselineCounter < 15)
         {
             isCollectingBaseline = true;  //THIS TRIGGERS THE START OF THE ANALYSIS (?)
-                                          //Debug.Log($"[{GetType().Name}] Collecting Baseline");
+             //Debug.Log($"[{GetType().Name}] Collecting Baseline");
         }
         else
         {
@@ -318,6 +327,7 @@ public class TrackingManager : MonoBehaviour
         if (BSocialOK)
         {
             //BSocialUnity.BSocialWrapper_release();
+            //              *   *   * SEEM TO HAVE SOME MEMORY LEAK WARNINGS FROM UNITY ON ENDING - DOES THIS NEED RELEASING/TIDY UP ?? *   *   *
         }
     }
 }

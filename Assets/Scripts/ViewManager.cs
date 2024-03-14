@@ -5,6 +5,8 @@ using Cursor = UnityEngine.Cursor;
 
 public class ViewManager : MonoBehaviour 
 {
+    //Sets visibility of screen elements
+
     [SerializeField] private GameObject SplashScreen;
 
 #if UNITY_EDITOR
@@ -13,19 +15,17 @@ public class ViewManager : MonoBehaviour
     private int splashScreenSecs = 6; //set to at least 4 for release
 #endif
 
+    //Managers and screen elements
     [SerializeField] private GameObject SettingsScreen;
     [SerializeField] private SettingsManager settingsManager;
     [SerializeField] private GameObject NetworkError;
     [SerializeField] private GameObject TrackingError;
     [SerializeField] private GameObject WebcamError;
     [SerializeField] private GameObject BeginButton;
-
     [SerializeField] private GameObject Background;
-
     [SerializeField] private GameObject TrackingScreen;
     [SerializeField] private TrackingManager trackingManager;
     [SerializeField] private CameraManager cameraManager;
-
     [SerializeField] private GameObject WatchScreen;
     [SerializeField] private GameObject WebcamTexture;
     [SerializeField] private VideoManager videoManager;

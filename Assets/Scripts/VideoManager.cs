@@ -7,6 +7,7 @@ using System.Collections;
 
 public class VideoManager : MonoBehaviour
 {
+    //Managers
     [SerializeField] private ViewManager viewManager;
     [SerializeField] private SettingsManager settingsManager;
     [SerializeField] private SceneOrderManager2 sceneOrderManager;

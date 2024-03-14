@@ -7,8 +7,9 @@ using UnityEngine.Windows.WebCam;
 
 public class SettingsManager : MonoBehaviour 
 {
-    //Configures web cam, video resolution etc, num of screenings
+    //Displays and configures web cam and starts tracking on button press
 
+    //Managers
     [SerializeField] private CameraManager cameraManager;
     [SerializeField] private ViewManager viewManager;
 
@@ -30,15 +31,12 @@ public class SettingsManager : MonoBehaviour
 
     [SerializeField] private Button BeginButton;
 
-    //private int maxScreenings = 10;
-
     //FIX MAC PERMISSIONS FOR WEBCAM
 
     void Start()
     {
         BeginButton.onClick.AddListener(delegate { BeginTrackingClicked(); });
         cameraDropdown.onValueChanged.AddListener(OnWebcamChanged);
-        //blankTempData = new TMP_Dropdown.OptionData("-");
     }
 
     private void BeginTrackingClicked()

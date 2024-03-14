@@ -4,6 +4,9 @@ using UnityEngine.UI;
 
 public class CameraManager : MonoBehaviour
 {
+    //Manages the webcam
+
+    //Managers
     [SerializeField] private SettingsManager settingsManager;
 
     public readonly int textureRequestedWidth = 1280;
@@ -21,14 +24,13 @@ public class CameraManager : MonoBehaviour
     public WebCamDevice[] cameraDevices;
 
     public WebCamTexture webcamTexture { get; set; }
-    //[SerializeField] private RawImage cameraImage;
     public RawImage webcamTextureDisplay;
 
     void Start()
     {
         GetWebcamDevices();
     }
-
+    
     private void GetWebcamDevices()
     {
         deviceNames = new List<string>();
@@ -46,9 +48,11 @@ public class CameraManager : MonoBehaviour
 
     public void SetAndPlayWebcam()
     {
+        GetWebcamDevices();
+
         //Debug.Log($"[{GetType().Name}] SetWebcam...");
 
-        
+
         //Init camera
         if (webcamTexture != null)
         {
@@ -56,10 +60,6 @@ public class CameraManager : MonoBehaviour
             //Destroy(webcamTexture);
         }
 
-        //webcamTexture = new WebCamTexture();
-        //webcamTexture.requestedFPS = wTextureRequestedFPS;
-
-        
         //Application.RequestUserAuthorization(UserAuthorization.WebCam);
 
         webcamTexture = new WebCamTexture(
@@ -79,7 +79,7 @@ public class CameraManager : MonoBehaviour
         {
             webcamTexture.Play();
             
-            Debug.Log($"[{GetType().Name}] SetWebcam : Play Webcam : " + webcamTexture.name +", Dimensions : " + webcamTexture.width +", "+ webcamTexture.height);
+            //Debug.Log($"[{GetType().Name}] SetWebcam : Play Webcam : " + webcamTexture.name +", Dimensions : " + webcamTexture.width +", "+ webcamTexture.height);
 
             if (webcamTexture.isPlaying)
             {
@@ -105,7 +105,6 @@ public class CameraManager : MonoBehaviour
         float newWidth;
         float newHeight;
 
-        //NEEDS FINISHING
 
         if (displayWidth / aspectRatio > displayHeight)
         {
@@ -124,7 +123,7 @@ public class CameraManager : MonoBehaviour
 
         Vector2 newSizeDelta = new Vector2 (newWidth, newHeight);
 
-        //SET THIS SO THAT THE Blueskyeyes TRACKING INSTATIATES AN OVERLAY WITH THE CORRECT DIMENSIONS - NEEDS TESTING (SEEMS OK ATM)
+        //CAMERA SIZE SET HERE SO THAT THE Blueskyeyes TRACKING INSTATIATES AN OVERLAY WITH THE CORRECT DIMENSIONS - NEEDS TESTING (SEEMS OK ATM)
         cameraWidth = (int) webcamTexture.width;
         cameraHeight = (int) webcamTexture.height;
         //

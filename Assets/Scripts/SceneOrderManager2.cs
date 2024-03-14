@@ -2,8 +2,11 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class SceneOrderManager2 : MonoBehaviour {
+public class SceneOrderManager2 : MonoBehaviour
+{
+    //Manages the Scene Order Algorithm
 
+    //Managers
     [SerializeField] private SettingsManager settingsManager;
     [SerializeField] private VideoManager videoManager;
 
