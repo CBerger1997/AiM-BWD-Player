@@ -24,7 +24,7 @@ public class TrackingManager : MonoBehaviour
     [SerializeField] private SceneOrderManager2 sceneOrderManager;
     [SerializeField] private VideoManager videoManager;
 
-    bool isShowingBsocialOverlay;
+    bool BSocialInitComplete;
 
     bool isCollectingBaseline;
     bool isWaitingBaseline;
@@ -68,7 +68,7 @@ public class TrackingManager : MonoBehaviour
         initialValenceBaseline = 0;
         initialArousalBaseline = 0;
 
-        isShowingBsocialOverlay = false;
+        BSocialInitComplete = false;
 
         isCollectingBaseline = false;
         isWaitingBaseline = false;
@@ -81,11 +81,13 @@ public class TrackingManager : MonoBehaviour
         currentPredictionCounter = 0;
         currentValenceAverage = 0;
         currentArousalAverage = 0;
+
+        txBuffer = null;
     }
 
     void Update()
     {
-        if (isShowingBsocialOverlay && sceneOrderManager.isFirstScene)
+        if (BSocialInitComplete && sceneOrderManager.isFirstScene)
         {
             UpdateOverlay();
         }
@@ -184,7 +186,7 @@ public class TrackingManager : MonoBehaviour
         BSocialUnity.BSocialWrapper_set_nthreads(4); // Change for optimal performance, BSocial needs at least 10FPS, 15FPS+ preferred
         BSocialUnity.BSocialWrapper_reset();
 
-        
+        BSocialInitComplete = true;
 
         return BSocialOK;
     }
@@ -239,7 +241,7 @@ public class TrackingManager : MonoBehaviour
         txBuffer.SetPixels32(textureData);
         txBuffer.Apply();
 
-        isShowingBsocialOverlay = true;
+        
     }
 
     void SetBSocialThreadFree(bool b)
@@ -341,6 +343,7 @@ public class TrackingManager : MonoBehaviour
         Debug.Log("Quitting...");
 
         /* Deallocate memory taken by B-Social if it was init-d */
+        //Destroy(txBuffer);
 
         if (BSocialOK)
         {
