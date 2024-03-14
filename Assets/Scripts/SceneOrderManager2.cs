@@ -98,7 +98,11 @@ public class SceneOrderManager2 : MonoBehaviour
         return currentSceneNumber < currentSceneOrder.Count;
     }
 
-    public void ResetOrderManager() {
+    public void ResetOrderManager()
+    {
+        isFirstScene = true;
+        currentSceneNumber = 0;
+
         previousSceneOrders.Add ( currentSceneOrder );
 
         currentSceneOrder = new List<Scene> ();

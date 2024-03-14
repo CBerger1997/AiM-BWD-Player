@@ -85,7 +85,7 @@ public class CameraManager : MonoBehaviour
             {
                 StartCoroutine(WaitAndScaleGameObject(webcamTexture));
 
-                Debug.Log($"[{GetType().Name}] SetWebcam - webcam: {webcamTexture.name} is playing.");
+                //Debug.Log($"[{GetType().Name}] SetWebcam - webcam: {webcamTexture.name} is playing.");
             }
         }
     }
@@ -110,13 +110,13 @@ public class CameraManager : MonoBehaviour
         {
             newWidth = (float)displayHeight * aspectRatio;
             newHeight = (float)displayHeight;
-            Debug.Log($"[{GetType().Name}] WaitAndScaleGameObject - Increase Width");
+            //Debug.Log($"[{GetType().Name}] WaitAndScaleGameObject - Increase Width");
         }
         else
         {
             newWidth = (float)displayWidth;
             newHeight = (float)displayWidth / aspectRatio;
-            Debug.Log($"[{GetType().Name}] WaitAndScaleGameObject - Reduce Height");
+            //Debug.Log($"[{GetType().Name}] WaitAndScaleGameObject - Reduce Height");
         }
 
         
