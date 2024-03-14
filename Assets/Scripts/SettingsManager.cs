@@ -13,17 +13,6 @@ public class SettingsManager : MonoBehaviour
     [SerializeField] private CameraManager cameraManager;
     [SerializeField] private ViewManager viewManager;
 
-
-    /*public enum AnalysisOptions {
-        Valence_Baseline,
-        Arousal_Baseline,
-        Arousal_Over_Valence,
-        Valence_Over_Arousal
-    }*/
-
-    //public AnalysisOptions analysis { get; set; }
-    //public ResolutionOptions resolution { get; set; }
-
     public int numOfScreenings = 2; // HARDCODED IN A 2 SCREENING NUMBER HERE;  // { get; set; }
 
     [SerializeField] private TMP_Dropdown cameraDropdown;
