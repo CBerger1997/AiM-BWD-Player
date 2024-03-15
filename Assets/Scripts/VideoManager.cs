@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
 using System.Collections;
-
+using System.IO;
 
 public class VideoManager : MonoBehaviour
 {
@@ -17,7 +17,7 @@ public class VideoManager : MonoBehaviour
     //Video Management
     [SerializeField] public VideoPlayer[] VideoPlayers;
     public bool isLoadingNextVideo;
-    public VideoClip[] videos;
+    public List<string> videos;
     public int activePlayerIndex;
 
     //Clip counting
@@ -34,7 +34,8 @@ public class VideoManager : MonoBehaviour
 
     //private bool isInactivePaused;
 
-  
+    private string[] videoClipNames;
+
 
     private void ResetVideoManager()
     {
@@ -56,8 +57,36 @@ public class VideoManager : MonoBehaviour
 
     private void Start()
     {
-        videos = Resources.LoadAll<VideoClip>("BWD 2K");//, typeof(VideoClip));
-        //Debug.Log($"[{GetType().Name}] Number of video files found : "+ videos.Length);
+        videos = new List<string> ();//{ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "910", "911" };
+        
+
+        string streamingAssetsFolderPath = Path.Combine(Application.streamingAssetsPath, "BWD 2K");
+        Debug.Log("streamingAssetsFolderPath: " + streamingAssetsFolderPath);
+
+        if (Directory.Exists(streamingAssetsFolderPath))
+        {
+            // Get all files in the folder with the ".mov" extension
+            string[] movFilesList = Directory.GetFiles(streamingAssetsFolderPath, "*.mov");
+
+            if (movFilesList.Length == 12) //THERE SHOULD ALWAYS BE ONLY 12 VIDEO FILES IN USE
+            {
+                foreach (string movFile in movFilesList)
+                {
+                    videos.Add(movFile);
+                    Debug.Log("Found .mov file: " + movFile);
+                }
+                Debug.Log($"[{GetType().Name}] videos list : " + videos.ToString());
+            }
+            else
+            {
+                Debug.LogError($"[{GetType().Name}] ERROR - Complete set of mov files NOT FOUND");
+            }
+            
+        }
+        else
+        {
+            Debug.LogError($"[{GetType().Name}] ERROR - streamingAssetsFolderPath path does not exist: " + streamingAssetsFolderPath);
+        }
 
         ResetVideoManager();
     }
@@ -136,7 +165,8 @@ public class VideoManager : MonoBehaviour
             isLoadingNextVideo = true;
 
             //Prepare the next video a few seconds before needed
-            VideoPlayers[ nextActivePlayerIndex ].clip = videos[ nextClipCounter ];
+            //VideoPlayers[ nextActivePlayerIndex ].clip = videos[ nextClipCounter ];
+            VideoPlayers[nextActivePlayerIndex].url = videos[nextClipCounter];
             VideoPlayers[ nextActivePlayerIndex ].Prepare ();
 
             //Once the overlap time has ended, swap the video players
@@ -274,7 +304,9 @@ public class VideoManager : MonoBehaviour
 
     private void PrepareVideo(int clipCounter)
     {
-        VideoPlayers[activePlayerIndex].clip = videos[clipCounter];
+        //VideoPlayers[activePlayerIndex].clip = videos[clipCounter];
+        VideoPlayers[activePlayerIndex].url = videos[clipCounter];
+        //Set URL of video player to play from Streaming Assets
 
         VideoPlayers[activePlayerIndex].Prepare();
 

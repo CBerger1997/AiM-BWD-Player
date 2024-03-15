@@ -32,7 +32,7 @@ public class CameraManager : MonoBehaviour
 
         SetAlphaOfWebcamTeture(0); //make ther texture transparent so we can't see it before resizing and applying the webcam,
     }
-    
+
     private void GetWebcamDevices()
     {
         deviceNames = new List<string>();
@@ -78,26 +78,26 @@ public class CameraManager : MonoBehaviour
         if (webcamTexture.isReadable)
         {
             webcamTexture.Play();
-            
+
             //Debug.Log($"[{GetType().Name}] SetWebcam : Play Webcam : " + webcamTexture.name +", Dimensions : " + webcamTexture.width +", "+ webcamTexture.height);
 
             if (webcamTexture.isPlaying)
             {
                 StartCoroutine(WaitAndScaleGameObject(webcamTexture));
-                
+
                 //Debug.Log($"[{GetType().Name}] SetWebcam - webcam: {webcamTexture.name} is playing.");
             }
         }
     }
 
-    
+
     private System.Collections.IEnumerator WaitAndScaleGameObject(WebCamTexture webcamTexture)
     {
         yield return new WaitForSeconds(2f);
 
         Debug.Log($"[{GetType().Name}] WaitAndScaleGameObject : Webcam Dimensions (After delay) : " + webcamTexture.width + ", " + webcamTexture.height);
 
-        
+
         float aspectRatio = (float)webcamTexture.width / (float)webcamTexture.height;
 
         Debug.Log($"[{GetType().Name}] WaitAndScaleGameObject - aspectRatio: {aspectRatio}");
@@ -119,13 +119,13 @@ public class CameraManager : MonoBehaviour
             //Debug.Log($"[{GetType().Name}] WaitAndScaleGameObject - Reduce Height");
         }
 
-        
 
-        Vector2 newSizeDelta = new Vector2 (newWidth, newHeight);
+
+        Vector2 newSizeDelta = new Vector2(newWidth, newHeight);
 
         //CAMERA SIZE SET HERE SO THAT THE Blueskyeyes TRACKING INSTATIATES AN OVERLAY WITH THE CORRECT DIMENSIONS - NEEDS TESTING (SEEMS OK ATM)
-        cameraWidth = (int) webcamTexture.width;
-        cameraHeight = (int) webcamTexture.height;
+        cameraWidth = (int)webcamTexture.width;
+        cameraHeight = (int)webcamTexture.height;
         //
 
         Debug.Log($"[{GetType().Name}] WaitAndScaleGameObject - Set new dimensions : {newWidth} x {newHeight}");
@@ -157,4 +157,9 @@ public class CameraManager : MonoBehaviour
         webcamTextureDisplayColour.a = f;
         webcamTextureDisplay.color = webcamTextureDisplayColour;
     }
+
+    /*private void OnApplicationQuit()
+    {
+        Destroy(webcamTexture);
+    }*/
 }
