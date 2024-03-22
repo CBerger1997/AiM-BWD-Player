@@ -110,13 +110,11 @@ public class CameraManager : MonoBehaviour
         {
             newWidth = (float)displayHeight * aspectRatio;
             newHeight = (float)displayHeight;
-            //Debug.Log($"[{GetType().Name}] WaitAndScaleGameObject - Increase Width");
         }
         else
         {
             newWidth = (float)displayWidth;
             newHeight = (float)displayWidth / aspectRatio;
-            //Debug.Log($"[{GetType().Name}] WaitAndScaleGameObject - Reduce Height");
         }
 
 
@@ -149,6 +147,7 @@ public class CameraManager : MonoBehaviour
         SetAlphaOfWebcamTeture(1);
         webcamTextureDisplay.texture = webcamTexture;//put the texture into the object
     }
+
 
 
     void SetAlphaOfWebcamTeture(float f)

@@ -91,6 +91,7 @@ public class VideoManager : MonoBehaviour
         ResetVideoManager();
     }
 
+
     void Update()
     {
         #if UNITY_EDITOR_WIN || UNITY_EDITOR_OSX
